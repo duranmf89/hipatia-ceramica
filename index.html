@@ -57,6 +57,9 @@ p{margin:0}
 .demobar{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#F7D6DF;font-size:14px}
 .demobar b{font-weight:600;color:#fff}
 .demobar button{padding:5px 12px;border-radius:99px;border:1px solid #ffffff40;color:#fff;font-size:13.5px}
+.demonow{display:flex;align-items:center;gap:6px;font-size:13.5px}
+.demonow select{padding:4px 8px;border-radius:99px;border:1px solid #ffffff40;background:transparent;color:#fff;font:inherit}
+.demonow option{color:#000}
 .demobar button.on{background:var(--rosa);color:var(--bordo);border-color:var(--rosa);font-weight:600}
 
 /* buttons */
@@ -430,7 +433,7 @@ function seed(){
   lola.pause={from:'2026-10',until:null}; lola.total=4;
   // Día cerrado
   const s12=slots.find(x=>x.id==='s12'); s12.closed={reason:'Mantenimiento del horno'};
-  s12.list.forEach(id=>st.find(x=>x.id===id).recover.push({note:'Cierre del sábado 28'})); s12.list=[];
+  s12.list.forEach(id=>st.find(x=>x.id===id).recover.push({note:'Cierre del sábado 28',from:'sábado 28',cierre:true})); s12.list=[];
   const workshops = [
     {id:'w1',name:'Tazas con asa',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,taken:5,art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
     {id:'w2',name:'Joyitas de cerámica',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,taken:3,art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
@@ -480,6 +483,23 @@ const cap = t => t.charAt(0).toUpperCase()+t.slice(1);
 const abono = (s,m=CUR) => s.ledger.find(x=>x.kind==='abono'&&x.month===m);
 const paidMonth = s => (abono(s)||{}).status==='pagado';
 const isPaused = (s,m=CUR) => !!(s.pause && m>=s.pause.from && (!s.pause.until || m<s.pause.until));
+/* Hora actual. En la maqueta se fija desde la barra de arriba; en el paso de fechas reales pasa a ser la del día. */
+const DEMO_AHORA = [['2026-11-13T09:00','viernes 13, 9 hs'],['2026-11-17T20:00','martes 17, 20 hs'],['2026-11-18T14:00','miércoles 18, 14 hs']];
+const ahora = () => new Date(S.now || DEMO_AHORA[0][0]);
+const slotStart = sl => new Date(`${sl.date}T${String(parseInt(sl.time)).padStart(2,'0')}:00`);
+const hoursLeft = sl => (slotStart(sl) - ahora()) / 36e5;
+const isPast = sl => hoursLeft(sl) <= 0;
+const isLate = sl => hoursLeft(sl) < S.settings.horas;
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+const fechaLarga = iso => { const d=new Date(iso+'T12:00'); return `${d.getDate()} de ${MESES[d.getMonth()]}`; };
+/* Hasta cuándo vale un recupero, según Ajustes. Se guarda en el recupero al crearlo. */
+function venceRecupero(dateIso){
+  const d=new Date(dateIso+'T12:00'), r=S.settings.recupera;
+  if(r==='2 meses'){ d.setMonth(d.getMonth()+2); return d.toISOString().slice(0,10); }
+  const fin=new Date(d.getFullYear(), d.getMonth()+(r==='fin de mes'?1:2), 0, 12);
+  return fin.toISOString().slice(0,10);
+}
+const recuperoNota = r => r.vence ? `${r.note}. Vence el ${fechaLarga(r.vence)}` : r.note;
 function debtItems(s){
   return s.ledger.filter(x=>x.status==='pendiente').slice().sort((a,b)=>a.month<b.month?-1:a.month>b.month?1:0)
     .map(x=>Object.assign({},x,{sub: x.kind==='abono' ? (x.month<CUR?'Vencida':x.month===CUR?`${S.settings.clases} clases + 1 pieza mediana`:`Vence el ${S.settings.pagoHasta} de ${MES[x.month]}`) : (x.sub||'')}));
@@ -539,7 +559,8 @@ function demobar(){
   <button data-act="go" data-v="alumna" class="${S.view==='alumna'?'on':''}">Alumna</button>
   <button data-act="go" data-v="pauli" class="${S.view==='pauli'?'on':''}">Pauli, dueña</button>
   <button data-act="go" data-v="tienda" class="${S.view==='tienda'?'on':''}">Tienda pública</button>
-  <button data-act="reset">Empezar de cero</button></div>`;
+  <button data-act="reset">Empezar de cero</button>
+  <label class="demonow">Hoy es <select data-demo="now" aria-label="Simular la hora actual">${DEMO_AHORA.map(([v,t])=>`<option value="${v}" ${(S.now||DEMO_AHORA[0][0])===v?'selected':''}>${t}</option>`).join('')}</select></label></div>`;
 }
 let toastT;
 function toast(msg){
@@ -548,7 +569,7 @@ function toast(msg){
   const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent=msg; document.body.appendChild(t);
   toastT=setTimeout(()=>t.remove(),2600);
 }
-function openSheet(html,ctx={}){ sheetHTML=html; sheetCtx=ctx; render(); setTimeout(()=>{const f=document.querySelector('.sheet button, .sheet input');},0); }
+function openSheet(html,ctx={}){ clearTimeout(toastT); document.querySelectorAll('.toast').forEach(t=>t.remove()); sheetHTML=html; sheetCtx=ctx; render(); setTimeout(()=>{const f=document.querySelector('.sheet button, .sheet input');},0); }
 function closeSheet(){ sheetHTML=null; sheetCtx={}; render(); }
 function head(title,sub){ return `<div class="grab"></div><div class="sheet-head"><div><h2>${title}</h2>${sub?`<p class="muted mt6">${sub}</p>`:''}</div><button class="close" data-act="close" aria-label="Cerrar">${ic('x',20)}</button></div>`; }
 
@@ -628,13 +649,13 @@ function planLine(s){
 function classDates(s){
   const rows=[], taken=s.taken||[];
   for(let i=0;i<s.used;i++){ const t=taken[i]; rows.push({c:C.bordo,label:t?t.label:'Clase tomada',note:t&&t.note?t.note:'Tomada'}); }
-  bookedSlots(s.id).sort((a,b)=>a.d-b.d).forEach(sl=>{ const moved=s.fixed&&sl.dow!==s.fixed.dow; rows.push({c:C.naranja,label:`${sl.dow} ${sl.d}`,note:moved?'Cambiada de día':'Reservada'}); });
-  for(let i=0;i<available(s);i++){ const r=(s.recover||[])[i]; rows.push({c:null,label:'Clase para recuperar',note:r?r.note:'Elegí otro día'}); }
+  bookedSlots(s.id).sort((a,b)=>a.d-b.d).forEach(sl=>{ const rec=s.recUsed&&s.recUsed[sl.id], moved=s.fixed&&sl.dow!==s.fixed.dow; rows.push({c:C.naranja,label:`${sl.dow} ${sl.d}`,note:rec||(moved?'Cambiada de día':'Reservada')}); });
+  for(let i=0;i<available(s);i++){ const r=(s.recover||[])[i]; rows.push({c:null,label:r?'Clase para recuperar':'Clase para reservar',note:r?recuperoNota(r):'Elegí un día'}); }
   return `<div class="cdates">${rows.map(r=>`<div class="cd"><i style="${r.c?'background:'+r.c:'border:1.5px dashed '+C.bordo}"></i><span>${r.label}</span><span class="tiny muted">${r.note}</span></div>`).join('')}</div>`;
 }
 
 function aInicio(s){
-  const next = bookedSlots(s.id)[0];
+  const next = bookedSlots(s.id).filter(sl=>!isPast(sl))[0];
   const items = debtItems(s), d = debt(s);
   const ready = s.pieces.filter(p=>p.stage===4);
   let money;
@@ -696,7 +717,7 @@ function slotRow(sl, action){
 }
 
 function aClases(s){
-  const mine = bookedSlots(s.id);
+  const mine = bookedSlots(s.id).filter(sl=>!isPast(sl));
   const seg = `<div class="seg mt10" role="tablist"><button class="${S.clsSeg==='clases'?'on':''}" data-act="clsSeg" data-v="clases">Mis clases</button><button class="${S.clsSeg==='talleres'?'on':''}" data-act="clsSeg" data-v="talleres">Tallercitos</button></div>`;
   if(S.clsSeg==='talleres'){
     return `<h1 class="mt10">Tallercitos</h1><p class="muted mt6">Encuentros de una tarde, con todo incluido. Se pagan aparte de tu mensualidad.</p>${seg}
@@ -706,14 +727,15 @@ function aClases(s){
       <div class="row between mt14"><div><div class="serif" style="font-size:24px;font-weight:650;color:${C.bordo}">${fmt(w.price)}</div><div class="tiny muted">${mineW?'Tenés tu lugar':`Quedan ${left} lugares`}</div></div>
       ${mineW?`<span class="chip ok">${ic('check',14,3)} Anotada</span>`:`<button class="btn sm" data-act="wsBook" data-w="${w.id}">Quiero ir</button>`}</div></div></div>`}).join('')}</div>`;
   }
-  const days = S.slots.filter(sl=>sl.id!=='s1');
+  const days = S.slots.filter(sl=>sl.id!=='s1'&&!isPast(sl));
   const weeks = [['Esta semana',days.filter(d=>d.d<=21)],['La semana que viene',days.filter(d=>d.d>21)]];
   return `<h1 class="mt10">Clases</h1>${seg}
   <section class="section"><div class="panel rosa" style="padding:18px 20px">
     <div class="row between"><b>Te ${available(s)===1?'queda':'quedan'} ${available(s)} ${available(s)===1?'clase':'clases'} para reservar</b><span class="tiny muted">de ${s.total}</span></div>
+    ${(s.recover||[]).slice(0,available(s)).map(r=>`<p class="tiny muted mt6">${esc(recuperoNota(r))}.</p>`).join('')}
     ${rulesLink()}
   </div></section>
-  ${mine.length?`<section class="section"><h2 style="margin-bottom:12px">Tus reservas</h2>${mine.map(sl=>`<div class="slot" style="flex-wrap:wrap"><div class="datebox" style="background:${C.naranja};color:#fff"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.dow} ${sl.d} de noviembre</b><div class="small muted">${sl.time}</div></div>
+  ${mine.length?`<section class="section"><h2 style="margin-bottom:12px">Tus reservas</h2>${mine.map(sl=>`<div class="slot" style="flex-wrap:wrap"><div class="datebox" style="background:${C.naranja};color:#fff"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.dow} ${sl.d} de noviembre</b><div class="small muted">${sl.time}</div>${isLate(sl)?`<div class="tiny muted mt6">Faltan menos de ${S.settings.horas} hs: ya no se puede cambiar de día.</div>`:''}</div>
     <div class="row" style="gap:8px;width:100%"><button class="btn ghost sm" style="flex:1" data-act="reprog" data-slot="${sl.id}">${ic('swap',18)} Cambiar día</button><button class="btn ghost sm" style="flex:1" data-act="cancel" data-slot="${sl.id}">No voy a ir</button></div></div>`).join('')}</section>`:''}
   <section class="section"><h2 style="margin-bottom:14px">Horarios</h2>
     ${weeks.map(([t,list])=>`<div class="daygroup"><p class="daylabel">${t}</p>${list.map(sl=>slotRow(sl,'book')).join('')}</div>`).join('')}
@@ -992,7 +1014,7 @@ const A = {
   renewNow(){ const pv=renewPreview(); pv.charge.forEach(s=>s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:S.settings.mensualidad,status:'pendiente'})); pv.pause.forEach(s=>{ if(!abono(s,NEXT)) s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:0,status:'pausa'}); }); S.renewed[NEXT]={count:pv.charge.length,total:pv.total}; closeSheet(); toast(`Diciembre generado: ${pv.charge.length} abonos`); },
   closeDay(){ sheetCtx={}; openSheet(closeDaySheet(),{}); },
   reason(el){ sheetCtx.reason=el.dataset.v; sheetHTML=closeDaySheet(); render(); },
-  confirmClose(){ const sl=S.slots.find(x=>x.id===sheetCtx.slot); if(!sl){ toast('Elegí qué día cerrás'); return; } const reason=sheetCtx.reason||'Feriado'; const n=sl.list.length; sl.list.forEach(id=>stu(id).recover.push({note:`Cierre del ${sl.dow.toLowerCase()} ${sl.d}`})); sl.list=[]; sl.closed={reason}; S.avisos.unshift({kind:'cierre',text:`El ${sl.dow.toLowerCase()} ${sl.d} el taller está cerrado por ${reason.toLowerCase()}. Si tenías clase ese día, ya la tenés para recuperar: elegí otro día desde Clases.`,date:'Recién'}); closeSheet(); toast(`Listo. Avisamos a ${n} alumnas y su clase queda para recuperar`); },
+  confirmClose(){ const sl=S.slots.find(x=>x.id===sheetCtx.slot); if(!sl){ toast('Elegí qué día cerrás'); return; } const reason=sheetCtx.reason||'Feriado'; const n=sl.list.length; sl.list.forEach(id=>stu(id).recover.push({note:`Cierre del ${sl.dow.toLowerCase()} ${sl.d}`,from:`${sl.dow.toLowerCase()} ${sl.d}`,cierre:true})); sl.list=[]; sl.closed={reason}; S.avisos.unshift({kind:'cierre',text:`El ${sl.dow.toLowerCase()} ${sl.d} el taller está cerrado por ${reason.toLowerCase()}. Si tenías clase ese día, ya la tenés para recuperar: elegí otro día desde Clases.`,date:'Recién'}); closeSheet(); toast(`Listo. Avisamos a ${n} alumnas y su clase queda para recuperar`); },
   trial(){ openSheet(head('Clase de prueba','Vení a conocer el taller. Dura 2 horas y te llevás tu pieza.')+`<form data-form="trial"><div class="field"><label for="tr-n">Tu nombre</label><input id="tr-n" class="input" required></div><div class="field"><label for="tr-p">Tu celular</label><input id="tr-p" class="input" inputmode="tel" required></div><div class="field"><label for="tr-d">¿Qué día te queda mejor?</label><select id="tr-d" class="input">${S.slots.filter(s=>s.list.length<s.cap&&s.id!=='s1').map(s=>`<option>${s.dow} ${s.d}, ${s.time}</option>`).join('')}</select></div><button class="btn block mt10" type="submit">Pedir mi lugar</button></form>`); },
 
   /* alumna: clases */
@@ -1003,16 +1025,22 @@ const A = {
       <p class="mt14">Usás 1 de tus clases. Te ${available(s)-1===1?'queda':'quedan'} <b>${available(s)-1}</b> después de esta.</p><p class="small muted mt6">Te mandamos un recordatorio por WhatsApp el día anterior.</p>
       <button class="btn block mt18" data-act="confirmBook" data-slot="${sl.id}">Sí, reservar</button>`);
   },
-  confirmBook(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list.push(S.me); if(me().recover&&me().recover.length) me().recover.shift(); openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d} de ${sl.time}. Traé ropa que se pueda manchar.`)); },
+  confirmBook(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot), s=me(); sl.list.push(S.me); if(s.recover&&s.recover.length){ const r=s.recover.shift(); s.recUsed=s.recUsed||{}; s.recUsed[sl.id]=r.from?`Recupera la del ${r.from}`:'Recupera una clase'; } openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d} de ${sl.time}. Traé ropa que se pueda manchar.`)); },
   buySuelta(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sheetCtx={kind:'suelta',slot:sl.id,amount:S.settings.suelta,title:'Clase suelta'}; openSheet(paySheet(sheetCtx),sheetCtx); },
   reprog(el){
     const from=S.slots.find(x=>x.id===el.dataset.slot);
-    const opts=S.slots.filter(x=>x.id!=='s1'&&!x.closed&&x.id!==from.id&&x.list.length<x.cap&&!x.list.includes(S.me));
+    if(isLate(from)){ openSheet(head('Ya no se puede cambiar',`Faltan menos de ${S.settings.horas} hs para tu clase del ${from.dow.toLowerCase()} ${from.d}.`)+`<p>Los cambios de día se hacen hasta ${S.settings.horas} hs antes. Si no podés venir, avisá igual así otra alumna usa tu lugar. Esa clase se pierde.</p><button class="btn block mt18" data-act="cancel" data-slot="${from.id}">No voy a ir</button><button class="btn ghost block mt10" data-act="close">Voy a ir</button>`); return; }
+    const opts=S.slots.filter(x=>x.id!=='s1'&&!x.closed&&!isPast(x)&&x.id!==from.id&&x.list.length<x.cap&&!x.list.includes(S.me));
     openSheet(head('Cambiar de día',`Ahora estás en el ${from.dow.toLowerCase()} ${from.d}, ${from.time}. Elegí otro horario:`)+opts.map(sl=>slotRow(sl,'moveTo').replace('data-act="moveTo"',`data-act="moveTo" data-from="${from.id}"`)).join(''),{});
   },
-  moveTo(el){ const from=S.slots.find(x=>x.id===el.dataset.from), to=S.slots.find(x=>x.id===el.dataset.slot); from.list=from.list.filter(i=>i!==S.me); to.list.push(S.me); closeSheet(); toast(`Listo, te pasamos al ${to.dow.toLowerCase()} ${to.d}`); },
-  cancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); openSheet(head('¿No podés ir?')+`<p>Avisaste con más de ${S.settings.horas} hs, así que la clase del <b>${sl.dow.toLowerCase()} ${sl.d}</b> vuelve a tu cuenta para que la uses otro día.</p><p class="small muted mt10">Se libera tu lugar para otra alumna.</p><button class="btn block mt18" data-act="confirmCancel" data-slot="${sl.id}">Sí, liberar mi lugar</button><button class="btn ghost block mt10" data-act="close">Mejor no</button>`); },
-  confirmCancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list=sl.list.filter(i=>i!==S.me); me().recover.push({note:`Avisaste que no ibas el ${sl.dow.toLowerCase()} ${sl.d}`}); closeSheet(); toast('Liberaste tu lugar. La clase volvió a tu cuenta'); },
+  moveTo(el){ const from=S.slots.find(x=>x.id===el.dataset.from), to=S.slots.find(x=>x.id===el.dataset.slot); from.list=from.list.filter(i=>i!==S.me); to.list.push(S.me); const s=me(); if(s.recUsed&&s.recUsed[from.id]){ s.recUsed[to.id]=s.recUsed[from.id]; delete s.recUsed[from.id]; } closeSheet(); toast(`Listo, te pasamos al ${to.dow.toLowerCase()} ${to.d}`); },
+  cancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot), h=S.settings.horas;
+    if(isLate(sl)) openSheet(head('¿No podés ir?')+`<p>Faltan menos de ${h} hs para tu clase del <b>${sl.dow.toLowerCase()} ${sl.d}</b>, así que esa clase se pierde.</p><p class="small muted mt10">Igual podés liberar tu lugar para que lo use otra alumna.</p><button class="btn block mt18" data-act="confirmCancel" data-slot="${sl.id}">Liberar mi lugar igual</button><button class="btn ghost block mt10" data-act="close">Mejor voy</button>`);
+    else openSheet(head('¿No podés ir?')+`<p>Avisaste con más de ${h} hs, así que la clase del <b>${sl.dow.toLowerCase()} ${sl.d}</b> vuelve a tu cuenta. Podés recuperarla hasta el ${fechaLarga(venceRecupero(sl.date))}.</p><p class="small muted mt10">Se libera tu lugar para otra alumna.</p><button class="btn block mt18" data-act="confirmCancel" data-slot="${sl.id}">Sí, liberar mi lugar</button><button class="btn ghost block mt10" data-act="close">Mejor no</button>`); },
+  confirmCancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot), s=me(), late=isLate(sl), dia=`${sl.dow.toLowerCase()} ${sl.d}`;
+    sl.list=sl.list.filter(i=>i!==S.me); if(s.recUsed) delete s.recUsed[sl.id];
+    if(late){ s.used++; (s.taken=s.taken||[]).push({label:`${sl.dow} ${sl.d}`,note:'Perdida: avisaste tarde'}); closeSheet(); toast('Liberaste tu lugar. Esa clase se pierde'); return; }
+    s.recover.push({note:`Avisaste que no ibas el ${dia}`,from:dia,vence:venceRecupero(sl.date)}); closeSheet(); toast('Liberaste tu lugar. La clase volvió a tu cuenta'); },
   wait(){ toast('Te avisamos por WhatsApp si se libera un lugar'); },
   libre(){ openSheet(head('Pedir horario libre','Contale a Pauli cuándo podés venir.')+`<form data-form="libre"><div class="field"><label for="lb">Días y horarios que te quedan</label><textarea id="lb" class="input" placeholder="Por ejemplo: martes a la tarde o jueves a la mañana" required></textarea></div><button class="btn block" type="submit">Enviar a Pauli</button></form>`); },
   wsBook(el){ const w=S.workshops.find(x=>x.id===el.dataset.w); sheetCtx={kind:'taller',w:w.id,amount:w.price,title:'Tallercito: '+w.name}; openSheet(paySheet(sheetCtx),sheetCtx); },
@@ -1173,6 +1201,7 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.dataset.demo==='now'){ S.now=t.value; render(); toast('Ahora la maqueta está en el '+t.selectedOptions[0].text); return; }
   if(t.dataset.regsel!==undefined){ const id=t.dataset.regsel; sheetCtx.sel = t.checked ? [...sheetCtx.sel,id] : sheetCtx.sel.filter(x=>x!==id); sheetHTML=regPaySheet(); render(); return; }
   if(t.dataset.regmethod!==undefined){ sheetCtx.method=t.value; return; }
   if(t.dataset.closeslot!==undefined){ sheetCtx.slot=t.value; sheetHTML=closeDaySheet(); render(); return; }
