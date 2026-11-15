@@ -10,3 +10,7 @@ Una fila por decisión. ID es el código de la pregunta (C1, P4, PA2...) o, si n
 | 2026-11-15 | C6 | Pendiente Pauli. Provisorio: los recuperos por cierre del taller no vencen, como dice la regla que ven las alumnas ("si el taller cierra, siempre se recupera"). Los de aviso a tiempo vencen según Ajustes. | Pendiente Pauli |
 | 2026-11-15 | Maqueta | La barra oscura de la maqueta tiene un selector "Hoy es" para simular la hora y probar el límite de 24 h. Solo existe en la maqueta. | Francisco y Sasha |
 | 2026-11-15 | Flujo 1 | Los avisos flotantes se cierran al abrir otra ventana, para que no tapen el contenido. | Francisco y Sasha |
+| 2026-11-15 | P1 | Pendiente Pauli. Una alumna propone pagar por pack de 4 clases: que la cuota venza y cuente como deuda apenas termina la última clase del pack, en lugar de por mes. Provisorio: se mantiene la regla actual (se paga del 1 al 10) y la app la aplica: el mes en curso dice "Por pagar, vence el 10" hasta el día de pago y "Debe" desde el día siguiente. | Pendiente Pauli |
+| 2026-11-15 | Flujo 2 | Mientras Pauli no confirma una transferencia, cada ítem del comprobante dice "en revisión" y el mes lleva el chip "En revisión" en lugar de "Por pagar". Se ve igual en la ficha de Pauli. | Francisco y Sasha |
+| 2026-11-15 | P3 | Pendiente Pauli. Provisorio: una alumna que debe puede seguir reservando (como hoy). | Pendiente Pauli |
+| 2026-11-15 | P4 | Pendiente Pauli. Provisorio: la deuda vieja queda al precio de ese mes (septiembre a $40.000), como hoy. | Pendiente Pauli |

@@ -506,7 +506,9 @@ function debtItems(s){
 }
 const debt = s => debtItems(s).reduce((a,b)=>a+b.amount,0);
 const dueNow = s => debtItems(s).filter(x=>x.month<=CUR).reduce((a,b)=>a+b.amount,0);
-const overdue = s => debtItems(s).some(x=>x.kind==='abono'&&x.month<=CUR);
+/* P1 (provisorio, pendiente Pauli): el mes en curso está "Por pagar" hasta el día de pago y "Debe" desde el siguiente. */
+const abonoVencido = m => m<CUR || (m===CUR && ahora().getDate()>S.settings.pagoHasta);
+const overdue = s => debtItems(s).some(x=>x.kind==='abono'&&abonoVencido(x.month));
 function payState(s){
   if(s.pending) return {k:'rev',t:'Revisar comprobante'};
   const d=debt(s);
@@ -516,16 +518,20 @@ function payState(s){
   if(old) return {k:'bad',t:`Debe ${fmt(d)} desde ${MES[old.month].slice(0,3)}`};
   return overdue(s)?{k:'bad',t:'Debe '+fmt(d)}:{k:'warn',t:'Por pagar '+fmt(d)};
 }
-function itemStatusText(i){
+const enRevision = (s,i) => !!(s&&s.pending&&(s.pending.items||[]).includes(i.id));
+function itemStatusText(i,s){
+  if(i.status==='pendiente'&&enRevision(s,i)) return 'en revisión';
   if(i.status==='pagado') return `pagado el ${i.paidOn}`;
   if(i.status==='pausa') return 'en pausa, sin cargo';
   if(i.status==='condonado') return 'sin cargo';
-  return i.month<CUR?'vencido':i.month===CUR?'pendiente':`vence el ${S.settings.pagoHasta}`;
+  return i.month<CUR?'vencido':(i.kind==='abono'&&abonoVencido(i.month))?'vencido':`vence el ${S.settings.pagoHasta}`;
 }
-function monthState(items, m){
+function monthState(items, m, s){
   if(items.every(i=>i.status==='pausa')) return {k:'pause',t:'En pausa'};
-  if(items.some(i=>i.status==='pendiente'&&i.kind==='abono'&&m<=CUR)) return {k:'bad',t:'Debe'};
-  if(items.some(i=>i.status==='pendiente')) return {k:'warn',t:'Por pagar'};
+  const open=items.filter(i=>i.status==='pendiente'&&!enRevision(s,i));
+  if(open.some(i=>i.kind==='abono'&&abonoVencido(m))) return {k:'bad',t:'Debe'};
+  if(open.length) return {k:'warn',t:'Por pagar'};
+  if(items.some(i=>i.status==='pendiente')) return {k:'rev',t:'En revisión'};
   return {k:'ok',t:'Pagado'};
 }
 const ledgerMonths = s => [...new Set(s.ledger.map(x=>x.month))].sort().reverse();
@@ -795,7 +801,7 @@ function aCuenta(s){
     <p class="mt10"><b>Mensualidad ${fmt(S.settings.mensualidad)}</b></p><p class="small muted">${S.settings.clases} clases de 2 horas por mes, materiales y 1 pieza mediana incluida.</p>${planLine(s)}</section>
   <section class="section"><h2 style="margin-bottom:12px">Tu cuenta</h2><div class="list">
     ${s.pending?`<div class="li"><div style="flex:1"><b>Pago de ${fmt(s.pending.amount)}</b><div class="tiny muted">${s.pending.date}, ${s.pending.method}</div></div><span class="chip rev">En revisión</span></div>`:''}
-    ${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st=monthState(items,m);return `<div class="li" style="align-items:flex-start"><div style="flex:1;min-width:0"><b>${cap(MES[m])}</b>${items.map(i=>`<div class="tiny muted">${esc(i.kind==='abono'?'Mensualidad':i.label)}${i.status==='pendiente'?' '+fmt(i.amount):''}, ${itemStatusText(i)}</div>`).join('')}</div><span class="chip ${st.k}">${st.t}</span></div>`}).join('')}
+    ${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st=monthState(items,m,s);return `<div class="li" style="align-items:flex-start"><div style="flex:1;min-width:0"><b>${cap(MES[m])}</b>${items.map(i=>`<div class="tiny muted">${esc(i.kind==='abono'?'Mensualidad':i.label)}${i.status==='pendiente'?' '+fmt(i.amount):''}, ${itemStatusText(i,s)}</div>`).join('')}</div><span class="chip ${st.k}">${st.t}</span></div>`}).join('')}
   </div>
   ${s.pauseReq?`<p class="tiny muted mt10">Pediste pausar ${MES[s.pauseReq]}. Pauli te confirma por acá.</p>`:isPaused(s)?'':`<button class="rules-link" data-act="askPause">${ic('pause',14)} ¿Necesitás pausar un mes?</button>`}
   </section>
@@ -964,8 +970,8 @@ function stuSheet(id){
   <div class="stack gap10 mt10">${s.pieces.map(p=>`<div class="piece" style="padding:10px 12px"><div class="art" style="width:52px;height:52px;border-radius:14px">${art(p.art,C.rosa2,p.color)}</div><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="tiny muted">${p.included?'Incluida':'Extra'}, ${p.size}</div></div>
     <select class="input" style="width:auto;min-height:42px" data-stage="${p.id}" data-s="${id}" aria-label="Estado de ${esc(p.name)}">${STAGES.map((t,i)=>`<option value="${i}" ${p.stage===i?'selected':''}>${t}</option>`).join('')}</select></div>`).join('')}</div>
   <div class="row between mt18"><h3>Cuenta mes a mes</h3>${debt(s)?`<span class="num" style="color:${C.bordo}">Debe ${fmt(debt(s))}</span>`:''}</div>
-  <div class="list mt10">${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st2=monthState(items,m);return `<div class="li" style="flex-direction:column;align-items:stretch;gap:4px"><div class="row between"><b>${cap(MES[m])}</b><span class="chip ${st2.k}">${st2.t}</span></div>
-    ${items.map(i=>`<div class="ledger-item"><span class="lbl">${esc(i.label)} <span class="tiny muted">${itemStatusText(i)}</span></span><span class="num">${i.status==='pendiente'||i.status==='pagado'?fmt(i.amount):'$0'}</span>${i.status==='pendiente'?`${i.kind==='abono'?`<button class="tlink" data-act="itemPause" data-s="${id}" data-i="${i.id}">Pausar</button>`:''}<button class="tlink" data-act="itemForgive" data-s="${id}" data-i="${i.id}">No cobrar</button>`:''}</div>`).join('')}</div>`}).join('')}</div>
+  <div class="list mt10">${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st2=monthState(items,m,s);return `<div class="li" style="flex-direction:column;align-items:stretch;gap:4px"><div class="row between"><b>${cap(MES[m])}</b><span class="chip ${st2.k}">${st2.t}</span></div>
+    ${items.map(i=>`<div class="ledger-item"><span class="lbl">${esc(i.label)} <span class="tiny muted">${itemStatusText(i,s)}</span></span><span class="num">${i.status==='pendiente'||i.status==='pagado'?fmt(i.amount):'$0'}</span>${i.status==='pendiente'?`${i.kind==='abono'?`<button class="tlink" data-act="itemPause" data-s="${id}" data-i="${i.id}">Pausar</button>`:''}<button class="tlink" data-act="itemForgive" data-s="${id}" data-i="${i.id}">No cobrar</button>`:''}</div>`).join('')}</div>`}).join('')}</div>
   <p class="tiny muted mt6">Cada mes queda separado: lo viejo no se mezcla con lo nuevo y vos elegís qué cobra cada pago.</p>
   <div class="row mt14" style="gap:8px;flex-wrap:wrap">${s.pending?`<button class="btn sm olive" data-act="approve" data-s="${id}">Aprobar comprobante de ${fmt(s.pending.amount)}</button>`:''}${debt(s)&&!s.pending?`<button class="btn sm" data-act="regPay" data-s="${id}">Registrar pago</button><button class="btn ghost sm" data-act="remind" data-s="${id}">${ic('wa',18)} Recordarle</button>`:''}${isPaused(s)||(s.pause&&s.pause.from>CUR)?`<button class="btn ghost sm" data-act="resume" data-s="${id}">Retomar en ${MES[NEXT]}</button>`:`<button class="btn ghost sm" data-act="pauseStu" data-s="${id}">${ic('pause',16)} Pausar</button>`}</div>`;
 }
