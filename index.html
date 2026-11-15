@@ -252,6 +252,11 @@ button.li:hover{background:var(--rosa-2)}
 .toggle.on::after{transform:translateX(22px)}
 .att{width:38px;height:38px;border-radius:12px;border:1.5px solid var(--line);display:grid;place-items:center;background:#fff;flex:none}
 .att.on{background:var(--oliva);border-color:var(--oliva);color:#fff}
+.att.no.on{background:var(--bordo);border-color:var(--bordo)}
+.attrow{flex-wrap:wrap}
+.attrow .who{flex:1;min-width:0}
+.attrow .who .chip{margin-top:6px}
+.attbtns{display:flex;gap:6px;flex:none}
 .receipt{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-xl);padding:18px;display:flex;gap:16px;align-items:stretch}
 .receipt .thumb{width:110px;flex:none;border-radius:14px;background:var(--lila-2);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:10px;text-align:center;font-size:12px;color:#5A4573;overflow:hidden}
 .receipt .thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px}
@@ -474,7 +479,7 @@ function save(){ try{ localStorage.setItem('hipatia-demo', JSON.stringify(S)); }
 /* ---------- derived ---------- */
 const stu = id => S.students.find(s=>s.id===id);
 const me = () => stu(S.me);
-const bookedSlots = id => S.slots.filter(sl=>sl.list.includes(id) && sl.id!=='s1');
+const bookedSlots = id => { const s=stu(id), a=(s&&s.attended)||{}; return S.slots.filter(sl=>sl.list.includes(id) && !a[sl.id]); };
 const available = s => isPaused(s) ? 0 : Math.max(0, s.total - s.used - bookedSlots(s.id).length);
 const CUR='2026-11', NEXT='2026-12';
 const MES={'2026-09':'septiembre','2026-10':'octubre','2026-11':'noviembre','2026-12':'diciembre','2027-01':'enero'};
@@ -490,6 +495,14 @@ const slotStart = sl => new Date(`${sl.date}T${String(parseInt(sl.time)).padStar
 const hoursLeft = sl => (slotStart(sl) - ahora()) / 36e5;
 const isPast = sl => hoursLeft(sl) <= 0;
 const isLate = sl => hoursLeft(sl) < S.settings.horas;
+const hoyIso = () => { const d=ahora(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+/* Asistencia: 'vino' o 'falto'. Faltar sin avisar descuenta la clase (C2). */
+const asistencia = (s,slotId) => { const v=(s.attended||{})[slotId]; return v===true?'vino':v||null; };
+function attRow(s, sl){
+  const a=asistencia(s,sl.id);
+  return `<div class="li attrow"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div class="who"><b>${esc(s.name)}</b><div class="tiny muted">${s.used} de ${s.total} clases usadas${a?'':' · Sin marcar'}</div><span class="chip ${payState(s).k}">${payState(s).t}</span></div>
+    <div class="attbtns"><button class="att ${a==='vino'?'on':''}" data-act="att" data-v="vino" data-s="${s.id}" data-slot="${sl.id}" aria-pressed="${a==='vino'}" aria-label="${esc(s.short)} vino">${ic('check',18,2.5)}</button><button class="att no ${a==='falto'?'on':''}" data-act="att" data-v="falto" data-s="${s.id}" data-slot="${sl.id}" aria-pressed="${a==='falto'}" aria-label="${esc(s.short)} faltó">${ic('x',18,2.5)}</button></div></div>`;
+}
 const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
 const fechaLarga = iso => { const d=new Date(iso+'T12:00'); return `${d.getDate()} de ${MESES[d.getMonth()]}`; };
 /* Hasta cuándo vale un recupero, según Ajustes. Se guarda en el recupero al crearlo. */
@@ -654,7 +667,8 @@ function planLine(s){
 }
 function classDates(s){
   const rows=[], taken=s.taken||[];
-  for(let i=0;i<s.used;i++){ const t=taken[i]; rows.push({c:C.bordo,label:t?t.label:'Clase tomada',note:t&&t.note?t.note:'Tomada'}); }
+  const sinFecha=Math.max(0,s.used-taken.length);
+  for(let i=0;i<s.used;i++){ const t=i<sinFecha?null:taken[i-sinFecha]; rows.push({c:C.bordo,label:t?t.label:'Clase tomada',note:t&&t.note?t.note:'Tomada'}); }
   bookedSlots(s.id).sort((a,b)=>a.d-b.d).forEach(sl=>{ const rec=s.recUsed&&s.recUsed[sl.id], moved=s.fixed&&sl.dow!==s.fixed.dow; rows.push({c:C.naranja,label:`${sl.dow} ${sl.d}`,note:rec||(moved?'Cambiada de día':'Reservada')}); });
   for(let i=0;i<available(s);i++){ const r=(s.recover||[])[i]; rows.push({c:null,label:r?'Clase para recuperar':'Clase para reservar',note:r?recuperoNota(r):'Elegí un día'}); }
   return `<div class="cdates">${rows.map(r=>`<div class="cd"><i style="${r.c?'background:'+r.c:'border:1.5px dashed '+C.bordo}"></i><span>${r.label}</span><span class="tiny muted">${r.note}</span></div>`).join('')}</div>`;
@@ -849,9 +863,9 @@ function oHoy(){
   <div class="cols">
     <div>
       <div class="sec-head" style="margin-top:8px"><h2>Hoy, ${today.time}</h2><span class="muted small">${today.list.length} de ${today.cap}</span></div>
-      <div class="list">${today.list.map(id=>{const s=stu(id), a=s.attended[today.id];return `<div class="li"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:0"><b>${esc(s.name)}</b><div class="tiny muted">${s.used} de ${s.total} clases usadas</div></div><span class="chip ${payState(s).k}">${payState(s).t}</span><button class="att ${a?'on':''}" data-act="att" data-s="${id}" data-slot="${today.id}" aria-pressed="${!!a}" aria-label="Marcar presente ${esc(s.name)}">${ic('check',18,2.5)}</button></div>`}).join('')}</div>
-      <p class="tiny muted mt6">Marcá quién vino y se descuenta la clase sola.</p>
-      <div class="sec-head" style="margin-top:22px"><h2>Mañana, ${tomorrow.time}</h2><span class="chip bad">Completa</span></div>
+      <div class="list">${today.list.map(id=>attRow(stu(id),today)).join('')}</div>
+      <p class="tiny muted mt6">Marcá quién vino y quién faltó. En los dos casos se descuenta la clase: si falta sin avisar, la pierde.</p>
+      <div class="sec-head" style="margin-top:22px"><h2>Mañana, ${tomorrow.time}</h2>${tomorrow.list.length>=tomorrow.cap?'<span class="chip bad">Completa</span>':`<span class="muted small">${tomorrow.list.length} de ${tomorrow.cap}</span>`}</div>
       <div class="list"><div class="li"><div style="flex:1">${tomorrow.list.map(id=>stu(id).short).join(', ')}</div></div></div>
     </div>
     <div>
@@ -1073,10 +1087,19 @@ const A = {
   checkout(){ if(S.view==='tienda'){ if(!(sheetCtx.gname||'').trim()||!(sheetCtx.gphone||'').trim()){ toast('Completá tu nombre y WhatsApp para seguir'); return; } S.guest={name:sheetCtx.gname.trim(),phone:sheetCtx.gphone.trim()}; } const ship = sheetCtx.delivery==='envio'?3500:0; const d=sheetCtx.delivery; sheetCtx={kind:'orden',amount:cartTotal()+ship,title:'Pagar tu compra',delivery:d}; openSheet(paySheet(sheetCtx),sheetCtx); },
 
   /* owner */
-  att(el){ const s=stu(el.dataset.s); const k=el.dataset.slot; if(s.attended[k]){delete s.attended[k]; s.used--; } else { s.attended[k]=true; s.used++; } render(); },
+  att(el){ const s=stu(el.dataset.s), k=el.dataset.slot, v=el.dataset.v, sl=S.slots.find(x=>x.id===k), prev=asistencia(s,k);
+    s.attended=s.attended||{}; s.taken=(s.taken||[]).filter(x=>x.slot!==k);
+    if(prev===v){ delete s.attended[k]; s.used--; }
+    else { if(!prev) s.used++; s.attended[k]=v; s.taken.push({label:`${sl.dow} ${sl.d}`,note:v==='vino'?'Tomada':'Perdida: faltaste sin avisar',slot:k}); }
+    if(sheetCtx.oslot) sheetHTML=oslotSheet(sheetCtx.oslot); render(); },
   delivered(el){ const s=stu(el.dataset.s); s.pieces=s.pieces.filter(p=>p.id!==el.dataset.p); render(); toast('Marcada como entregada'); },
-  oslot(el){ openSheet(oslotSheet(el.dataset.slot)); },
-  addToSlot(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); const v=document.getElementById('add-stu').value; if(v&&!sl.list.includes(v)&&sl.list.length<sl.cap){sl.list.push(v); sheetHTML=oslotSheet(sl.id); render(); toast(stu(v).short+' anotada');} },
+  oslot(el){ openSheet(oslotSheet(el.dataset.slot),{oslot:el.dataset.slot}); },
+  addToSlot(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); const v=document.getElementById('add-stu').value; if(!v||sl.list.includes(v)||sl.list.length>=sl.cap) return; const s=stu(v);
+    if(!available(s)){ sheetHTML=head(isPaused(s)?`${esc(s.short)} está en pausa`:`${esc(s.short)} ya usó sus ${s.total} clases`,`${sl.dow} ${sl.d}, ${sl.time}`)+`<p>${isPaused(s)?'Este mes no tiene clases.':'No le quedan clases libres este mes.'} ¿Cómo la anotás?</p><button class="btn block mt18" data-act="addToSlotExtra" data-cobrar="1" data-slot="${sl.id}" data-s="${s.id}">Anotar como clase suelta (${fmt(S.settings.suelta)})</button><p class="tiny muted mt6">Se suma a su cuenta como clase suelta.</p><button class="btn ghost block mt14" data-act="addToSlotExtra" data-cobrar="" data-slot="${sl.id}" data-s="${s.id}">Anotar sin cobrar</button><button class="link block mt14" data-act="oslot" data-slot="${sl.id}">Volver</button>`; render(); return; }
+    sl.list.push(v); sheetHTML=oslotSheet(sl.id); render(); toast(s.short+' anotada'); },
+  addToSlotExtra(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot), s=stu(el.dataset.s), cobrar=!!el.dataset.cobrar; sl.list.push(s.id); s.total++; s.customTotal=true;
+    if(cobrar) s.ledger.push({id:'su'+Date.now(),month:CUR,kind:'suelta',label:'Clase suelta',sub:`${sl.dow} ${sl.d}`,amount:S.settings.suelta,status:'pendiente'});
+    sheetHTML=oslotSheet(sl.id); render(); toast(cobrar?`${s.short} anotada. Se le suma una clase suelta`:`${s.short} anotada sin cargo`); },
   rmFromSlot(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list=sl.list.filter(i=>i!==el.dataset.s); sheetHTML=oslotSheet(sl.id); render(); },
   capAdj(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.cap=Math.max(sl.list.length,sl.cap+(+el.dataset.d)); sheetHTML=oslotSheet(sl.id); render(); },
   ostu(el){ sheetCtx={}; openSheet(stuSheet(el.dataset.s),{}); },
@@ -1176,10 +1199,10 @@ function closeDaySheet(){
   <button class="btn block mt18" data-act="confirmClose" ${sl?'':'disabled'}>Cerrar y avisar</button>`;
 }
 function oslotSheet(id){
-  const sl=S.slots.find(x=>x.id===id);
+  const sl=S.slots.find(x=>x.id===id), conAsistencia = sl.date<=hoyIso();
   if(sl.closed) return head(`${sl.dow} ${sl.d}, ${sl.time}`,'Taller cerrado')+`<div class="panel aviso-cierre"><p>Cerrado por ${esc(sl.closed.reason.toLowerCase())}. Las alumnas de ese día ya recibieron el aviso y tienen la clase para recuperar.</p></div>`; const others=S.students.filter(s=>!sl.list.includes(s.id));
   return head(`${sl.dow} ${sl.d}, ${sl.time}`,`${sl.list.length} de ${sl.cap} lugares ocupados`)+
-  `<div class="list">${sl.list.map(sid=>{const s=stu(sid);return `<div class="li"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1"><b>${esc(s.name)}</b><div class="tiny muted">${available(s)} clases libres</div></div><span class="chip ${payState(s).k}">${payState(s).t}</span><button class="close" data-act="rmFromSlot" data-slot="${id}" data-s="${sid}" aria-label="Sacar a ${esc(s.name)}">${ic('x',16)}</button></div>`}).join('')||'<div class="li muted">Todavía no se anotó nadie.</div>'}</div>
+  `${conAsistencia?'<p class="small muted" style="margin-bottom:10px">Marcá quién vino y quién faltó.</p>':''}<div class="list">${sl.list.map(sid=>{const s=stu(sid); if(conAsistencia) return attRow(s,sl); return `<div class="li attrow"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div class="who"><b>${esc(s.name)}</b><div class="tiny muted">${available(s)} ${available(s)===1?'clase libre':'clases libres'}</div><span class="chip ${payState(s).k}">${payState(s).t}</span></div><button class="close" data-act="rmFromSlot" data-slot="${id}" data-s="${sid}" aria-label="Sacar a ${esc(s.name)}">${ic('x',16)}</button></div>`}).join('')||'<div class="li muted">Todavía no se anotó nadie.</div>'}</div>
   ${sl.list.length<sl.cap?`<div class="row mt14" style="gap:8px"><select class="input" id="add-stu" style="flex:1" aria-label="Elegir alumna"><option value="">Anotar a una alumna…</option>${others.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><button class="btn" data-act="addToSlot" data-slot="${id}">Anotar</button></div>`:''}
   <div class="row between mt18 panel" style="padding:14px 18px"><span>Lugares en esta clase</span><div class="stepper"><button data-act="capAdj" data-slot="${id}" data-d="-1" aria-label="Un lugar menos">−</button><b>${sl.cap}</b><button data-act="capAdj" data-slot="${id}" data-d="1" aria-label="Un lugar más">+</button></div></div>`;
 }
