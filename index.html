@@ -1,0 +1,1046 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hipatia Cerámica – App de clases y tienda (maqueta)</title>
+<meta name="theme-color" content="#962019">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hipatia">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght,SOFT,WONK@9..144,400..900,0..100,0..1&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#FFF7F8;
+  --rosa:#F7D6DF;
+  --rosa-2:#FCEBEF;
+  --bordo:#962019;
+  --bordo-2:#7A1712;
+  --ink:#3A1512;
+  --ink-2:#7B5551;
+  --naranja:#E0855A;
+  --naranja-2:#FBE4D8;
+  --oliva:#77822F;
+  --oliva-2:#E9ECCB;
+  --lila:#D6CDE0;
+  --lila-2:#EEE9F3;
+  --chicle:#E6A0CC;
+  --line:#F0D7DD;
+  --white:#fff;
+  --r-xl:30px; --r-lg:22px; --r-md:16px;
+  --serif:'Fraunces', Georgia, serif;
+  --sans:'Figtree', system-ui, sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);font-size:17px;line-height:1.45;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:3px solid var(--naranja);outline-offset:2px;border-radius:10px}
+.serif{font-family:var(--serif);font-variation-settings:"SOFT" 100,"WONK" 0}
+h1,h2,h3{font-family:var(--serif);font-variation-settings:"SOFT" 100;margin:0;font-weight:650;letter-spacing:-.01em}
+h1{font-size:44px;line-height:1.02;color:var(--bordo)}
+h2{font-size:26px;line-height:1.1}
+h3{font-size:20px;line-height:1.2}
+p{margin:0}
+.muted{color:var(--ink-2)}
+.small{font-size:15px}
+.tiny{font-size:13.5px}
+
+/* demo bar */
+.demobar{display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;padding:8px 14px;background:var(--ink);color:#F7D6DF;font-size:14px}
+.demobar b{font-weight:600;color:#fff}
+.demobar button{padding:5px 12px;border-radius:99px;border:1px solid #ffffff40;color:#fff;font-size:13.5px}
+.demobar button.on{background:var(--rosa);color:var(--bordo);border-color:var(--rosa);font-weight:600}
+
+/* buttons */
+.btn{white-space:nowrap;display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:52px;padding:0 22px;border-radius:99px;background:var(--bordo);color:#fff;font-weight:600;font-size:17px;transition:transform .12s, background .2s}
+.btn:active{transform:scale(.97)}
+.btn:hover{background:var(--bordo-2)}
+.btn.block{width:100%}
+.btn.soft{background:var(--rosa);color:var(--bordo)}
+.btn.soft:hover{background:#F2C6D2}
+.btn.ghost{background:transparent;color:var(--bordo);border:1.5px solid var(--line)}
+.btn.ghost:hover{background:var(--rosa-2)}
+.btn.olive{background:var(--oliva);color:#fff}
+.btn.sm{min-height:40px;padding:0 16px;font-size:15px}
+.btn[disabled]{opacity:.4;pointer-events:none}
+.link{color:var(--bordo);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;padding:4px 11px;border-radius:99px;font-size:13.5px;font-weight:600;white-space:nowrap}
+.chip.ok{background:var(--oliva-2);color:#4F5A14}
+.chip.warn{background:var(--naranja-2);color:#9A4417}
+.chip.rev{background:var(--lila-2);color:#5A4573}
+.chip.bad{background:#FADBD8;color:var(--bordo)}
+
+/* ---------- login ---------- */
+.login{min-height:calc(100vh - 40px);display:grid;place-items:center;padding:28px 18px;background:
+  radial-gradient(circle at 12% 18%, #F2C6D2 0 90px, transparent 91px),
+  radial-gradient(circle at 92% 82%, #E9ECCB 0 120px, transparent 121px),
+  var(--rosa)}
+.login-card{width:100%;max-width:440px;background:var(--white);border-radius:36px;padding:34px 28px 28px;position:relative}
+.login-logo{display:flex;justify-content:center;margin:-80px 0 14px}
+.role-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:22px 0 18px}
+.role{border:2px solid var(--line);border-radius:var(--r-lg);padding:16px;text-align:left;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.role:hover{border-color:var(--chicle)}
+.role.on{border-color:var(--bordo);background:var(--rosa-2)}
+.role .ic{width:46px;height:46px;border-radius:14px;display:grid;place-items:center}
+.role b{font-size:18px}
+.field{display:flex;flex-direction:column;gap:6px;margin-bottom:12px}
+.field label{font-size:14.5px;font-weight:600;color:var(--ink-2)}
+.input{width:100%;min-height:52px;border-radius:var(--r-md);border:1.5px solid var(--line);padding:0 16px;background:#fff}
+textarea.input{padding:14px 16px;min-height:96px;resize:vertical}
+.input:focus{outline:none;border-color:var(--bordo)}
+
+/* ---------- alumna shell ---------- */
+.app{max-width:540px;margin:0 auto;padding:0 18px 120px;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:18px 0 8px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-weight:700;font-size:22px;color:var(--bordo)}
+.iconbtn{position:relative;width:46px;height:46px;border-radius:15px;display:grid;place-items:center;background:#fff;border:1.5px solid var(--line)}
+.badge{position:absolute;top:-5px;right:-5px;min-width:21px;height:21px;padding:0 6px;border-radius:99px;background:var(--bordo);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.avatar{width:46px;height:46px;border-radius:15px;display:grid;place-items:center;font-family:var(--serif);font-weight:700;font-size:20px}
+
+.bottomnav{position:fixed;left:50%;transform:translateX(-50%);bottom:14px;z-index:30;display:flex;gap:2px;background:#fff;border:1.5px solid var(--line);border-radius:26px;padding:7px;box-shadow:0 10px 30px -12px #9620194d;width:min(520px,calc(100% - 24px))}
+.bottomnav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 2px;border-radius:19px;font-size:12.5px;font-weight:600;color:var(--ink-2);position:relative}
+.bottomnav button.on{background:var(--rosa);color:var(--bordo)}
+.bottomnav .badge{top:2px;right:calc(50% - 22px)}
+
+.section{margin-top:26px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:12px}
+
+.panel{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-xl);padding:22px}
+.panel.rosa{background:var(--rosa);border-color:transparent}
+.panel.lila{background:var(--lila-2);border-color:transparent}
+.panel.oliva{background:var(--oliva-2);border-color:transparent}
+.row{display:flex;align-items:center;gap:14px}
+.between{justify-content:space-between}
+.stack{display:flex;flex-direction:column}
+.gap6{gap:6px}.gap10{gap:10px}.gap14{gap:14px}
+.mt6{margin-top:6px}.mt10{margin-top:10px}.mt14{margin-top:14px}.mt18{margin-top:18px}.mt24{margin-top:24px}
+.hr{height:1.5px;background:#00000010;margin:16px 0}
+
+/* stars meter */
+.stars{display:flex;gap:10px;flex-wrap:wrap}
+.stars svg{width:52px;height:52px}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:14px;color:var(--ink-2);margin-top:12px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.cdates{margin-top:14px;border-top:1.5px dashed #96201930;padding-top:8px}
+.cd{display:flex;align-items:center;gap:10px;padding:5px 0;font-size:15px}
+.cd i{width:9px;height:9px;border-radius:50%;flex:none}
+.cd span:nth-of-type(1){flex:1}
+.legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+.money{font-family:var(--serif);font-weight:650;font-size:40px;line-height:1;color:var(--bordo);font-variant-numeric:tabular-nums}
+.line-item{display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1.5px dashed #96201922}
+.line-item:last-child{border-bottom:0}
+.num{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+
+/* piece progress */
+.piece{display:flex;gap:14px;align-items:center;padding:14px;background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg)}
+.piece .art{width:72px;height:72px;border-radius:18px;flex:none;overflow:hidden}
+.steps{display:flex;gap:4px;margin-top:8px}
+.steps span{flex:1;height:7px;border-radius:9px;background:#00000012}
+.steps span.done{background:var(--oliva)}
+.steps span.now{background:var(--naranja)}
+
+/* slots */
+.daygroup{margin-bottom:18px}
+.daylabel{font-weight:700;font-size:15px;color:var(--ink-2);margin:0 0 8px 4px}
+.slot{display:flex;align-items:center;gap:14px;padding:12px 12px 12px 14px;background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);margin-bottom:8px}
+.datebox{width:58px;height:62px;border-radius:16px;background:var(--rosa);color:var(--bordo);display:flex;flex-direction:column;align-items:center;justify-content:center;flex:none}
+.datebox b{font-family:var(--serif);font-size:26px;line-height:1}
+.datebox small{font-size:12px;font-weight:600}
+.dots{display:flex;gap:4px;margin-top:5px}
+.dots i{width:10px;height:10px;border-radius:50%;background:var(--bordo)}
+.dots i.free{background:transparent;border:1.5px solid var(--bordo)}
+
+.seg{display:flex;background:#fff;border:1.5px solid var(--line);border-radius:99px;padding:4px;gap:4px}
+.seg button{flex:1;padding:10px 8px;border-radius:99px;font-weight:600;color:var(--ink-2)}
+.seg button.on{background:var(--bordo);color:#fff}
+
+/* store */
+.highlights{display:flex;gap:14px;overflow-x:auto;padding:4px 2px 8px;scrollbar-width:none}
+.highlights::-webkit-scrollbar{display:none}
+.hl{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13.5px;font-weight:600;flex:none}
+.hl .ring{width:70px;height:70px;border-radius:50%;padding:4px;border:2px solid var(--line);display:grid;place-items:center}
+.hl.on .ring{border-color:var(--bordo)}
+.hl .ring div{width:100%;height:100%;border-radius:50%;display:grid;place-items:center}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.prod{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-lg);overflow:hidden;text-align:left;display:flex;flex-direction:column}
+.prod .art{aspect-ratio:1/1}
+.prod .info{padding:10px 12px 14px}
+.prod .name{font-weight:600;font-size:15.5px;line-height:1.25}
+.prod .price{font-family:var(--serif);font-weight:650;color:var(--bordo);font-size:19px;margin-top:4px}
+.prod.sold{opacity:.55}
+.tag{position:absolute;top:10px;left:10px;background:#fff;color:var(--bordo);border-radius:99px;padding:3px 10px;font-size:12.5px;font-weight:700}
+.cartbar{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:29;width:min(500px,calc(100% - 36px));display:flex;justify-content:space-between;align-items:center;background:var(--bordo);color:#fff;border-radius:20px;padding:14px 18px;font-weight:600;box-shadow:0 12px 28px -12px #962019aa}
+
+/* sheet */
+.scrim{position:fixed;inset:0;background:#3A151266;z-index:50;display:flex;align-items:flex-end;justify-content:center;animation:fade .18s}
+.sheet{background:var(--bg);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:32px 32px 0 0;padding:12px 22px 28px;animation:up .26s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:32px;max-height:88vh}}
+.grab{width:44px;height:5px;border-radius:9px;background:#3A151230;margin:0 auto 14px}
+.sheet-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px}
+.close{width:40px;height:40px;border-radius:13px;background:#fff;border:1.5px solid var(--line);display:grid;place-items:center;flex:none}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}60%{transform:scale(1.08)}100%{transform:scale(1);opacity:1}}
+
+.choice{display:flex;gap:14px;align-items:center;width:100%;text-align:left;padding:16px;border-radius:var(--r-lg);background:#fff;border:2px solid var(--line);margin-bottom:10px}
+.choice.on{border-color:var(--bordo);background:var(--rosa-2)}
+.choice .ic{width:48px;height:48px;border-radius:15px;display:grid;place-items:center;flex:none}
+.radio{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);margin-left:auto;flex:none;display:grid;place-items:center}
+.choice.on .radio{border-color:var(--bordo);background:var(--bordo)}
+.choice.on .radio::after{content:"";width:8px;height:8px;border-radius:50%;background:#fff}
+
+.alias{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border:1.5px dashed var(--bordo);border-radius:var(--r-md);padding:12px 14px}
+.drop{display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:22px;border:2px dashed var(--chicle);border-radius:var(--r-lg);background:#fff;cursor:pointer}
+.drop.has{border-style:solid;border-color:var(--oliva);background:var(--oliva-2)}
+.drop img{max-width:100%;max-height:180px;border-radius:12px}
+
+.success{text-align:center;padding:10px 0 4px}
+.success .burst{width:96px;height:96px;margin:0 auto 14px;animation:pop .5s cubic-bezier(.2,.8,.2,1)}
+
+.toast{position:fixed;left:50%;top:56px;transform:translateX(-50%);z-index:80;background:var(--ink);color:#fff;padding:12px 18px;border-radius:16px;font-weight:600;font-size:15px;animation:up .25s;max-width:calc(100% - 32px)}
+
+/* ---------- Pauli (owner) ---------- */
+.owner{display:grid;grid-template-columns:250px 1fr;min-height:calc(100vh - 40px)}
+.side{background:#fff;border-right:1.5px solid var(--line);padding:22px 16px;position:sticky;top:0;height:100vh;display:flex;flex-direction:column;gap:4px}
+.side .brand{margin:0 6px 22px}
+.navbtn{display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:16px;font-weight:600;color:var(--ink-2);position:relative;text-align:left;width:100%}
+.navbtn:hover{background:var(--rosa-2)}
+.navbtn.on{background:var(--rosa);color:var(--bordo)}
+.navbtn .badge{position:static;margin-left:auto}
+.owner-main{padding:28px 34px 60px;max-width:1080px;width:100%}
+.owner-top{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin-bottom:22px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat{border-radius:var(--r-xl);padding:20px 22px;text-align:left}
+.stat .big{font-family:var(--serif);font-size:34px;font-weight:650;line-height:1.05;margin-top:6px;font-variant-numeric:tabular-nums}
+.cols{display:grid;grid-template-columns:1.25fr 1fr;gap:18px;margin-top:18px}
+.list{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-xl);overflow:hidden}
+.li{display:flex;align-items:center;gap:14px;padding:14px 18px;border-bottom:1.5px solid var(--line);width:100%;text-align:left}
+.li:last-child{border-bottom:0}
+button.li:hover{background:var(--rosa-2)}
+.mini-av{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;font-weight:700;font-family:var(--serif);flex:none}
+.bar{height:9px;border-radius:9px;background:#00000010;overflow:hidden;width:100%}
+.bar i{display:block;height:100%;background:var(--bordo);border-radius:9px}
+.toggle{width:52px;height:30px;border-radius:99px;background:#0000001f;position:relative;flex:none;transition:background .2s}
+.toggle::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px #0003}
+.toggle.on{background:var(--oliva)}
+.toggle.on::after{transform:translateX(22px)}
+.att{width:38px;height:38px;border-radius:12px;border:1.5px solid var(--line);display:grid;place-items:center;background:#fff;flex:none}
+.att.on{background:var(--oliva);border-color:var(--oliva);color:#fff}
+.receipt{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-xl);padding:18px;display:flex;gap:16px;align-items:stretch}
+.receipt .thumb{width:110px;flex:none;border-radius:14px;background:var(--lila-2);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:10px;text-align:center;font-size:12px;color:#5A4573;overflow:hidden}
+.receipt .thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:42px;height:42px;border-radius:13px;background:#fff;border:1.5px solid var(--line);font-size:22px;font-weight:600;color:var(--bordo)}
+.extra-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.extra-grid button{padding:12px 6px;border-radius:16px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:15px;line-height:1.2}
+.extra-grid button:hover,.extra-grid button.on{border-color:var(--bordo);background:var(--rosa-2)}
+.owner-bottom{display:none}
+select.input{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23962019' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:38px}
+
+@media (max-width:900px){
+  .owner{grid-template-columns:1fr}
+  .side{display:none}
+  .owner-main{padding:18px 18px 120px}
+  .owner-bottom{display:flex}
+  .cols{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  h1{font-size:38px}
+  .stats{grid-template-columns:1fr 1fr}
+  .stats .stat:first-child{grid-column:1/-1}
+  .stat .big{font-size:28px}
+  .stars svg{width:46px;height:46px}
+  .receipt{flex-direction:column}
+  .receipt .thumb{width:100%;height:120px}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+/* =========================================================
+   Hipatia Cerámica — maqueta navegable
+   Todo el estado vive en memoria (y en este navegador).
+   ========================================================= */
+
+const C = {bordo:'#962019',naranja:'#E0855A',oliva:'#77822F',olivaL:'#B9BE5E',rosa:'#F7D6DF',rosa2:'#FCEBEF',lila:'#D6CDE0',chicle:'#E6A0CC',ink:'#3A1512'};
+const fmt = n => '$' + Math.round(n).toLocaleString('es-AR');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const STAGES = ['Modelada','Secando','Bizcocho','Esmaltada','Lista para retirar'];
+
+/* ---------- 8-point hand-made star (from her highlights) ---------- */
+const JIT = [1,.8,.96,.86,1,.78,.94,.88];
+function starPath(cx,cy,R,r){
+  let d='';
+  for(let i=0;i<16;i++){
+    const a = -Math.PI/2 + i*Math.PI/8 + (i%2?0:.04*(i%3-1));
+    const rad = i%2 ? r : R*JIT[i/2];
+    d += (i?'L':'M') + (cx+Math.cos(a)*rad).toFixed(2) + ' ' + (cy+Math.sin(a)*rad).toFixed(2);
+  }
+  return d+'Z';
+}
+const STAR = starPath(50,50,47,19);
+function star(fill, opts={}){
+  const s = opts.size||24, stroke = opts.stroke||'none', dash = opts.dash?'stroke-dasharray="5 5"':'';
+  return `<svg viewBox="0 0 100 100" width="${s}" height="${s}" aria-hidden="true"><path d="${STAR}" fill="${fill}" stroke="${stroke}" stroke-width="${opts.sw||4}" stroke-linejoin="round" ${dash}/></svg>`;
+}
+function logo(size=44){
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" aria-label="Hipatia"><circle cx="50" cy="50" r="49" fill="${C.rosa}"/><text x="50" y="66" text-anchor="middle" font-family="Fraunces, Georgia, serif" font-weight="800" font-size="62" fill="${C.bordo}" style="font-variation-settings:'SOFT' 0,'WONK' 1">h</text><path d="${starPath(50,82,9,3.6)}" fill="${C.bordo}"/></svg>`;
+}
+
+/* ---------- icons ---------- */
+const I = {
+  home:'<path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+  cal:'<rect x="3" y="5" width="18" height="16" rx="3"/><path d="M8 3v4M16 3v4M3 10h18"/>',
+  vase:'<path d="M9 3h6M10 3v3c-3 2-5 5-5 9a6 6 0 0 0 6 6h2a6 6 0 0 0 6-6c0-4-2-7-5-9V3"/>',
+  bag:'<path d="M5 8h14l-1 13H6zM9 8V6a3 3 0 0 1 6 0v2"/>',
+  user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/>',
+  users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c1-3.5 3.5-5.5 6.5-5.5s5.5 2 6.5 5.5"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5c2 .8 3.2 2.8 3.8 5.5"/>',
+  bell:'<path d="M6 16v-5a6 6 0 0 1 12 0v5l2 2H4zM10 21h4"/>',
+  cash:'<rect x="2.5" y="6" width="19" height="13" rx="3"/><circle cx="12" cy="12.5" r="2.6"/><path d="M6 9.5v.01M18 15.5v.01"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  cog:'<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/>',
+  x:'<path d="M6 6l12 12M18 6 6 18"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  plus:'<path d="M12 5v14M5 12h14"/>',
+  copy:'<rect x="8" y="8" width="12" height="12" rx="3"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  upload:'<path d="M12 16V4M7 9l5-5 5 5M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
+  swap:'<path d="M7 4 3 8l4 4M3 8h13M17 20l4-4-4-4M21 16H8"/>',
+  card:'<rect x="2.5" y="5" width="19" height="14" rx="3"/><path d="M2.5 10h19M6 15h4"/>',
+  bank:'<path d="M3 10 12 4l9 6M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/>',
+  store:'<path d="M4 9.5V20h16V9.5M3 4h18l-1.5 5.5a2.5 2.5 0 0 1-4.8 0 2.5 2.5 0 0 1-4.9 0 2.5 2.5 0 0 1-4.9 0z"/>',
+  wa:'<path d="M4 20l1.3-3.8A8 8 0 1 1 8 19z"/><path d="M9 9.5c.3 2 2.3 4.2 5 5l1.2-1.3-1.8-1-1 .7c-.8-.4-1.6-1.2-2-2l.7-1-1-1.8z"/>',
+  pin:'<path d="M12 21s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="9" r="2.5"/>',
+  truck:'<path d="M2.5 6h11v10h-11zM13.5 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
+  chev:'<path d="m9 6 6 6-6 6"/>',
+  fire:'<path d="M12 21c4 0 7-2.7 7-6.5 0-3.4-2.4-5.6-4-8.5-.8 2-1.8 3-3 3.4C12 6.5 10.5 4.5 9 3c0 3.5-4 6-4 11.5C5 18.3 8 21 12 21z"/>',
+  logout:'<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/>'
+};
+const ic = (n,s=22,w=1.9) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
+
+/* ---------- ceramic illustrations (placeholders for her photos) ---------- */
+function art(kind, bg, fg){
+  const b=bg||C.rosa, f=fg||C.bordo;
+  const dots = `<g fill="#fff" opacity=".55"><circle cx="78" cy="96" r="3"/><circle cx="96" cy="108" r="3"/><circle cx="114" cy="96" r="3"/><circle cx="132" cy="108" r="3"/></g>`;
+  const shapes = {
+    taza:`<ellipse cx="100" cy="160" rx="54" ry="8" fill="#0000001a"/><path d="M58 70h78v62a26 26 0 0 1-26 26H84a26 26 0 0 1-26-26z" fill="${f}"/><path d="M136 86c22 0 22 40 0 40" fill="none" stroke="${f}" stroke-width="11" stroke-linecap="round"/><ellipse cx="97" cy="70" rx="39" ry="7" fill="#00000030"/>${dots}`,
+    cuenco:`<ellipse cx="100" cy="150" rx="62" ry="9" fill="#0000001a"/><path d="M34 90h132c0 34-28 58-66 58S34 124 34 90z" fill="${f}"/><ellipse cx="100" cy="90" rx="66" ry="12" fill="#00000030"/><path d="M48 108q13 10 26 0t26 0 26 0 26 0" fill="none" stroke="#fff" stroke-width="4" opacity=".6"/>`,
+    florero:`<ellipse cx="100" cy="166" rx="40" ry="7" fill="#0000001a"/><path d="M84 36h32v18c22 14 30 36 30 60 0 30-20 50-46 50s-46-20-46-50c0-24 8-46 30-60z" fill="${f}"/><ellipse cx="100" cy="36" rx="16" ry="4" fill="#00000030"/><path d="${starPath(100,110,20,8)}" fill="#fff" opacity=".7"/>`,
+    plato:`<ellipse cx="100" cy="112" rx="76" ry="40" fill="#0000001a"/><ellipse cx="100" cy="104" rx="76" ry="40" fill="${f}"/><ellipse cx="100" cy="104" rx="50" ry="25" fill="#ffffff40"/><path d="${starPath(100,104,13,5)}" fill="#fff" opacity=".8"/>`,
+    aros:`<path d="M70 30v28M130 30v28" stroke="${C.ink}" stroke-width="3"/><circle cx="70" cy="30" r="6" fill="none" stroke="${C.ink}" stroke-width="3"/><circle cx="130" cy="30" r="6" fill="none" stroke="${C.ink}" stroke-width="3"/><path d="${starPath(70,96,40,15)}" fill="${f}"/><path d="${starPath(130,96,40,15)}" fill="${f}"/>`,
+    collar:`<path d="M28 20c10 70 134 70 144 0" fill="none" stroke="${C.ink}" stroke-width="3"/><path d="M100 82c-9-14-34-12-34 10 0 20 26 34 34 44 8-10 34-24 34-44 0-22-25-24-34-10z" fill="${f}"/><circle cx="100" cy="74" r="5" fill="none" stroke="${C.ink}" stroke-width="3"/>`,
+    sahumerio:`<ellipse cx="100" cy="132" rx="64" ry="12" fill="#0000001a"/><path d="${starPath(100,110,62,26)}" fill="${f}" transform="matrix(1 0 0 .45 0 60)"/><circle cx="100" cy="109" r="5" fill="${C.ink}" opacity=".5"/><path d="M100 109V30" stroke="#8a6a3f" stroke-width="3"/><path d="M100 30c-8-10 8-14 0-24" stroke="#00000040" stroke-width="2" fill="none"/>`,
+    corazon:`<path d="M100 72c-14-22-56-18-56 14 0 30 40 52 56 70 16-18 56-40 56-70 0-32-42-36-56-14z" fill="${f}"/><path d="M100 50V30" stroke="${C.ink}" stroke-width="3"/><circle cx="100" cy="26" r="6" fill="none" stroke="${C.ink}" stroke-width="3"/>`
+  };
+  return `<svg viewBox="0 0 200 200" width="100%" height="100%" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><rect width="200" height="200" fill="${b}"/>${shapes[kind]||shapes.taza}</svg>`;
+}
+
+function pimg(p){ return p.img ? `<img src="${p.img}" alt="${esc(p.name)}" style="width:100%;height:100%;object-fit:cover;display:block">` : art(p.art,p.bg,p.fg); }
+function resizeImg(file,max=1000){ return new Promise((res,rej)=>{ const u=URL.createObjectURL(file), im=new Image(); im.onload=()=>{ const k=Math.min(1,max/Math.max(im.width,im.height)); const c=document.createElement('canvas'); c.width=Math.round(im.width*k); c.height=Math.round(im.height*k); c.getContext('2d').drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(u); res(c.toDataURL('image/jpeg',.82)); }; im.onerror=rej; im.src=u; }); }
+
+/* ---------- seed data ---------- */
+function seed(){
+  const S = (id,name,used,paid,extra={}) => Object.assign({id,name,short:name.split(' ')[0],phone:'351 5'+(10+name.length)+'-0'+(100+name.length*7),used,total:4,paidMonth:paid,extras:[],pending:null,pieces:[],history:[],attended:{}},extra);
+  const avc = [C.rosa,'#FBE4D8','#E9ECCB','#EEE9F3','#F6D0E8'];
+  const st = [
+    S('sofia','Sofía Paz',2,true,{short:'Sofi',fixed:{dow:'Miércoles',time:'18 a 20 hs'},paidOn:'3 nov',taken:[{label:'Miércoles 4'},{label:'Jueves 12',note:'Cambiada del miércoles 11'}],
+      extras:[{id:'e1',label:'Cuenco ondulado',size:'mediana',amount:3500,paid:false},{id:'e2',label:'Platito de postre',size:'chica',amount:2000,paid:false}],
+      pieces:[{id:'p1',name:'Taza con asa',size:'mediana',included:true,stage:2,art:'taza',color:'#C9A0D9'},{id:'p2',name:'Cuenco ondulado',size:'mediana',extra:'e1',stage:3,art:'cuenco',color:C.naranja},{id:'p3',name:'Platito de postre',size:'chica',extra:'e2',stage:4,art:'plato',color:C.oliva}],
+      history:[{date:'3 nov',concept:'Mensualidad de noviembre',amount:45000,method:'Transferencia'},{date:'4 oct',concept:'Mensualidad de octubre',amount:42000,method:'Mercado Pago'}]
+    }),
+    S('martina','Martina Ríos',2,false,{pending:{amount:45000,method:'Transferencia',date:'12 nov',items:['month'],file:null}}),
+    S('lucia','Lucía Ferreyra',2,false,{extras:[{id:'e3',label:'Maceta chica',size:'chica',amount:2000,paid:false}],pending:{amount:47000,method:'Transferencia',date:'12 nov',items:['month','e3'],file:null}}),
+    S('valen','Valentina Sosa',3,true),
+    S('cami','Camila Bustos',1,false),
+    S('juli','Julieta Aguirre',2,true,{extras:[{id:'e4',label:'Fuente grande',size:'grande',amount:5000,paid:false}]}),
+    S('agus','Agustina Moyano',2,true),
+    S('flor','Florencia Díaz',2,true),
+    S('rocio','Rocío Herrera',3,true),
+    S('mica','Micaela Luna',1,false),
+    S('caro','Carolina Peralta',2,true),
+    S('belen','Belén Vera',2,true),
+    S('anto','Antonella Funes',2,true),
+    S('delfi','Delfina Quiroga',0,false),
+    S('abril','Abril Molina',2,true)
+  ];
+  st.forEach((s,i)=>{s.av=avc[i%avc.length]; if(!s.pieces.length){const k=i%7;s.pieces=[{id:'p'+s.id,name:['Taza','Maceta','Cuenco','Florero','Fuente','Jarrita','Plato hondo'][k],size:'mediana',included:true,stage:[1,2,3,0,2,1,4][k],art:['taza','cuenco','cuenco','florero','plato','taza','plato'][k],color:[C.naranja,C.oliva,'#C9A0D9',C.bordo,C.chicle,C.oliva,C.naranja][k]}]} if(s.paidMonth&&!s.history.length){s.history=[{date:(2+i%6)+' nov',concept:'Mensualidad de noviembre',amount:45000,method:i%2?'Mercado Pago':'Transferencia'}]}});
+  const slot = (id,date,dow,d,time,list,cap=6)=>({id,date,dow,d,mon:'nov',time,cap,list,past:false});
+  const slots = [
+    slot('s1','2026-11-13','Viernes',13,'10 a 12 hs',['martina','lucia','valen','cami','juli']),
+    slot('s2','2026-11-14','Sábado',14,'10 a 12 hs',['agus','flor','rocio','mica','caro','belen']),
+    slot('s3','2026-11-16','Lunes',16,'18 a 20 hs',['martina','anto','delfi','abril']),
+    slot('s4','2026-11-18','Miércoles',18,'18 a 20 hs',['sofia','lucia','cami','juli','agus']),
+    slot('s5','2026-11-19','Jueves',19,'18 a 20 hs',['valen','flor','rocio','mica','caro','belen']),
+    slot('s6','2026-11-20','Viernes',20,'10 a 12 hs',['anto','delfi']),
+    slot('s7','2026-11-21','Sábado',21,'10 a 12 hs',['martina','lucia','abril']),
+    slot('s8','2026-11-23','Lunes',23,'18 a 20 hs',['valen','cami','juli']),
+    slot('s9','2026-11-25','Miércoles',25,'18 a 20 hs',['sofia','flor','rocio','mica','caro']),
+    slot('s10','2026-11-26','Jueves',26,'18 a 20 hs',['belen','anto','delfi','abril','agus']),
+    slot('s11','2026-11-27','Viernes',27,'10 a 12 hs',['martina']),
+    slot('s12','2026-11-28','Sábado',28,'10 a 12 hs',['lucia','valen'])
+  ];
+  st.forEach(s=>{ if(!s.fixed){ const sl=slots.find(x=>x.list.includes(s.id)); if(sl) s.fixed={dow:sl.dow,time:sl.time}; } if(s.paidMonth&&!s.paidOn) s.paidOn=(s.history[0]||{}).date; });
+  const workshops = [
+    {id:'w1',name:'Tazas con asa',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,taken:5,art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
+    {id:'w2',name:'Joyitas de cerámica',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,taken:3,art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
+    {id:'w3',name:'Adornos navideños',date:'Sábado 5 de diciembre',time:'16 a 18 hs',price:20000,cap:10,taken:2,art:'corazon',color:C.oliva,desc:'Estrellas, corazones y colgantes para el arbolito. Ideal para venir con amigas o con tu mamá.'}
+  ];
+  const products = [
+    {id:'pr1',name:'Aros estrella',cat:'joyitas',price:9500,unique:false,available:true,stock:6,art:'aros',bg:C.rosa,fg:C.bordo,desc:'Esmaltados a mano, con ganchos de acero quirúrgico. Livianos para usar todo el día.'},
+    {id:'pr2',name:'Dije corazón',cat:'joyitas',price:12000,unique:false,available:true,stock:4,art:'collar',bg:'#FBE4D8',fg:C.bordo,desc:'Corazón de cerámica con cadena de 45 cm.'},
+    {id:'pr3',name:'Taza Hipatia',cat:'casa',price:18000,unique:false,available:true,stock:5,art:'taza',bg:'#E9ECCB',fg:C.oliva,desc:'Capacidad 300 ml. Apta lavavajillas y microondas.'},
+    {id:'pr4',name:'Cuenco ondas',cat:'casa',price:15000,unique:true,available:true,stock:1,art:'cuenco',bg:'#EEE9F3',fg:'#8E6FAE',desc:'Pieza única. 14 cm de diámetro, ideal para frutas secas o el desayuno.'},
+    {id:'pr5',name:'Florero lila',cat:'casa',price:24000,unique:true,available:true,stock:1,art:'florero',bg:C.rosa,fg:'#B78BC9',desc:'Pieza única. 22 cm de alto, esmaltado por dentro, apto agua.'},
+    {id:'pr6',name:'Portasahumerio estrella',cat:'casa',price:8000,unique:false,available:true,stock:8,art:'sahumerio',bg:'#FBE4D8',fg:C.naranja,desc:'La estrella de Hipatia en versión para sahumerios.'},
+    {id:'pr7',name:'Plato de postre',cat:'casa',price:11000,unique:false,available:false,stock:0,art:'plato',bg:'#E9ECCB',fg:C.bordo,desc:'18 cm. Volvemos a tener a fin de mes.'},
+    {id:'pr8',name:'Colgante corazón',cat:'joyitas',price:7000,unique:false,available:true,stock:10,art:'corazon',bg:'#F6D0E8',fg:C.bordo,desc:'Para colgar en la pared, la ventana o el arbolito.'}
+  ];
+  return {
+    v:4,
+    view:'login', loginRole:'alumna', tab:'inicio', otab:'hoy', clsSeg:'clases', storeCat:'todo', storeSeg:'productos', aluFilter:'todas', aluQuery:'',
+    me:'sofia',
+    settings:{mensualidad:45000,clases:4,chica:2000,mediana:3500,grande:5000,suelta:13000,alias:'hipatia.ceramica',titular:'Paula González',horas:24},
+    students:st, slots, workshops, myWorkshops:[],
+    products, cart:[],
+    orders:[{id:'o1',who:'Rocío Herrera',items:'Aros estrella x2',total:19000,delivery:'Retiro en el taller',method:'Mercado Pago',status:'Nuevo',paid:true},
+            {id:'o2',who:'Inés Carranza',items:'Florero rosa x1',total:24000,delivery:'Envío en Córdoba',method:'Transferencia',status:'Preparando',paid:true}],
+    encargos:[{id:'en1',who:'Carolina Peralta',what:'Juego de 6 platos playos con borde rojo para un casamiento',when:'Fines de diciembre',status:'Nuevo'}],
+    storeReviews:[],
+    avisos:[{text:'El jueves 19 hay hornada. Si tenés piezas secas, dejalas en el estante de la entrada.',date:'Ayer'},{text:'Ya están las fechas de los tallercitos de noviembre. ¡Quedan pocos lugares para tazas!',date:'10 nov'}],
+    seenAvisos:0
+  };
+}
+
+let S;
+try{ S = JSON.parse(localStorage.getItem('hipatia-demo')); if(!S||S.v!==4) S=null; }catch(e){ S=null; }
+if(!S) S = seed();
+S.view = 'login';
+function save(){ try{ localStorage.setItem('hipatia-demo', JSON.stringify(S)); }catch(e){} }
+
+/* ---------- derived ---------- */
+const stu = id => S.students.find(s=>s.id===id);
+const me = () => stu(S.me);
+const bookedSlots = id => S.slots.filter(sl=>sl.list.includes(id) && sl.id!=='s1');
+const available = s => Math.max(0, s.total - s.used - bookedSlots(s.id).length);
+function debtItems(s){
+  const items=[];
+  if(!s.paidMonth) items.push({id:'month',label:'Mensualidad de noviembre',sub:`${S.settings.clases} clases + 1 pieza mediana`,amount:S.settings.mensualidad});
+  s.extras.filter(e=>!e.paid).forEach(e=>items.push({id:e.id,label:e.label,sub:`Pieza extra ${e.size}`,amount:e.amount}));
+  return items;
+}
+const debt = s => debtItems(s).reduce((a,b)=>a+b.amount,0);
+function payState(s){
+  if(s.pending) return {k:'rev',t:'Revisar comprobante'};
+  const d=debt(s); if(!d) return {k:'ok',t:'Al día'};
+  return {k:s.paidMonth?'warn':'bad',t:'Debe '+fmt(d)};
+}
+const cartCount = () => S.cart.reduce((a,c)=>a+c.qty,0);
+const cartTotal = () => S.cart.reduce((a,c)=>a+c.qty*S.products.find(p=>p.id===c.pid).price,0);
+const pendingReceipts = () => S.students.filter(s=>s.pending).length + S.orders.filter(o=>o.needsReview).length;
+
+/* ---------- render ---------- */
+const root = document.getElementById('root');
+let sheetHTML = null, sheetCtx = {};
+function render(keepScroll=true){
+  const y = window.scrollY;
+  let html = demobar();
+  if(S.view==='login') html += loginView();
+  else if(S.view==='alumna') html += alumnaView();
+  else if(S.view==='tienda') html += publicView();
+  else html += ownerView();
+  if(sheetHTML!==null) html += `<div class="scrim" data-act="scrim"><div class="sheet" role="dialog" aria-modal="true">${sheetHTML}</div></div>`;
+  root.innerHTML = html;
+  if(keepScroll) window.scrollTo(0,y);
+  save();
+}
+function demobar(){
+  return `<div class="demobar"><span><b>Maqueta de Hipatia.</b> Probala desde los dos lados:</span>
+  <button data-act="go" data-v="alumna" class="${S.view==='alumna'?'on':''}">Alumna</button>
+  <button data-act="go" data-v="pauli" class="${S.view==='pauli'?'on':''}">Pauli, dueña</button>
+  <button data-act="go" data-v="tienda" class="${S.view==='tienda'?'on':''}">Tienda pública</button>
+  <button data-act="reset">Empezar de cero</button></div>`;
+}
+let toastT;
+function toast(msg){
+  clearTimeout(toastT);
+  document.querySelectorAll('.toast').forEach(t=>t.remove());
+  const t=document.createElement('div'); t.className='toast'; t.setAttribute('role','status'); t.textContent=msg; document.body.appendChild(t);
+  toastT=setTimeout(()=>t.remove(),2600);
+}
+function openSheet(html,ctx={}){ sheetHTML=html; sheetCtx=ctx; render(); setTimeout(()=>{const f=document.querySelector('.sheet button, .sheet input');},0); }
+function closeSheet(){ sheetHTML=null; sheetCtx={}; render(); }
+function head(title,sub){ return `<div class="grab"></div><div class="sheet-head"><div><h2>${title}</h2>${sub?`<p class="muted mt6">${sub}</p>`:''}</div><button class="close" data-act="close" aria-label="Cerrar">${ic('x',20)}</button></div>`; }
+
+/* =========================================================
+   LOGIN
+   ========================================================= */
+function loginView(){
+  const a = S.loginRole==='alumna';
+  return `<main class="login"><div class="login-card">
+    <div class="login-logo">${logo(104)}</div>
+    <h1 style="text-align:center">Hola, qué lindo verte</h1>
+    <p class="muted" style="text-align:center;margin-top:8px">Tus clases, tus piezas y la tienda de Hipatia en un solo lugar.</p>
+    <div class="role-grid" role="radiogroup" aria-label="¿Quién entra?">
+      <button class="role ${a?'on':''}" data-act="role" data-v="alumna" role="radio" aria-checked="${a}">
+        <span class="ic" style="background:${C.rosa};color:${C.bordo}">${ic('user')}</span><b>Soy alumna</b><span class="tiny muted">Reservar, ver mis clases y pagar</span></button>
+      <button class="role ${!a?'on':''}" data-act="role" data-v="pauli" role="radio" aria-checked="${!a}">
+        <span class="ic" style="background:#E9ECCB;color:${C.oliva}">${ic('store')}</span><b>Soy Pauli</b><span class="tiny muted">Manejar el taller y la tienda</span></button>
+    </div>
+    <form data-form="login">
+      <div class="field"><label for="em">Tu celular o email</label><input id="em" class="input" value="${a?'sofi.paz@gmail.com':'pauli@hipatia.com.ar'}" autocomplete="off"></div>
+      <div class="field"><label for="pw">Contraseña</label><input id="pw" class="input" type="password" value="hipatia123"></div>
+      <button class="btn block mt10" type="submit">Entrar</button>
+    </form>
+    ${a?`<p class="small muted" style="text-align:center;margin-top:16px">¿Es tu primera vez? <button class="link" data-act="trial">Reservá una clase de prueba</button></p>`:''}
+    <div class="hr" style="margin:22px 0 18px"></div>
+    <div class="row" style="gap:14px"><span style="flex:none">${star(C.naranja,{size:40})}</span><div style="flex:1"><b>¿Solo querés comprar una pieza?</b><p class="small muted">No hace falta ser alumna ni crear una cuenta.</p></div></div>
+    <button class="btn soft block mt14" data-act="go" data-v="tienda">${ic('bag',20)} Ver la tienda</button>
+  </div></main>`;
+}
+
+/* =========================================================
+   ALUMNA
+   ========================================================= */
+function alumnaView(){
+  const s = me(), unseen = S.avisos.length - S.seenAvisos;
+  const tabs = [['inicio','Inicio','home'],['clases','Clases','cal'],['piezas','Mis piezas','vase'],['tienda','Tienda','bag'],['cuenta','Mi cuenta','user']];
+  let body='';
+  if(S.tab==='inicio') body=aInicio(s);
+  if(S.tab==='clases') body=aClases(s);
+  if(S.tab==='piezas') body=aPiezas(s);
+  if(S.tab==='tienda') body=aTienda(s);
+  if(S.tab==='cuenta') body=aCuenta(s);
+  return `<div class="app">
+    <header class="topbar">
+      <div class="brand">${logo(42)}<span>Hipatia</span></div>
+      <div class="row" style="gap:10px">
+        <button class="iconbtn" data-act="avisos" aria-label="Avisos de Pauli">${ic('bell')}${unseen>0?`<span class="badge">${unseen}</span>`:''}</button>
+        <button class="avatar" style="background:${s.av};color:${C.bordo}" data-act="tab" data-v="cuenta" aria-label="Mi cuenta">${s.short[0]}</button>
+      </div>
+    </header>
+    ${body}
+  </div>
+  ${S.tab==='tienda'&&cartCount()?`<button class="cartbar" data-act="cart"><span>Ver carrito (${cartCount()})</span><span>${fmt(cartTotal())}</span></button>`:''}
+  <nav class="bottomnav" aria-label="Secciones">${tabs.map(([k,l,i])=>`<button class="${S.tab===k?'on':''}" data-act="tab" data-v="${k}" ${S.tab===k?'aria-current="page"':''}>${ic(i)}<span>${l}</span>${k==='tienda'&&cartCount()?`<span class="badge">${cartCount()}</span>`:''}</button>`).join('')}</nav>`;
+}
+
+function classMeter(s, big=true){
+  const b = bookedSlots(s.id).length, out=[];
+  for(let i=0;i<s.total;i++){
+    if(i<s.used) out.push(star(C.bordo,{size:52}));
+    else if(i<s.used+b) out.push(star(C.naranja,{size:52}));
+    else out.push(star('#ffffff',{size:52,stroke:C.bordo,sw:3.5,dash:true}));
+  }
+  return `<div class="stars" aria-label="${s.used} clases tomadas, ${b} reservadas, ${available(s)} para reservar">${out.join('')}</div>
+  <div class="legend"><span><i style="background:${C.bordo}"></i>Tomadas (${s.used})</span><span><i style="background:${C.naranja}"></i>Reservadas (${b})</span><span><i style="border:1.5px dashed ${C.bordo}"></i>Para reservar (${available(s)})</span></div>
+  ${classDates(s)}`;
+}
+const longDate = d => d ? d.replace(' nov',' de noviembre') : '';
+function planLine(s){
+  const parts=[];
+  if(s.fixed) parts.push(`Turno fijo: ${s.fixed.dow.toLowerCase()} de ${s.fixed.time}.`);
+  parts.push(s.paidMonth&&s.paidOn ? `Abono habilitado el ${longDate(s.paidOn)}.` : 'Abono de noviembre sin pagar.');
+  return `<p class="tiny muted mt6">${parts.join(' ')}</p>`;
+}
+function classDates(s){
+  const rows=[], taken=s.taken||[];
+  for(let i=0;i<s.used;i++){ const t=taken[i]; rows.push({c:C.bordo,label:t?t.label:'Clase tomada',note:t&&t.note?t.note:'Tomada'}); }
+  bookedSlots(s.id).sort((a,b)=>a.d-b.d).forEach(sl=>{ const moved=s.fixed&&sl.dow!==s.fixed.dow; rows.push({c:C.naranja,label:`${sl.dow} ${sl.d}`,note:moved?'Cambiada de día':'Reservada'}); });
+  for(let i=0;i<available(s);i++) rows.push({c:null,label:'Clase para reprogramar',note:'Elegí otro día'});
+  return `<div class="cdates">${rows.map(r=>`<div class="cd"><i style="${r.c?'background:'+r.c:'border:1.5px dashed '+C.bordo}"></i><span>${r.label}</span><span class="tiny muted">${r.note}</span></div>`).join('')}</div>`;
+}
+
+function aInicio(s){
+  const next = bookedSlots(s.id)[0];
+  const items = debtItems(s), d = debt(s);
+  const ready = s.pieces.filter(p=>p.stage===4);
+  let money;
+  if(s.pending) money = `<div class="panel lila"><div class="row between"><h3>Tu pago</h3><span class="chip rev">En revisión</span></div>
+      <p class="mt10">Recibimos tu comprobante por <b>${fmt(s.pending.amount)}</b>. Pauli lo revisa y te avisamos acá.</p></div>`;
+  else if(d) money = `<div class="panel"><div class="row between"><h3>Para abonar</h3><span class="chip ${s.paidMonth?'warn':'bad'}">${s.paidMonth?'Piezas extra':'Mensualidad'}</span></div>
+      <div class="money mt10">${fmt(d)}</div>
+      <div class="mt14">${items.map(it=>`<div class="line-item"><div><div>${esc(it.label)}</div><div class="tiny muted">${it.sub}</div></div><span class="num">${fmt(it.amount)}</span></div>`).join('')}</div>
+      <button class="btn block mt14" data-act="pay">Pagar ${fmt(d)}</button></div>`;
+  else money = `<div class="panel oliva"><div class="row"><span>${star(C.oliva,{size:34})}</span><div><h3>Estás al día</h3><p class="small muted">La próxima mensualidad vence el 10 de diciembre.</p></div></div></div>`;
+
+  return `<section class="mt10">
+    <h1>Hola, ${esc(s.short)}.</h1>
+    <p class="muted mt6" style="font-size:18px">${next?`Tu próxima clase es el <b style="color:${C.ink}">${next.dow.toLowerCase()} ${next.d}</b>, de ${next.time}.`:'No tenés clases reservadas todavía.'}</p>
+  </section>
+  <section class="section"><div class="panel rosa">
+    <div class="row between"><h3>Tus clases de noviembre</h3><span class="tiny muted">${s.total} por mes</span></div>
+    ${planLine(s)}
+    <div class="mt14">${classMeter(s)}</div>
+    ${available(s)?`<button class="btn block mt18" data-act="tab" data-v="clases">Reservar ${available(s)===1?'mi clase':'mis clases'}</button>`:`<p class="small mt14">Ya organizaste todas tus clases del mes ✶</p>`}
+    ${next?`<div class="row mt10" style="gap:8px"><button class="btn ghost sm" style="flex:1;background:#fff" data-act="reprog" data-slot="${next.id}">${ic('swap',18)} Cambiar día</button><button class="btn ghost sm" style="flex:1;background:#fff" data-act="cancel" data-slot="${next.id}">No voy a ir</button></div>`:''}
+  </div></section>
+  <section class="section">${money}</section>
+  <section class="section">
+    <div class="sec-head"><h2>Tus piezas</h2><button class="link small" data-act="tab" data-v="piezas">Ver todas</button></div>
+    ${ready.length?`<div class="panel oliva" style="padding:16px 18px;margin-bottom:10px"><p><b>${esc(ready[0].name)}</b> ya salió del horno. Retirala en tu próxima clase.</p></div>`:''}
+    <div class="stack gap10">${s.pieces.slice(0,2).map(pieceRow).join('')}</div>
+  </section>
+  <section class="section">
+    <div class="sec-head"><h2>Avisos de Pauli</h2></div>
+    <div class="panel" style="padding:18px"><p>${esc(S.avisos[0].text)}</p><p class="tiny muted mt6">${S.avisos[0].date}</p></div>
+  </section>`;
+}
+
+function pieceRow(p){
+  return `<div class="piece"><div class="art">${art(p.art,C.rosa2,p.color)}</div>
+    <div style="flex:1;min-width:0"><div class="row between" style="gap:8px"><b>${esc(p.name)}</b>${p.included?'<span class="chip ok">Incluida</span>':`<span class="chip warn">Extra</span>`}</div>
+    <div class="small muted">${p.stage===4?'<b style="color:#4F5A14">Lista para retirar</b>':STAGES[p.stage]} · pieza ${p.size}</div>
+    <div class="steps" aria-hidden="true">${STAGES.map((_,i)=>`<span class="${i<p.stage?'done':i===p.stage?(p.stage===4?'done':'now'):''}"></span>`).join('')}</div></div></div>`;
+}
+
+function slotRow(sl, action){
+  const free = sl.cap - sl.list.length;
+  const mine = sl.list.includes(S.me);
+  return `<div class="slot"><div class="datebox"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div>
+    <div style="flex:1"><b>${sl.time}</b>
+      <div class="dots" aria-hidden="true">${Array.from({length:sl.cap},(_,i)=>`<i class="${i<sl.list.length?'':'free'}"></i>`).join('')}</div>
+      <div class="tiny muted mt6">${mine?'Ya estás anotada':free?`Quedan ${free} ${free===1?'lugar':'lugares'}`:'Clase completa'}</div></div>
+    ${mine?`<span class="chip ok">${ic('check',14,3)} Tuya</span>`:free?`<button class="btn sm" data-act="${action}" data-slot="${sl.id}">${action==='book'?'Reservar':'Elegir'}</button>`:`<button class="btn ghost sm" data-act="wait" data-slot="${sl.id}">Avisarme</button>`}
+  </div>`;
+}
+
+function aClases(s){
+  const mine = bookedSlots(s.id);
+  const seg = `<div class="seg mt10" role="tablist"><button class="${S.clsSeg==='clases'?'on':''}" data-act="clsSeg" data-v="clases">Mis clases</button><button class="${S.clsSeg==='talleres'?'on':''}" data-act="clsSeg" data-v="talleres">Tallercitos</button></div>`;
+  if(S.clsSeg==='talleres'){
+    return `<h1 class="mt10">Tallercitos</h1><p class="muted mt6">Encuentros de una tarde, con todo incluido. Se pagan aparte de tu mensualidad.</p>${seg}
+    <div class="stack gap14 section">${S.workshops.map(w=>{const left=w.cap-w.taken, mineW=S.myWorkshops.includes(w.id);return `<div class="panel" style="padding:0;overflow:hidden">
+      <div style="height:150px">${art(w.art,C.rosa,w.color)}</div>
+      <div style="padding:18px 20px 20px"><h3>${esc(w.name)}</h3><p class="small muted mt6">${w.date}, ${w.time}</p><p class="small mt10">${esc(w.desc)}</p>
+      <div class="row between mt14"><div><div class="serif" style="font-size:24px;font-weight:650;color:${C.bordo}">${fmt(w.price)}</div><div class="tiny muted">${mineW?'Tenés tu lugar':`Quedan ${left} lugares`}</div></div>
+      ${mineW?`<span class="chip ok">${ic('check',14,3)} Anotada</span>`:`<button class="btn sm" data-act="wsBook" data-w="${w.id}">Quiero ir</button>`}</div></div></div>`}).join('')}</div>`;
+  }
+  const days = S.slots.filter(sl=>sl.id!=='s1');
+  const weeks = [['Esta semana',days.filter(d=>d.d<=21)],['La semana que viene',days.filter(d=>d.d>21)]];
+  return `<h1 class="mt10">Clases</h1>${seg}
+  <section class="section"><div class="panel rosa" style="padding:18px 20px">
+    <div class="row between"><b>Te ${available(s)===1?'queda':'quedan'} ${available(s)} ${available(s)===1?'clase':'clases'} para reservar</b><span class="tiny muted">de ${s.total}</span></div>
+    <p class="small muted mt6">Podés cambiar de día hasta ${S.settings.horas} hs antes. Si avisás a tiempo, la clase vuelve a tu cuenta.</p>
+  </div></section>
+  ${mine.length?`<section class="section"><h2 style="margin-bottom:12px">Tus reservas</h2>${mine.map(sl=>`<div class="slot" style="flex-wrap:wrap"><div class="datebox" style="background:${C.naranja};color:#fff"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.dow} ${sl.d} de noviembre</b><div class="small muted">${sl.time}</div></div>
+    <div class="row" style="gap:8px;width:100%"><button class="btn ghost sm" style="flex:1" data-act="reprog" data-slot="${sl.id}">${ic('swap',18)} Cambiar día</button><button class="btn ghost sm" style="flex:1" data-act="cancel" data-slot="${sl.id}">No voy a ir</button></div></div>`).join('')}</section>`:''}
+  <section class="section"><h2 style="margin-bottom:14px">Horarios</h2>
+    ${weeks.map(([t,list])=>`<div class="daygroup"><p class="daylabel">${t}</p>${list.map(sl=>slotRow(sl,'book')).join('')}</div>`).join('')}
+    <div class="panel lila mt10"><h3>¿Ningún horario te queda?</h3><p class="small mt6">Pauli tiene horarios libres según disponibilidad. Contale cuándo podés y te responde.</p><button class="btn soft sm mt14" data-act="libre">Pedir horario libre</button></div>
+  </section>`;
+}
+
+function aPiezas(s){
+  const st = S.settings;
+  return `<h1 class="mt10">Mis piezas</h1>
+  <p class="muted mt6">Seguí cada pieza desde que la modelás hasta que sale del horno.</p>
+  <section class="section"><div class="panel rosa" style="padding:18px 20px">
+    <b>Tu mensualidad incluye 1 pieza mediana.</b>
+    <p class="small mt6">Las piezas extra se suman a tu saldo: chica ${fmt(st.chica)}, mediana ${fmt(st.mediana)}, grande ${fmt(st.grande)}.</p>
+  </div></section>
+  <section class="section stack gap10">${s.pieces.map(pieceRow).join('')}</section>
+  <section class="section"><h3>Cómo avanza una pieza</h3>
+    <div class="stack gap6 mt10">${STAGES.map((t,i)=>`<div class="row" style="gap:12px"><span style="width:30px;height:30px;border-radius:10px;display:grid;place-items:center;font-weight:700;font-size:14px;background:${i===4?C.oliva:C.rosa};color:${i===4?'#fff':C.bordo}">${i+1}</span><span>${t}${['',' (unos días al aire)',' (primera quema)',' (le das color)',' (segunda quema)'][i]}</span></div>`).join('')}</div>
+  </section>`;
+}
+
+const CATS = [['todo','Todo',C.rosa,C.bordo],['joyitas','Joyitas','#E9ECCB',C.oliva],['casa','En casa','#FBE4D8',C.naranja],['unicas','Únicas',C.lila,'#8E6FAE'],['encargo','Encargos','#F6D0E8',C.bordo]];
+function aTienda(pub=false){
+  const cat=S.storeCat;
+  let list = S.products;
+  if(cat==='joyitas'||cat==='casa') list=list.filter(p=>p.cat===cat);
+  if(cat==='unicas') list=list.filter(p=>p.unique);
+  const hl = `<div class="highlights" role="tablist">${CATS.map(([k,l,bg,fg])=>`<button class="hl ${cat===k?'on':''}" data-act="cat" data-v="${k}" role="tab" aria-selected="${cat===k}"><span class="ring"><div style="background:${bg}">${star(fg,{size:36})}</div></span>${l}</button>`).join('')}</div>`;
+  if(cat==='encargo') return `<h1 class="mt10">Tienda</h1>${pub?'<p class="muted mt6">No necesitás cuenta para comprar ni para pedir.</p>':''}<div class="mt14">${hl}</div>
+    <section class="section panel"><h2>Pedí una pieza a medida</h2><p class="muted mt6">Vajilla para tu casa, regalos, souvenirs. Contale a Pauli qué imaginás y te pasa presupuesto.</p>
+    <form data-form="encargo" class="mt18">
+      ${pub?`<div class="field"><label for="en-name">Tu nombre</label><input id="en-name" class="input" required></div><div class="field"><label for="en-phone">Tu WhatsApp</label><input id="en-phone" class="input" inputmode="tel" required></div>`:''}
+      <div class="field"><label for="en-what">¿Qué te gustaría?</label><textarea id="en-what" class="input" required placeholder="Por ejemplo: 6 tazas verdes con mi inicial"></textarea></div>
+      <div class="field"><label for="en-when">¿Para cuándo?</label><input id="en-when" class="input" placeholder="Por ejemplo: antes del 20 de diciembre"></div>
+      <div class="field"><label>Foto de referencia (opcional)</label><label class="drop" for="en-file" id="en-drop">${ic('upload',26)}<span class="small">Tocá para subir una foto</span></label><input id="en-file" type="file" accept="image/*" hidden data-file="encargo"></div>
+      <button class="btn block mt10" type="submit">Enviar pedido a Pauli</button>
+    </form></section>`;
+  return `<h1 class="mt10">Tienda</h1><p class="muted mt6">Piezas hechas a mano en el taller. Retirás en Barrio Urca o te la enviamos.${pub?' No necesitás cuenta para comprar.':''}</p>
+  <div class="mt14">${hl}</div>
+  <section class="section grid2">${list.map(p=>`<button class="prod ${p.available?'':'sold'}" data-act="prod" data-p="${p.id}">
+    <div class="art" style="position:relative">${pimg(p)}${p.unique&&p.available?'<span class="tag">Pieza única</span>':''}${!p.available?'<span class="tag">Agotado</span>':''}</div>
+    <div class="info"><div class="name">${esc(p.name)}</div><div class="price">${fmt(p.price)}</div></div></button>`).join('')}</section>`;
+}
+
+function publicView(){
+  return `<div class="app" style="padding-bottom:110px">
+    <header class="topbar"><div class="brand">${logo(42)}<span>Hipatia</span></div><button class="btn ghost sm" data-act="go" data-v="login">${ic('user',18)} Soy alumna</button></header>
+    ${aTienda(true)}
+    <p class="small muted mt24" style="text-align:center">Hipatia, estudio de cerámica. Barrio Urca, Córdoba.</p>
+  </div>
+  ${cartCount()?`<button class="cartbar" style="bottom:20px" data-act="cart"><span>Ver carrito (${cartCount()})</span><span>${fmt(cartTotal())}</span></button>`:''}`;
+}
+
+function aCuenta(s){
+  return `<div class="row mt10" style="gap:16px"><div class="avatar" style="width:72px;height:72px;font-size:32px;border-radius:22px;background:${s.av};color:${C.bordo}">${s.short[0]}</div><div><h2>${esc(s.name)}</h2><p class="muted small">Alumna desde marzo</p></div></div>
+  <section class="section panel rosa"><div class="row between"><h3>Tu plan</h3><span class="chip ok">Activo</span></div>
+    <p class="mt10"><b>Mensualidad ${fmt(S.settings.mensualidad)}</b></p><p class="small muted">${S.settings.clases} clases de 2 horas por mes, materiales y 1 pieza mediana incluida.</p>${planLine(s)}</section>
+  <section class="section"><h2 style="margin-bottom:12px">Tus pagos</h2><div class="list">
+    ${s.pending?`<div class="li"><div style="flex:1"><b>${fmt(s.pending.amount)}</b><div class="tiny muted">${s.pending.date}, ${s.pending.method}</div></div><span class="chip rev">En revisión</span></div>`:''}
+    ${s.history.map(h=>`<div class="li"><div style="flex:1"><b>${esc(h.concept)}</b><div class="tiny muted">${h.date}, ${h.method}</div></div><span class="num">${fmt(h.amount)}</span></div>`).join('')}
+  </div></section>
+  <section class="section"><h2 style="margin-bottom:12px">Tus datos</h2><div class="list">
+    <div class="li"><span class="muted" style="flex:1">Celular</span><b>${s.phone}</b></div>
+    <div class="li"><span class="muted" style="flex:1">Recordatorios</span><span>WhatsApp, 1 día antes</span></div>
+  </div></section>
+  <section class="section"><button class="btn ghost block" data-act="logout">${ic('logout',20)} Salir</button></section>`;
+}
+
+/* =========================================================
+   OWNER (Pauli)
+   ========================================================= */
+function ownerView(){
+  const rev = pendingReceipts(), newOrders = S.orders.filter(o=>o.status==='Nuevo').length + S.encargos.filter(e=>e.status==='Nuevo').length;
+  const nav = [['hoy','Hoy','sun'],['agenda','Agenda','cal'],['alumnas','Alumnas','users'],['cobros','Cobros','cash',rev],['tienda','Tienda','store',newOrders],['ajustes','Precios y ajustes','cog']];
+  let body='';
+  ({hoy:()=>body=oHoy(),agenda:()=>body=oAgenda(),alumnas:()=>body=oAlumnas(),cobros:()=>body=oCobros(),tienda:()=>body=oTienda(),ajustes:()=>body=oAjustes()})[S.otab]();
+  return `<div class="owner">
+    <aside class="side"><div class="brand">${logo(42)}<span>Hipatia</span></div>
+      ${nav.map(([k,l,i,b])=>`<button class="navbtn ${S.otab===k?'on':''}" data-act="otab" data-v="${k}">${ic(i)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`).join('')}
+      <div style="margin-top:auto"><button class="navbtn" data-act="logout">${ic('logout')}<span>Salir</span></button></div>
+    </aside>
+    <main class="owner-main">${body}</main>
+  </div>
+  <nav class="bottomnav owner-bottom" aria-label="Secciones">${nav.slice(0,5).map(([k,l,i,b])=>`<button class="${S.otab===k?'on':''}" data-act="otab" data-v="${k}">${ic(i)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`).join('')}</nav>`;
+}
+function ownerTop(title,sub,extra=''){
+  return `<div class="owner-top"><div><h1>${title}</h1>${sub?`<p class="muted mt6" style="font-size:18px">${sub}</p>`:''}</div>${extra}</div>`;
+}
+function oHoy(){
+  const paid = S.students.filter(s=>s.paidMonth).length, total=S.students.length;
+  const cobrado = S.students.reduce((a,s)=>a+(s.paidMonth?S.settings.mensualidad:0)+s.extras.filter(e=>e.paid).reduce((x,e)=>x+e.amount,0),0) + S.orders.filter(o=>o.paid).reduce((a,o)=>a+o.total,0);
+  const porCobrar = S.students.reduce((a,s)=>a+debt(s),0);
+  const today = S.slots[0], tomorrow=S.slots[1];
+  const ready = S.students.flatMap(s=>s.pieces.filter(p=>p.stage===4).map(p=>({s,p})));
+  return ownerTop('Buen día, Pauli.', `${paid} de tus ${total} alumnas ya pagaron noviembre.`, `<button class="btn soft" data-act="aviso">${ic('bell',20)} Mandar un aviso</button>`)+
+  `<div class="stats">
+    <div class="stat" style="background:${C.bordo};color:#fff"><div class="small" style="opacity:.85">Cobrado en noviembre</div><div class="big">${fmt(cobrado)}</div><div class="tiny" style="opacity:.8;margin-top:4px">Clases, piezas extra y tienda</div></div>
+    <button class="stat" style="background:${C.naranja}22" data-act="otab" data-v="cobros"><div class="small muted">Falta cobrar</div><div class="big" style="color:#9A4417">${fmt(porCobrar)}</div><div class="tiny muted" style="margin-top:4px">${S.students.filter(s=>debt(s)>0&&!s.pending).length} alumnas deben</div></button>
+    <button class="stat" style="background:${C.lila}88" data-act="otab" data-v="cobros"><div class="small muted">Comprobantes para revisar</div><div class="big" style="color:#5A4573">${pendingReceipts()}</div><div class="tiny muted" style="margin-top:4px">Tocá para aprobarlos</div></button>
+  </div>
+  <div class="cols">
+    <div>
+      <div class="sec-head" style="margin-top:8px"><h2>Hoy, ${today.time}</h2><span class="muted small">${today.list.length} de ${today.cap}</span></div>
+      <div class="list">${today.list.map(id=>{const s=stu(id), a=s.attended[today.id];return `<div class="li"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:0"><b>${esc(s.name)}</b><div class="tiny muted">${s.used} de ${s.total} clases usadas</div></div><span class="chip ${payState(s).k}">${payState(s).t}</span><button class="att ${a?'on':''}" data-act="att" data-s="${id}" data-slot="${today.id}" aria-pressed="${!!a}" aria-label="Marcar presente ${esc(s.name)}">${ic('check',18,2.5)}</button></div>`}).join('')}</div>
+      <p class="tiny muted mt6">Marcá quién vino y se descuenta la clase sola.</p>
+      <div class="sec-head" style="margin-top:22px"><h2>Mañana, ${tomorrow.time}</h2><span class="chip bad">Completa</span></div>
+      <div class="list"><div class="li"><div style="flex:1">${tomorrow.list.map(id=>stu(id).short).join(', ')}</div></div></div>
+    </div>
+    <div>
+      <div class="sec-head" style="margin-top:8px"><h2>Listas para retirar</h2></div>
+      <div class="list">${ready.length?ready.map(({s,p})=>`<div class="li"><div class="art" style="width:46px;height:46px;border-radius:12px;overflow:hidden;flex:none">${art(p.art,C.rosa2,p.color)}</div><div style="flex:1"><b>${esc(p.name)}</b><div class="tiny muted">${esc(s.name)}</div></div><button class="btn ghost sm" data-act="delivered" data-s="${s.id}" data-p="${p.id}">Entregada</button></div>`).join(''):'<div class="li muted">No hay piezas esperando.</div>'}</div>
+      <div class="sec-head" style="margin-top:22px"><h2>Tienda</h2><button class="link small" data-act="otab" data-v="tienda">Ver pedidos</button></div>
+      <div class="list">${S.orders.slice(0,3).map(o=>`<div class="li"><div style="flex:1"><b>${esc(o.who)}</b><div class="tiny muted">${esc(o.items)}</div></div><span class="chip ${o.status==='Nuevo'?'warn':o.status==='Entregado'?'ok':'rev'}">${o.status}</span></div>`).join('')}</div>
+    </div>
+  </div>`;
+}
+function oAgenda(){
+  return ownerTop('Agenda','Tocá una clase para ver quién viene, sumar a alguien o marcar asistencia.')+
+  `<div class="stack gap10">${S.slots.map(sl=>{const pct=sl.list.length/sl.cap*100;return `<button class="slot" style="width:100%;text-align:left;margin:0" data-act="oslot" data-slot="${sl.id}">
+    <div class="datebox"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div>
+    <div style="flex:1"><div class="row between"><b>${sl.dow} ${sl.d}, ${sl.time}</b><span class="small ${pct>=100?'':'muted'}" style="${pct>=100?'color:'+C.bordo+';font-weight:700':''}">${sl.list.length} de ${sl.cap}</span></div>
+    <div class="bar mt6"><i style="width:${pct}%;background:${pct>=100?C.bordo:pct>=67?C.naranja:C.oliva}"></i></div>
+    <div class="tiny muted mt6">${sl.list.map(id=>stu(id).short).join(', ')||'Nadie anotada todavía'}</div></div>${ic('chev',20)}</button>`}).join('')}
+    <h2 class="mt18">Tallercitos</h2>
+    ${S.workshops.map(w=>`<div class="slot" style="margin:0"><div class="datebox" style="background:#E9ECCB;color:${C.oliva}">${star(C.oliva,{size:30})}</div><div style="flex:1"><b>${esc(w.name)}</b><div class="small muted">${w.date}, ${w.time}</div><div class="bar mt6"><i style="width:${w.taken/w.cap*100}%;background:${C.oliva}"></i></div></div><span class="small"><b>${w.taken}</b> de ${w.cap}</span></div>`).join('')}
+  </div>`;
+}
+function oAlumnas(){
+  const q=S.aluQuery.toLowerCase(), f=S.aluFilter;
+  let list=S.students.filter(s=>s.name.toLowerCase().includes(q));
+  if(f==='deben') list=list.filter(s=>debt(s)>0);
+  if(f==='sin') list=list.filter(s=>available(s)===0);
+  const fl=[['todas','Todas'],['deben','Deben'],['sin','Sin clases']];
+  return ownerTop('Alumnas',`${S.students.length} alumnas activas este mes.`, `<button class="btn" data-act="newStudent">${ic('plus',20)} Nueva alumna</button>`)+
+  `<div class="row" style="flex-wrap:wrap;gap:10px;margin-bottom:14px"><input class="input" style="max-width:340px;flex:1" placeholder="Buscar por nombre" value="${esc(S.aluQuery)}" data-input="aluQuery" aria-label="Buscar alumna">
+   <div class="seg" style="min-width:300px">${fl.map(([k,l])=>`<button class="${f===k?'on':''}" data-act="aluFilter" data-v="${k}">${l}</button>`).join('')}</div></div>
+  <div class="list">${list.map(s=>{const ps=payState(s);return `<button class="li" data-act="ostu" data-s="${s.id}"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span>
+    <div style="flex:1;min-width:0"><b>${esc(s.name)}</b><div class="tiny muted">${s.used} tomadas, ${bookedSlots(s.id).length} reservadas, ${available(s)} libres</div></div>
+    <div class="row" style="gap:3px" aria-hidden="true">${Array.from({length:s.total},(_,i)=>star(i<s.used?C.bordo:i<s.used+bookedSlots(s.id).length?C.naranja:'#fff',{size:18,stroke:C.bordo,sw:5})).join('')}</div>
+    <span class="chip ${ps.k}" style="min-width:132px;justify-content:center">${ps.t}</span>${ic('chev',18)}</button>`}).join('')||'<div class="li muted">No hay alumnas con ese filtro.</div>'}</div>`;
+}
+function receiptCard(s){
+  const p=s.pending;
+  return `<div class="receipt"><div class="thumb">${p.file?`<img src="${p.file}" alt="Comprobante de ${esc(s.name)}">`:`${ic('bank',26)}<b style="font-size:15px">${fmt(p.amount)}</b><span>Comprobante de ejemplo</span>`}</div>
+    <div style="flex:1"><div class="row between"><b style="font-size:18px">${esc(s.name)}</b><span class="tiny muted">${p.date}</span></div>
+    <div class="money mt6" style="font-size:30px">${fmt(p.amount)}</div><p class="small muted">${p.method}. Paga: ${p.items.map(id=>id==='month'?'mensualidad':s.extras.find(e=>e.id===id)?.label.toLowerCase()).join(', ')}</p>
+    <div class="row mt14" style="gap:8px"><button class="btn sm olive" data-act="approve" data-s="${s.id}">${ic('check',18,2.5)} Aprobar</button><button class="btn ghost sm" data-act="reject" data-s="${s.id}">No llegó</button></div></div></div>`;
+}
+function oCobros(){
+  const pend=S.students.filter(s=>s.pending), deben=S.students.filter(s=>debt(s)>0&&!s.pending), orderRev=S.orders.filter(o=>o.needsReview);
+  return ownerTop('Cobros','Comprobantes de transferencia, pagos con Mercado Pago y quién debe.')+
+  `<h2 style="margin-bottom:12px">Para revisar ${pend.length+orderRev.length?`<span class="chip rev" style="vertical-align:middle">${pend.length+orderRev.length}</span>`:''}</h2>
+  <div class="stack gap10">${pend.map(receiptCard).join('')}${orderRev.map(o=>`<div class="receipt"><div class="thumb">${o.file?`<img src="${o.file}" alt="Comprobante">`:ic('bag',26)}</div><div style="flex:1"><div class="row between"><b style="font-size:18px">${esc(o.who)}</b><span class="tiny muted">Tienda</span></div><div class="money mt6" style="font-size:30px">${fmt(o.total)}</div><p class="small muted">${esc(o.items)}</p><div class="row mt14" style="gap:8px"><button class="btn sm olive" data-act="approveOrder" data-o="${o.id}">${ic('check',18,2.5)} Aprobar</button></div></div></div>`).join('')}
+  ${!pend.length&&!orderRev.length?`<div class="panel oliva"><p>No hay comprobantes pendientes. Todo revisado ✶</p></div>`:''}</div>
+  <h2 class="mt24" style="margin-bottom:12px">Deben</h2>
+  <div class="list">${deben.map(s=>`<div class="li" style="flex-wrap:wrap"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b><div class="tiny muted">${debtItems(s).map(i=>i.label).join(', ')}</div></div><span class="num">${fmt(debt(s))}</span><button class="btn ghost sm" data-act="remind" data-s="${s.id}">${ic('wa',18)} Recordar</button><button class="btn ghost sm" data-act="cash" data-s="${s.id}">Pagó en efectivo</button></div>`).join('')||'<div class="li muted">Nadie debe nada.</div>'}</div>
+  <p class="small muted mt14">Los pagos con Mercado Pago se acreditan solos y no necesitan revisión.</p>`;
+}
+function oTienda(){
+  const seg=S.storeSeg;
+  const tabs=`<div class="seg" style="max-width:480px;margin-bottom:16px">${[['productos','Productos'],['pedidos','Pedidos'],['encargos','Encargos']].map(([k,l])=>`<button class="${seg===k?'on':''}" data-act="storeSeg" data-v="${k}">${l}</button>`).join('')}</div>`;
+  let body='';
+  if(seg==='productos') body=`<div class="list">${S.products.map(p=>`<div class="li"><label title="Cambiar foto" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none;position:relative;cursor:pointer">${pimg(p)}<span style="position:absolute;right:3px;bottom:3px;width:24px;height:24px;border-radius:8px;background:#fffffff0;color:${C.bordo};display:grid;place-items:center">${ic('upload',14,2.4)}</span><input type="file" accept="image/*" hidden data-file="pimg" data-p="${p.id}" aria-label="Cambiar foto de ${esc(p.name)}"></label><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="tiny muted">${p.unique?'Pieza única':`${p.stock} en stock`}, ${p.cat==='joyitas'?'Joyitas':'En casa'}</div></div><span class="num">${fmt(p.price)}</span><span class="small muted" style="width:76px;text-align:right">${p.available?'Visible':'Agotado'}</span><button class="toggle ${p.available?'on':''}" data-act="ptoggle" data-p="${p.id}" role="switch" aria-checked="${p.available}" aria-label="Mostrar ${esc(p.name)} en la tienda"></button></div>`).join('')}</div>`;
+  if(seg==='productos') body=`<div class="panel rosa" style="padding:14px 18px;margin-bottom:12px"><p class="small"><b>Tocá la foto de un producto para cambiarla.</b> Podés sacarla con el celu en el momento o elegirla de tu galería.</p></div>`+body;
+  if(seg==='pedidos') body=`<div class="list">${S.orders.map(o=>`<div class="li" style="flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>${esc(o.who)}</b><div class="small">${esc(o.items)}</div><div class="tiny muted">${o.delivery}, ${o.method}${o.needsReview?', comprobante para revisar':''}</div></div><span class="num">${fmt(o.total)}</span><button class="chip ${o.status==='Nuevo'?'warn':o.status==='Entregado'?'ok':'rev'}" data-act="ostatus" data-o="${o.id}" title="Cambiar estado">${o.status} ${ic('chev',14,2.5)}</button></div>`).join('')}</div><p class="small muted mt10">Tocá el estado para pasarlo de Nuevo a Preparando y a Entregado.</p>`;
+  if(seg==='encargos') body=`<div class="stack gap10">${S.encargos.map(e=>`<div class="panel"><div class="row between"><b>${esc(e.who)}</b><span class="chip ${e.status==='Nuevo'?'warn':'ok'}">${e.status}</span></div><p class="mt10">${esc(e.what)}</p><p class="small muted mt6">Para: ${esc(e.when||'sin fecha')}</p>${e.status==='Nuevo'?`<button class="btn sm mt14" data-act="quote" data-e="${e.id}">Pasar presupuesto</button>`:''}</div>`).join('')}</div>`;
+  return ownerTop('Tienda','Lo que se ve en la tienda, los pedidos y los encargos a medida.', seg==='productos'?`<button class="btn" data-act="newProduct">${ic('plus',20)} Nuevo producto</button>`:'')+tabs+body;
+}
+function oAjustes(){
+  const st=S.settings;
+  const f=(k,l,pre='$')=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" class="input" inputmode="numeric" data-set="${k}" value="${st[k]}"></div>`;
+  return ownerTop('Precios y ajustes','Lo que cambies acá lo ven las alumnas al instante.')+
+  `<div class="cols" style="margin-top:0"><div class="panel"><h3>Mensualidad</h3><div class="mt14">${f('mensualidad','Precio por mes')}${f('clases','Clases por mes')}${f('suelta','Clase suelta')}</div><p class="small muted">Incluye 1 pieza mediana por mes.</p></div>
+  <div class="panel"><h3>Piezas extra</h3><div class="mt14">${f('chica','Pieza chica')}${f('mediana','Pieza mediana')}${f('grande','Pieza grande')}</div></div>
+  <div class="panel"><h3>Cobros por transferencia</h3><div class="mt14"><div class="field"><label for="set-alias">Alias</label><input id="set-alias" class="input" data-set="alias" value="${esc(st.alias)}"></div><div class="field"><label for="set-titular">Titular</label><input id="set-titular" class="input" data-set="titular" value="${esc(st.titular)}"></div></div></div>
+  <div class="panel"><h3>Reprogramar clases</h3><div class="mt14">${f('horas','Hasta cuántas horas antes se puede cambiar')}</div><p class="small muted">Si avisan a tiempo, la clase vuelve a su cuenta.</p></div></div>
+  <button class="btn mt18" data-act="saveSettings">Guardar cambios</button>`;
+}
+
+/* =========================================================
+   SHEETS
+   ========================================================= */
+function paySheet(ctx){
+  // ctx: {amount, title, kind:'deuda'|'orden'|'taller'|'suelta', ref}
+  const m=sheetCtx.method||null;
+  const st=S.settings;
+  let detail='';
+  if(m==='transfer') detail=`<div class="mt14"><p class="small muted">Transferí <b style="color:${C.ink}">${fmt(ctx.amount)}</b> a esta cuenta:</p>
+    <div class="alias mt10"><div><div class="tiny muted">Alias</div><b style="font-size:19px">${esc(st.alias)}</b><div class="tiny muted">${esc(st.titular)}</div></div><button class="btn soft sm" data-act="copyAlias">${ic('copy',18)} Copiar</button></div>
+    <p class="small muted mt18" style="margin-bottom:8px">Después subí la captura del comprobante:</p>
+    <label class="drop ${sheetCtx.file?'has':''}" for="rc-file">${sheetCtx.file?`<img src="${sheetCtx.file}" alt="Tu comprobante"><span class="small"><b>Listo.</b> Tocá para cambiarlo</span>`:`${ic('upload',28)}<b>Subir comprobante</b><span class="tiny muted">Foto o captura de pantalla</span>`}</label>
+    <input id="rc-file" type="file" accept="image/*,application/pdf" hidden data-file="receipt">
+    <button class="btn block mt14" data-act="sendReceipt" ${sheetCtx.file?'':'disabled'}>Enviar comprobante</button></div>`;
+  if(m==='mp') detail=`<div class="mt14 panel" style="padding:18px"><p class="small">Te llevamos a Mercado Pago para pagar con tarjeta de crédito, débito o dinero en cuenta. El pago se confirma solo.</p>
+    <button class="btn block mt14" style="background:#009EE3" data-act="mpPay" ${sheetCtx.loading?'disabled':''}>${sheetCtx.loading?'Conectando con Mercado Pago…':'Pagar '+fmt(ctx.amount)+' con Mercado Pago'}</button>
+    <p class="tiny muted mt10" style="text-align:center">En la maqueta el pago se simula.</p></div>`;
+  return head(ctx.title, `Total: <b style="color:${C.bordo}">${fmt(ctx.amount)}</b>`)+
+  `<button class="choice ${m==='transfer'?'on':''}" data-act="pmethod" data-v="transfer"><span class="ic" style="background:${C.rosa};color:${C.bordo}">${ic('bank')}</span><span><b>Transferencia</b><br><span class="small muted">Subís el comprobante y Pauli lo confirma</span></span><span class="radio"></span></button>
+   <button class="choice ${m==='mp'?'on':''}" data-act="pmethod" data-v="mp"><span class="ic" style="background:#E3F4FC;color:#007BB5">${ic('card')}</span><span><b>Mercado Pago</b><br><span class="small muted">Tarjeta o dinero en cuenta, se acredita al toque</span></span><span class="radio"></span></button>
+   ${detail}`;
+}
+function successSheet(title,text,btn='Listo'){
+  return `<div class="grab"></div><div class="success"><div class="burst">${star(C.oliva,{size:96})}</div><h2>${title}</h2><p class="muted mt10">${text}</p><button class="btn block mt24" data-act="close">${btn}</button></div>`;
+}
+function stuSheet(id){
+  const s=stu(id), ps=payState(s), st=S.settings, sel=sheetCtx.extraSize;
+  return head(esc(s.name), `${s.phone}`)+
+  `<div class="panel rosa" style="padding:18px"><div class="row between"><b>Clases de noviembre</b><span class="chip ${ps.k}">${ps.t}</span></div>
+    ${planLine(s)}
+    <div class="mt10">${classMeter(s)}</div>
+    <div class="row between mt14"><span class="small">Clases del mes</span><div class="stepper"><button data-act="clsAdj" data-s="${id}" data-d="-1" aria-label="Quitar una clase">−</button><b style="min-width:20px;text-align:center">${s.total}</b><button data-act="clsAdj" data-s="${id}" data-d="1" aria-label="Sumar una clase">+</button></div></div></div>
+  <h3 class="mt18">Sumar pieza extra</h3><p class="small muted mt6">Se agrega a lo que tiene que abonar y ${esc(s.short)} lo ve en su app.</p>
+  <div class="extra-grid mt10">${[['chica','Chica'],['mediana','Mediana'],['grande','Grande']].map(([k,l])=>`<button class="${sel===k?'on':''}" data-act="extraSize" data-v="${k}">${l}<br><span class="serif" style="color:${C.bordo}">+${fmt(st[k])}</span></button>`).join('')}</div>
+  ${sel?`<div class="row mt10" style="gap:8px"><input class="input" id="extra-name" placeholder="Qué pieza es (ej: cuenco)" style="flex:1"><button class="btn" data-act="addExtra" data-s="${id}">Sumar</button></div>`:''}
+  <h3 class="mt18">Sus piezas</h3>
+  <div class="stack gap10 mt10">${s.pieces.map(p=>`<div class="piece" style="padding:10px 12px"><div class="art" style="width:52px;height:52px;border-radius:14px">${art(p.art,C.rosa2,p.color)}</div><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="tiny muted">${p.included?'Incluida':'Extra'}, ${p.size}</div></div>
+    <select class="input" style="width:auto;min-height:42px" data-stage="${p.id}" data-s="${id}" aria-label="Estado de ${esc(p.name)}">${STAGES.map((t,i)=>`<option value="${i}" ${p.stage===i?'selected':''}>${t}</option>`).join('')}</select></div>`).join('')}</div>
+  <h3 class="mt18">Pagos</h3>
+  <div class="list mt10">${debtItems(s).map(i=>`<div class="li"><div style="flex:1">${esc(i.label)}<div class="tiny muted">${i.sub}</div></div><span class="num">${fmt(i.amount)}</span></div>`).join('')||'<div class="li">Está al día.</div>'}</div>
+  <div class="row mt14" style="gap:8px;flex-wrap:wrap">${debt(s)&&!s.pending?`<button class="btn ghost sm" data-act="remind" data-s="${id}">${ic('wa',18)} Recordarle el pago</button><button class="btn ghost sm" data-act="cash" data-s="${id}">Pagó en efectivo</button>`:''}${s.pending?`<button class="btn sm olive" data-act="approve" data-s="${id}">Aprobar comprobante de ${fmt(s.pending.amount)}</button>`:''}</div>`;
+}
+function remindSheet(id){
+  const s=stu(id), msg=`Hola ${s.short}! ¿Cómo estás? Te escribo de Hipatia para recordarte que tenés ${fmt(debt(s))} pendiente (${debtItems(s).map(i=>i.label.toLowerCase()).join(', ')}). Podés pagar desde la app con transferencia o Mercado Pago. ¡Gracias! ✶`;
+  return head('Recordatorio por WhatsApp',`Para ${esc(s.name)}, ${s.phone}`)+
+  `<div class="panel" style="background:#E7F6E9;border-color:transparent"><p id="wa-msg">${esc(msg)}</p></div>
+  <div class="row mt14" style="gap:8px"><button class="btn block" style="flex:1" data-act="copyMsg">${ic('copy',18)} Copiar mensaje</button></div>
+  <p class="tiny muted mt10">En la app real se abre WhatsApp con el mensaje listo para mandar.</p>`;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+const A = {
+  go(el){ S.view=el.dataset.v; sheetHTML=null; window.scrollTo(0,0); render(false); },
+  reset(){ try{localStorage.removeItem('hipatia-demo')}catch(e){} S=seed(); sheetHTML=null; render(false); toast('La maqueta volvió al inicio'); },
+  role(el){ S.loginRole=el.dataset.v; render(); },
+  logout(){ S.view='login'; render(false); },
+  close(){ closeSheet(); },
+  scrim(el,e){ if(e.target===el) closeSheet(); },
+  tab(el){ S.tab=el.dataset.v; window.scrollTo(0,0); render(false); },
+  otab(el){ S.otab=el.dataset.v; window.scrollTo(0,0); render(false); },
+  clsSeg(el){ S.clsSeg=el.dataset.v; render(); },
+  cat(el){ S.storeCat=el.dataset.v; render(); },
+  storeSeg(el){ S.storeSeg=el.dataset.v; render(); },
+  aluFilter(el){ S.aluFilter=el.dataset.v; render(); },
+  avisos(){ S.seenAvisos=S.avisos.length; openSheet(head('Avisos de Pauli')+`<div class="stack gap10">${S.avisos.map(a=>`<div class="panel" style="padding:16px 18px"><p>${esc(a.text)}</p><p class="tiny muted mt6">${a.date}</p></div>`).join('')}</div>`); },
+  trial(){ openSheet(head('Clase de prueba','Vení a conocer el taller. Dura 2 horas y te llevás tu pieza.')+`<form data-form="trial"><div class="field"><label for="tr-n">Tu nombre</label><input id="tr-n" class="input" required></div><div class="field"><label for="tr-p">Tu celular</label><input id="tr-p" class="input" inputmode="tel" required></div><div class="field"><label for="tr-d">¿Qué día te queda mejor?</label><select id="tr-d" class="input">${S.slots.filter(s=>s.list.length<s.cap&&s.id!=='s1').map(s=>`<option>${s.dow} ${s.d}, ${s.time}</option>`).join('')}</select></div><button class="btn block mt10" type="submit">Pedir mi lugar</button></form>`); },
+
+  /* alumna: clases */
+  book(el){
+    const sl=S.slots.find(x=>x.id===el.dataset.slot), s=me();
+    if(!available(s)){ openSheet(head('Ya usaste tus clases del mes',`Podés sumar una clase suelta por ${fmt(S.settings.suelta)}.`)+`<div class="panel rosa"><b>${sl.dow} ${sl.d}, ${sl.time}</b></div><button class="btn block mt18" data-act="buySuelta" data-slot="${sl.id}">Sumar clase suelta</button>`); return; }
+    openSheet(head('¿Reservamos?')+`<div class="panel rosa"><div class="row"><div class="datebox" style="background:#fff"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div><h3>${sl.dow} ${sl.d} de noviembre</h3><p class="muted">${sl.time}</p></div></div></div>
+      <p class="mt14">Usás 1 de tus clases. Te ${available(s)-1===1?'queda':'quedan'} <b>${available(s)-1}</b> después de esta.</p><p class="small muted mt6">Te mandamos un recordatorio por WhatsApp el día anterior.</p>
+      <button class="btn block mt18" data-act="confirmBook" data-slot="${sl.id}">Sí, reservar</button>`);
+  },
+  confirmBook(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list.push(S.me); openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d} de ${sl.time}. Traé ropa que se pueda manchar.`)); },
+  buySuelta(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sheetCtx={kind:'suelta',slot:sl.id,amount:S.settings.suelta,title:'Clase suelta'}; openSheet(paySheet(sheetCtx),sheetCtx); },
+  reprog(el){
+    const from=S.slots.find(x=>x.id===el.dataset.slot);
+    const opts=S.slots.filter(x=>x.id!=='s1'&&x.id!==from.id&&x.list.length<x.cap&&!x.list.includes(S.me));
+    openSheet(head('Cambiar de día',`Ahora estás en el ${from.dow.toLowerCase()} ${from.d}, ${from.time}. Elegí otro horario:`)+opts.map(sl=>slotRow(sl,'moveTo').replace('data-act="moveTo"',`data-act="moveTo" data-from="${from.id}"`)).join(''),{});
+  },
+  moveTo(el){ const from=S.slots.find(x=>x.id===el.dataset.from), to=S.slots.find(x=>x.id===el.dataset.slot); from.list=from.list.filter(i=>i!==S.me); to.list.push(S.me); closeSheet(); toast(`Listo, te pasamos al ${to.dow.toLowerCase()} ${to.d}`); },
+  cancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); openSheet(head('¿No podés ir?')+`<p>Avisaste con más de ${S.settings.horas} hs, así que la clase del <b>${sl.dow.toLowerCase()} ${sl.d}</b> vuelve a tu cuenta para que la uses otro día.</p><p class="small muted mt10">Se libera tu lugar para otra alumna.</p><button class="btn block mt18" data-act="confirmCancel" data-slot="${sl.id}">Sí, liberar mi lugar</button><button class="btn ghost block mt10" data-act="close">Mejor no</button>`); },
+  confirmCancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list=sl.list.filter(i=>i!==S.me); closeSheet(); toast('Liberaste tu lugar. La clase volvió a tu cuenta'); },
+  wait(){ toast('Te avisamos por WhatsApp si se libera un lugar'); },
+  libre(){ openSheet(head('Pedir horario libre','Contale a Pauli cuándo podés venir.')+`<form data-form="libre"><div class="field"><label for="lb">Días y horarios que te quedan</label><textarea id="lb" class="input" placeholder="Por ejemplo: martes a la tarde o jueves a la mañana" required></textarea></div><button class="btn block" type="submit">Enviar a Pauli</button></form>`); },
+  wsBook(el){ const w=S.workshops.find(x=>x.id===el.dataset.w); sheetCtx={kind:'taller',w:w.id,amount:w.price,title:'Tallercito: '+w.name}; openSheet(paySheet(sheetCtx),sheetCtx); },
+
+  /* pagos */
+  pay(){ const s=me(); sheetCtx={kind:'deuda',amount:debt(s),title:'Pagar'}; openSheet(paySheet(sheetCtx),sheetCtx); },
+  pmethod(el){ sheetCtx.method=el.dataset.v; sheetHTML=paySheet(sheetCtx); render(); },
+  copyAlias(){ try{navigator.clipboard.writeText(S.settings.alias).then(()=>toast('Alias copiado'),()=>toast('Alias: '+S.settings.alias));}catch(e){toast('Alias: '+S.settings.alias)} },
+  sendReceipt(){ finishPay('Transferencia', sheetCtx.file); },
+  mpPay(){ sheetCtx.loading=true; sheetHTML=paySheet(sheetCtx); render(); setTimeout(()=>finishPay('Mercado Pago'),1300); },
+
+  /* tienda */
+  prod(el){ const p=S.products.find(x=>x.id===el.dataset.p); const inCart=S.cart.find(c=>c.pid===p.id);
+    openSheet(`<div class="grab"></div><div style="border-radius:24px;overflow:hidden;aspect-ratio:4/3;position:relative">${pimg(p)}<button class="close" style="position:absolute;top:12px;right:12px" data-act="close" aria-label="Cerrar">${ic('x',20)}</button></div>
+      <div class="row between mt18"><h2>${esc(p.name)}</h2><div class="money" style="font-size:30px">${fmt(p.price)}</div></div>
+      ${p.unique?`<span class="chip rev mt10">Pieza única, hay una sola</span>`:''}
+      <p class="mt14">${esc(p.desc)}</p>
+      ${p.img?'':'<p class="small muted mt10">Esta pieza todavía no tiene foto. Pauli la sube desde su panel, en Tienda.</p>'}
+      ${p.available?`<button class="btn block mt18" data-act="addCart" data-p="${p.id}" ${p.unique&&inCart?'disabled':''}>${p.unique&&inCart?'Ya está en tu carrito':'Agregar al carrito'}</button>`:`<button class="btn ghost block mt18" data-act="wait">Avisarme cuando vuelva</button>`}`); },
+  addCart(el){ const c=S.cart.find(x=>x.pid===el.dataset.p); if(c) c.qty++; else S.cart.push({pid:el.dataset.p,qty:1}); closeSheet(); toast('Lo sumamos a tu carrito'); },
+  cart(){ openSheet(cartSheet()); },
+  qty(el){ const c=S.cart.find(x=>x.pid===el.dataset.p); const p=S.products.find(x=>x.id===c.pid); c.qty+=+el.dataset.d; if(p.unique&&c.qty>1)c.qty=1; if(c.qty<=0) S.cart=S.cart.filter(x=>x!==c); if(!S.cart.length){closeSheet();return;} sheetHTML=cartSheet(); render(); },
+  delivery(el){ sheetCtx.delivery=el.dataset.v; sheetHTML=cartSheet(); render(); },
+  checkout(){ if(S.view==='tienda'){ if(!(sheetCtx.gname||'').trim()||!(sheetCtx.gphone||'').trim()){ toast('Completá tu nombre y WhatsApp para seguir'); return; } S.guest={name:sheetCtx.gname.trim(),phone:sheetCtx.gphone.trim()}; } const ship = sheetCtx.delivery==='envio'?3500:0; const d=sheetCtx.delivery; sheetCtx={kind:'orden',amount:cartTotal()+ship,title:'Pagar tu compra',delivery:d}; openSheet(paySheet(sheetCtx),sheetCtx); },
+
+  /* owner */
+  att(el){ const s=stu(el.dataset.s); const k=el.dataset.slot; if(s.attended[k]){delete s.attended[k]; s.used--; } else { s.attended[k]=true; s.used++; } render(); },
+  delivered(el){ const s=stu(el.dataset.s); s.pieces=s.pieces.filter(p=>p.id!==el.dataset.p); render(); toast('Marcada como entregada'); },
+  oslot(el){ openSheet(oslotSheet(el.dataset.slot)); },
+  addToSlot(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); const v=document.getElementById('add-stu').value; if(v&&!sl.list.includes(v)&&sl.list.length<sl.cap){sl.list.push(v); sheetHTML=oslotSheet(sl.id); render(); toast(stu(v).short+' anotada');} },
+  rmFromSlot(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list=sl.list.filter(i=>i!==el.dataset.s); sheetHTML=oslotSheet(sl.id); render(); },
+  capAdj(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.cap=Math.max(sl.list.length,sl.cap+(+el.dataset.d)); sheetHTML=oslotSheet(sl.id); render(); },
+  ostu(el){ sheetCtx={}; openSheet(stuSheet(el.dataset.s),{}); },
+  clsAdj(el){ const s=stu(el.dataset.s); s.total=Math.max(s.used,s.total+(+el.dataset.d)); sheetHTML=stuSheet(s.id); render(); },
+  extraSize(el){ sheetCtx.extraSize=el.dataset.v; sheetHTML=stuSheet(el.closest('.sheet').querySelector('[data-act="clsAdj"]').dataset.s); render(); setTimeout(()=>document.getElementById('extra-name')?.focus(),30); },
+  addExtra(el){ const s=stu(el.dataset.s), size=sheetCtx.extraSize, name=(document.getElementById('extra-name').value||'Pieza extra').trim(); const id='e'+Date.now();
+    const nm = name.charAt(0).toUpperCase()+name.slice(1);
+    s.extras.push({id,label:nm,size,amount:S.settings[size],paid:false});
+    s.pieces.push({id:'p'+id,name:nm,size,extra:id,stage:0,art:size==='chica'?'plato':size==='grande'?'florero':'cuenco',color:[C.naranja,C.oliva,'#C9A0D9'][s.pieces.length%3]});
+    sheetCtx.extraSize=null; sheetHTML=stuSheet(s.id); render(); toast(`Sumaste ${nm} (+${fmt(S.settings[size])}) a ${s.short}`); },
+  remind(el){ openSheet(remindSheet(el.dataset.s)); },
+  copyMsg(){ const t=document.getElementById('wa-msg').textContent; try{navigator.clipboard.writeText(t).then(()=>toast('Mensaje copiado'),()=>toast('Seleccioná el texto para copiarlo'));}catch(e){} },
+  cash(el){ const s=stu(el.dataset.s); const amt=debt(s); payItems(s,debtItems(s).map(i=>i.id),'Efectivo',amt); closeSheet(); toast(`Registraste ${fmt(amt)} en efectivo de ${s.short}`); },
+  approve(el){ const s=stu(el.dataset.s); const p=s.pending; payItems(s,p.items,p.method,p.amount); s.pending=null; closeSheet(); toast(`Aprobado. ${s.short} ya lo ve en su app`); },
+  reject(el){ const s=stu(el.dataset.s); s.pending=null; render(); toast(`Le avisamos a ${s.short} que el pago no llegó`); },
+  approveOrder(el){ const o=S.orders.find(x=>x.id===el.dataset.o); o.needsReview=false; o.paid=true; render(); toast('Pedido aprobado'); },
+  ptoggle(el){ const p=S.products.find(x=>x.id===el.dataset.p); p.available=!p.available; render(); },
+  ostatus(el){ const o=S.orders.find(x=>x.id===el.dataset.o); const seq=['Nuevo','Preparando','Entregado']; o.status=seq[(seq.indexOf(o.status)+1)%3]; render(); },
+  quote(el){ const e=S.encargos.find(x=>x.id===el.dataset.e); openSheet(head('Pasar presupuesto',esc(e.who))+`<p class="panel" style="padding:14px 16px">${esc(e.what)}</p><form data-form="quote" data-e="${e.id}" class="mt14"><div class="field"><label for="q-p">Precio total</label><input id="q-p" class="input" inputmode="numeric" placeholder="Ej: 60000" required></div><div class="field"><label for="q-s">Seña para empezar</label><input id="q-s" class="input" inputmode="numeric" placeholder="Ej: 30000"></div><div class="field"><label for="q-t">Demora</label><input id="q-t" class="input" placeholder="Ej: 3 semanas"></div><button class="btn block" type="submit">Enviar presupuesto</button></form>`); },
+  newProduct(){ openSheet(head('Nuevo producto')+`<form data-form="product"><div class="field"><label for="np-n">Nombre</label><input id="np-n" class="input" required></div><div class="field"><label for="np-p">Precio</label><input id="np-p" class="input" inputmode="numeric" required></div><div class="field"><label for="np-c">Categoría</label><select id="np-c" class="input"><option value="casa">En casa</option><option value="joyitas">Joyitas</option></select></div><label class="row small" style="gap:10px;margin:6px 0 14px"><input type="checkbox" id="np-u" style="width:22px;height:22px"> Es pieza única</label><div class="field"><label>Foto</label><label class="drop" id="np-drop" for="np-f">${ic('upload',26)}<span class="small">Sacá una foto o elegila de tu galería</span></label><input id="np-f" type="file" accept="image/*" hidden data-file="newprod"></div><button class="btn block" type="submit">Publicar en la tienda</button></form>`); },
+  newStudent(){ openSheet(head('Nueva alumna','Le llega un WhatsApp con su acceso a la app.')+`<form data-form="student"><div class="field"><label for="ns-n">Nombre y apellido</label><input id="ns-n" class="input" required></div><div class="field"><label for="ns-p">Celular</label><input id="ns-p" class="input" inputmode="tel" required></div><div class="field"><label for="ns-c">Clases por mes</label><input id="ns-c" class="input" inputmode="numeric" value="${S.settings.clases}"></div><button class="btn block" type="submit">Sumar alumna</button></form>`); },
+  aviso(){ openSheet(head('Mandar un aviso','Les llega a todas en la app y por WhatsApp.')+`<form data-form="aviso"><div class="field"><label for="av">Mensaje</label><textarea id="av" class="input" required placeholder="Ej: Este sábado no hay clase por feriado"></textarea></div><button class="btn block" type="submit">Mandar a las ${S.students.length} alumnas</button></form>`); },
+  saveSettings(){ document.querySelectorAll('[data-set]').forEach(i=>{const k=i.dataset.set; S.settings[k]= (k==='alias'||k==='titular')? i.value : (parseInt(i.value.replace(/\D/g,''))||0);}); S.students.forEach(s=>{ if(!s.customTotal) s.total=S.settings.clases; }); render(); toast('Guardado. Las alumnas ya ven los precios nuevos'); }
+};
+
+function payItems(s, ids, method, amount){
+  ids.forEach(id=>{ if(id==='month'){ s.paidMonth=true; s.paidOn='13 nov'; } else { const e=s.extras.find(x=>x.id===id); if(e) e.paid=true; } });
+  s.history.unshift({date:'13 nov',concept: ids.length===1&&ids[0]==='month'?'Mensualidad de noviembre': ids.includes('month')?'Mensualidad y piezas extra':'Piezas extra',amount,method});
+}
+
+function finishPay(method, file){
+  const ctx=sheetCtx, s=me();
+  if(ctx.kind==='deuda'){
+    const ids=debtItems(s).map(i=>i.id);
+    if(method==='Mercado Pago'){ payItems(s,ids,method,ctx.amount); openSheet(successSheet('¡Pago aprobado!',`Pagaste ${fmt(ctx.amount)} con Mercado Pago. Ya estás al día.`)); }
+    else { s.pending={amount:ctx.amount,method,date:'13 nov',items:ids,file}; openSheet(successSheet('Comprobante enviado','Pauli lo revisa y te avisamos acá cuando esté confirmado.')); }
+  } else if(ctx.kind==='orden'){
+    const items=S.cart.map(c=>{const p=S.products.find(x=>x.id===c.pid); if(p.unique){p.available=false;} else {p.stock-=c.qty; if(p.stock<=0)p.available=false;} return `${p.name} x${c.qty}`}).join(', ');
+    S.orders.unshift({id:'o'+Date.now(),who:S.view==='tienda'?S.guest.name+' (sin cuenta)':s.name,items,total:ctx.amount,delivery:ctx.delivery==='envio'?'Envío en Córdoba':'Retiro en el taller',method,status:'Nuevo',paid:method==='Mercado Pago',needsReview:method!=='Mercado Pago',file});
+    S.cart=[];
+    openSheet(successSheet('¡Gracias por tu compra!', ctx.delivery==='envio'?(S.view==='tienda'?'Pauli te escribe por WhatsApp para coordinar el envío.':'Pauli te escribe para coordinar el envío.'):'Te avisamos cuando esté lista para retirar en el taller, Barrio Urca.'));
+  } else if(ctx.kind==='taller'){
+    const w=S.workshops.find(x=>x.id===ctx.w); w.taken++; S.myWorkshops.push(w.id);
+    openSheet(successSheet('¡Tenés tu lugar!',`${w.name}, ${w.date.toLowerCase()}. ${method==='Mercado Pago'?'Pago confirmado.':'Pauli confirma tu transferencia en breve.'}`));
+  } else if(ctx.kind==='suelta'){
+    const sl=S.slots.find(x=>x.id===ctx.slot); s.total++; s.customTotal=true; sl.list.push(S.me);
+    s.history.unshift({date:'13 nov',concept:'Clase suelta',amount:ctx.amount,method});
+    openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d}, ${sl.time}.`));
+  }
+}
+
+function cartSheet(){
+  const d=sheetCtx.delivery||'retiro', ship=d==='envio'?3500:0;
+  return head('Tu carrito')+
+  `<div class="stack gap10">${S.cart.map(c=>{const p=S.products.find(x=>x.id===c.pid);return `<div class="piece" style="padding:10px 12px"><div class="art" style="width:60px;height:60px;border-radius:14px">${pimg(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><div class="num" style="color:${C.bordo}">${fmt(p.price*c.qty)}</div></div><div class="stepper"><button data-act="qty" data-p="${p.id}" data-d="-1" aria-label="Quitar uno">−</button><b>${c.qty}</b><button data-act="qty" data-p="${p.id}" data-d="1" aria-label="Sumar uno" ${p.unique?'disabled style="opacity:.3"':''}>+</button></div></div>`}).join('')}</div>
+  <h3 class="mt18" style="margin-bottom:10px">¿Cómo te llega?</h3>
+  <button class="choice ${d==='retiro'?'on':''}" data-act="delivery" data-v="retiro"><span class="ic" style="background:${C.rosa};color:${C.bordo}">${ic('pin')}</span><span><b>Retiro en el taller</b><br><span class="small muted">Barrio Urca, en horario de clases. Sin costo</span></span><span class="radio"></span></button>
+  <button class="choice ${d==='envio'?'on':''}" data-act="delivery" data-v="envio"><span class="ic" style="background:#FBE4D8;color:${C.naranja}">${ic('truck')}</span><span><b>Envío en Córdoba capital</b><br><span class="small muted">${fmt(3500)}, llega en 2 a 4 días</span></span><span class="radio"></span></button>
+  <div class="panel mt14" style="padding:16px 18px"><div class="line-item"><span>Productos</span><span class="num">${fmt(cartTotal())}</span></div><div class="line-item"><span>Envío</span><span class="num">${ship?fmt(ship):'Gratis'}</span></div><div class="line-item"><b>Total</b><b class="num" style="color:${C.bordo};font-size:20px">${fmt(cartTotal()+ship)}</b></div></div>
+  ${S.view==='tienda'?`<h3 class="mt18" style="margin-bottom:10px">Tus datos</h3><p class="small muted" style="margin-bottom:10px">Para avisarte cuando tu pedido esté listo. No hace falta crear una cuenta.</p>
+    <div class="field"><label for="g-name">Nombre</label><input id="g-name" class="input" data-guest="name" value="${esc(sheetCtx.gname||'')}"></div>
+    <div class="field"><label for="g-phone">WhatsApp</label><input id="g-phone" class="input" inputmode="tel" data-guest="phone" value="${esc(sheetCtx.gphone||'')}"></div>`:''}
+  <button class="btn block mt18" data-act="checkout">Continuar al pago</button>`;
+}
+function oslotSheet(id){
+  const sl=S.slots.find(x=>x.id===id); const others=S.students.filter(s=>!sl.list.includes(s.id));
+  return head(`${sl.dow} ${sl.d}, ${sl.time}`,`${sl.list.length} de ${sl.cap} lugares ocupados`)+
+  `<div class="list">${sl.list.map(sid=>{const s=stu(sid);return `<div class="li"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1"><b>${esc(s.name)}</b><div class="tiny muted">${available(s)} clases libres</div></div><span class="chip ${payState(s).k}">${payState(s).t}</span><button class="close" data-act="rmFromSlot" data-slot="${id}" data-s="${sid}" aria-label="Sacar a ${esc(s.name)}">${ic('x',16)}</button></div>`}).join('')||'<div class="li muted">Todavía no se anotó nadie.</div>'}</div>
+  ${sl.list.length<sl.cap?`<div class="row mt14" style="gap:8px"><select class="input" id="add-stu" style="flex:1" aria-label="Elegir alumna"><option value="">Anotar a una alumna…</option>${others.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><button class="btn" data-act="addToSlot" data-slot="${id}">Anotar</button></div>`:''}
+  <div class="row between mt18 panel" style="padding:14px 18px"><span>Lugares en esta clase</span><div class="stepper"><button data-act="capAdj" data-slot="${id}" data-d="-1" aria-label="Un lugar menos">−</button><b>${sl.cap}</b><button data-act="capAdj" data-slot="${id}" data-d="1" aria-label="Un lugar más">+</button></div></div>`;
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click',e=>{
+  const el=e.target.closest('[data-act]'); if(!el) return;
+  const fn=A[el.dataset.act]; if(fn){ if(el.dataset.act!=='scrim') e.preventDefault(); fn(el,e); }
+});
+document.addEventListener('submit',e=>{
+  e.preventDefault(); const f=e.target.dataset.form;
+  if(f==='login'){ S.view=S.loginRole==='alumna'?'alumna':'pauli'; S.tab='inicio'; S.otab='hoy'; window.scrollTo(0,0); render(false); return; }
+  if(f==='encargo'){ S.encargos.unshift({id:'en'+Date.now(),who:S.view==='tienda'?(document.getElementById('en-name').value+' (sin cuenta)'):me().name,what:document.getElementById('en-what').value,when:document.getElementById('en-when').value,status:'Nuevo'}); openSheet(successSheet('Pedido enviado','Pauli te responde con el presupuesto en la app y por WhatsApp.')); return; }
+  if(f==='libre'){ openSheet(successSheet('Le avisamos a Pauli','Te contesta con los horarios libres que tenga.')); return; }
+  if(f==='trial'){ openSheet(successSheet('¡Listo!','Pauli te escribe por WhatsApp para confirmar tu clase de prueba.')); return; }
+  if(f==='aviso'){ S.avisos.unshift({text:document.getElementById('av').value,date:'Recién'}); closeSheet(); toast('Aviso enviado. Las alumnas lo ven en la campanita'); return; }
+  if(f==='quote'){ const en=S.encargos.find(x=>x.id===e.target.dataset.e); en.status='Presupuestado'; closeSheet(); toast('Presupuesto enviado a '+en.who.split(' ')[0]); return; }
+  if(f==='product'){ const n=document.getElementById('np-n').value, p=parseInt(document.getElementById('np-p').value.replace(/\D/g,''))||0, c=document.getElementById('np-c').value, u=document.getElementById('np-u').checked;
+    S.products.unshift({id:'pr'+Date.now(),name:n,cat:c,price:p,unique:u,available:true,stock:u?1:5,art:c==='joyitas'?'aros':'cuenco',bg:C.lila,fg:C.bordo,desc:'Nueva en la tienda.',img:sheetCtx.newImg||null}); closeSheet(); toast('Publicado en la tienda'); return; }
+  if(f==='student'){ const n=document.getElementById('ns-n').value.trim(); const id='n'+Date.now(); S.students.push({id,name:n,short:n.split(' ')[0],phone:document.getElementById('ns-p').value,used:0,total:parseInt(document.getElementById('ns-c').value)||4,paidMonth:false,extras:[],pending:null,pieces:[],history:[],attended:{},av:C.rosa}); closeSheet(); toast(n+' ya es parte de Hipatia'); return; }
+});
+document.addEventListener('input',e=>{
+  if(e.target.dataset.guest){ sheetCtx[e.target.dataset.guest==='name'?'gname':'gphone']=e.target.value; return; }
+  if(e.target.dataset.input==='aluQuery'){ S.aluQuery=e.target.value; const pos=e.target.selectionStart; render(); const i=document.querySelector('[data-input="aluQuery"]'); i.focus(); i.setSelectionRange(pos,pos); }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.stage){ const s=stu(t.dataset.s); const p=s.pieces.find(x=>x.id===t.dataset.stage); p.stage=+t.value; sheetHTML=stuSheet(s.id); render(); toast(`${p.name}: ${STAGES[p.stage].toLowerCase()}`); }
+  if(t.dataset.file==='receipt' && t.files[0]){ const f=t.files[0]; sheetCtx.file = f.type.startsWith('image/')? URL.createObjectURL(f) : null; if(!sheetCtx.file) sheetCtx.file='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120"><rect width="200" height="120" fill="#EEE9F3"/><text x="100" y="66" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#5A4573">PDF adjunto</text></svg>'); sheetHTML=paySheet(sheetCtx); render(); }
+  if(t.dataset.file==='pimg' && t.files[0]){ const pr=S.products.find(x=>x.id===t.dataset.p); resizeImg(t.files[0]).then(d=>{ pr.img=d; render(); toast('Foto actualizada. Ya se ve en la tienda'); }).catch(()=>toast('No pudimos leer esa imagen. Probá con otra foto')); }
+  if(t.dataset.file==='newprod' && t.files[0]){ resizeImg(t.files[0]).then(d=>{ sheetCtx.newImg=d; const dr=document.getElementById('np-drop'); dr.classList.add('has'); dr.innerHTML=`<img src="${d}" alt="Foto del producto"><span class="small">Tocá para cambiarla</span>`; }); }
+  if(t.dataset.file==='encargo' && t.files[0]){ const d=document.getElementById('en-drop'); d.classList.add('has'); d.innerHTML=`<img src="${URL.createObjectURL(t.files[0])}" alt="Tu referencia"><span class="small">Foto cargada</span>`; }
+});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&sheetHTML!==null) closeSheet(); });
+
+/* deep links: #alumna or #pauli */
+const h=location.hash.replace('#','');
+if(h==='alumna'||h==='pauli'||h==='tienda'){ S.view=h; }
+render(false);
+</script>
+<script>
+if('serviceWorker' in navigator){ window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
+</script>
+</body>
+</html>
