@@ -79,6 +79,18 @@ p{margin:0}
 .chip.warn{background:var(--naranja-2);color:#9A4417}
 .chip.rev{background:var(--lila-2);color:#5A4573}
 .chip.bad{background:#FADBD8;color:var(--bordo)}
+.chip.pause{background:#EEE8E6;color:#6B5551}
+.rules-link{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;color:var(--ink-2);margin-top:10px;text-decoration:underline;text-underline-offset:3px}
+.ledger-item{display:flex;align-items:center;gap:8px;font-size:15px;padding:3px 0}
+.ledger-item .lbl{flex:1;min-width:0}
+.tlink{font-size:13.5px;font-weight:600;color:var(--bordo);text-decoration:underline;text-underline-offset:3px;padding:4px 2px}
+.check{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1.5px solid var(--line);cursor:pointer}
+.check:last-child{border-bottom:0}
+.check input{width:22px;height:22px;accent-color:var(--bordo);flex:none}
+.reason-grid{display:flex;flex-wrap:wrap;gap:8px}
+.reason-grid button{padding:10px 14px;border-radius:99px;border:1.5px solid var(--line);background:#fff;font-weight:600;font-size:15px}
+.reason-grid button.on{border-color:var(--bordo);background:var(--rosa-2);color:var(--bordo)}
+.aviso-cierre{background:var(--naranja-2);border-color:transparent}
 
 /* ---------- login ---------- */
 .login{min-height:calc(100vh - 40px);display:grid;place-items:center;padding:28px 18px;background:
@@ -326,6 +338,9 @@ const I = {
   truck:'<path d="M2.5 6h11v10h-11zM13.5 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/>',
   chev:'<path d="m9 6 6 6-6 6"/>',
   fire:'<path d="M12 21c4 0 7-2.7 7-6.5 0-3.4-2.4-5.6-4-8.5-.8 2-1.8 3-3 3.4C12 6.5 10.5 4.5 9 3c0 3.5-4 6-4 11.5C5 18.3 8 21 12 21z"/>',
+  info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8v.01"/>',
+  pause:'<rect x="6" y="5" width="4" height="14" rx="1.5"/><rect x="14" y="5" width="4" height="14" rx="1.5"/>',
+  lock:'<rect x="5" y="11" width="14" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>',
   logout:'<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10"/>'
 };
 const ic = (n,s=22,w=1.9) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${I[n]}</svg>`;
@@ -373,7 +388,8 @@ function seed(){
     S('belen','Belén Vera',2,true),
     S('anto','Antonella Funes',2,true),
     S('delfi','Delfina Quiroga',0,false),
-    S('abril','Abril Molina',2,true)
+    S('abril','Abril Molina',2,true,{pauseReq:'2026-12'}),
+    S('lola','Lola Sánchez',0,true,{fixed:{dow:'Jueves',time:'18 a 20 hs'}})
   ];
   st.forEach((s,i)=>{s.av=avc[i%avc.length]; if(!s.pieces.length){const k=i%7;s.pieces=[{id:'p'+s.id,name:['Taza','Maceta','Cuenco','Florero','Fuente','Jarrita','Plato hondo'][k],size:'mediana',included:true,stage:[1,2,3,0,2,1,4][k],art:['taza','cuenco','cuenco','florero','plato','taza','plato'][k],color:[C.naranja,C.oliva,'#C9A0D9',C.bordo,C.chicle,C.oliva,C.naranja][k]}]} if(s.paidMonth&&!s.history.length){s.history=[{date:(2+i%6)+' nov',concept:'Mensualidad de noviembre',amount:45000,method:i%2?'Mercado Pago':'Transferencia'}]}});
   const slot = (id,date,dow,d,time,list,cap=6)=>({id,date,dow,d,mon:'nov',time,cap,list,past:false});
@@ -391,7 +407,30 @@ function seed(){
     slot('s11','2026-11-27','Viernes',27,'10 a 12 hs',['martina']),
     slot('s12','2026-11-28','Sábado',28,'10 a 12 hs',['lucia','valen'])
   ];
-  st.forEach(s=>{ if(!s.fixed){ const sl=slots.find(x=>x.list.includes(s.id)); if(sl) s.fixed={dow:sl.dow,time:sl.time}; } if(s.paidMonth&&!s.paidOn) s.paidOn=(s.history[0]||{}).date; });
+  st.forEach(s=>{
+    if(!s.fixed){ const sl=slots.find(x=>x.list.includes(s.id)); if(sl) s.fixed={dow:sl.dow,time:sl.time}; }
+    const h=s.history[0]||{};
+    s.ledger=[
+      {id:s.id+'-oct',month:'2026-10',kind:'abono',label:'Mensualidad de octubre',amount:42000,status:'pagado',paidOn:'4 oct',method:'Mercado Pago'},
+      {id:s.id+'-nov',month:'2026-11',kind:'abono',label:'Mensualidad de noviembre',amount:45000,status:s.paidMonth?'pagado':'pendiente',paidOn:s.paidMonth?(s.paidOn||h.date):null,method:s.paidMonth?(h.method||'Transferencia'):null},
+      ...s.extras.map(e=>({id:e.id,month:'2026-11',kind:'extra',label:e.label,sub:'Pieza extra '+e.size,amount:e.amount,status:e.paid?'pagado':'pendiente'}))
+    ];
+    if(s.pending) s.pending.items=s.pending.items.map(x=>x==='month'?s.id+'-nov':x);
+    s.recover=[]; s.remind=true;
+    delete s.paidMonth; delete s.extras; delete s.history; delete s.paidOn;
+  });
+  // Deudora: no pagó septiembre, sí octubre, debe noviembre
+  const delfi=st.find(x=>x.id==='delfi');
+  delfi.ledger.unshift({id:'delfi-sep',month:'2026-09',kind:'abono',label:'Mensualidad de septiembre',amount:40000,status:'pendiente'});
+  // En pausa desde octubre, sin deuda
+  const lola=st.find(x=>x.id==='lola');
+  lola.ledger=[{id:'lola-sep',month:'2026-09',kind:'abono',label:'Mensualidad de septiembre',amount:40000,status:'pagado',paidOn:'5 sep',method:'Transferencia'},
+    {id:'lola-oct',month:'2026-10',kind:'abono',label:'Mensualidad de octubre',amount:0,status:'pausa'},
+    {id:'lola-nov',month:'2026-11',kind:'abono',label:'Mensualidad de noviembre',amount:0,status:'pausa'}];
+  lola.pause={from:'2026-10',until:null}; lola.total=4;
+  // Día cerrado
+  const s12=slots.find(x=>x.id==='s12'); s12.closed={reason:'Mantenimiento del horno'};
+  s12.list.forEach(id=>st.find(x=>x.id===id).recover.push({note:'Cierre del sábado 28'})); s12.list=[];
   const workshops = [
     {id:'w1',name:'Tazas con asa',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,taken:5,art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
     {id:'w2',name:'Joyitas de cerámica',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,taken:3,art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
@@ -408,23 +447,23 @@ function seed(){
     {id:'pr8',name:'Colgante corazón',cat:'joyitas',price:7000,unique:false,available:true,stock:10,art:'corazon',bg:'#F6D0E8',fg:C.bordo,desc:'Para colgar en la pared, la ventana o el arbolito.'}
   ];
   return {
-    v:4,
+    v:5, renewed:{},
     view:'login', loginRole:'alumna', tab:'inicio', otab:'hoy', clsSeg:'clases', storeCat:'todo', storeSeg:'productos', aluFilter:'todas', aluQuery:'',
     me:'sofia',
-    settings:{mensualidad:45000,clases:4,chica:2000,mediana:3500,grande:5000,suelta:13000,alias:'hipatia.ceramica',titular:'Paula González',horas:24},
+    settings:{mensualidad:45000,clases:4,chica:2000,mediana:3500,grande:5000,suelta:13000,alias:'hipatia.ceramica',titular:'Paula González',horas:24,pagoHasta:10,recupera:'fin del mes siguiente',rem:{clase:true,pago:true,pieza:true,cierre:true}},
     students:st, slots, workshops, myWorkshops:[],
     products, cart:[],
     orders:[{id:'o1',who:'Rocío Herrera',items:'Aros estrella x2',total:19000,delivery:'Retiro en el taller',method:'Mercado Pago',status:'Nuevo',paid:true},
             {id:'o2',who:'Inés Carranza',items:'Florero rosa x1',total:24000,delivery:'Envío en Córdoba',method:'Transferencia',status:'Preparando',paid:true}],
     encargos:[{id:'en1',who:'Carolina Peralta',what:'Juego de 6 platos playos con borde rojo para un casamiento',when:'Fines de diciembre',status:'Nuevo'}],
     storeReviews:[],
-    avisos:[{text:'El jueves 19 hay hornada. Si tenés piezas secas, dejalas en el estante de la entrada.',date:'Ayer'},{text:'Ya están las fechas de los tallercitos de noviembre. ¡Quedan pocos lugares para tazas!',date:'10 nov'}],
+    avisos:[{kind:'cierre',text:'El sábado 28 el taller está cerrado por mantenimiento del horno. Si tenías clase ese día, ya la tenés para recuperar: elegí otro día desde Clases.',date:'12 nov'},{text:'El jueves 19 hay hornada. Si tenés piezas secas, dejalas en el estante de la entrada.',date:'Ayer'},{text:'Ya están las fechas de los tallercitos de noviembre. ¡Quedan pocos lugares para tazas!',date:'10 nov'}],
     seenAvisos:0
   };
 }
 
 let S;
-try{ S = JSON.parse(localStorage.getItem('hipatia-demo')); if(!S||S.v!==4) S=null; }catch(e){ S=null; }
+try{ S = JSON.parse(localStorage.getItem('hipatia-demo')); if(!S||S.v!==5) S=null; }catch(e){ S=null; }
 if(!S) S = seed();
 S.view = 'login';
 function save(){ try{ localStorage.setItem('hipatia-demo', JSON.stringify(S)); }catch(e){} }
@@ -433,18 +472,48 @@ function save(){ try{ localStorage.setItem('hipatia-demo', JSON.stringify(S)); }
 const stu = id => S.students.find(s=>s.id===id);
 const me = () => stu(S.me);
 const bookedSlots = id => S.slots.filter(sl=>sl.list.includes(id) && sl.id!=='s1');
-const available = s => Math.max(0, s.total - s.used - bookedSlots(s.id).length);
+const available = s => isPaused(s) ? 0 : Math.max(0, s.total - s.used - bookedSlots(s.id).length);
+const CUR='2026-11', NEXT='2026-12';
+const MES={'2026-09':'septiembre','2026-10':'octubre','2026-11':'noviembre','2026-12':'diciembre','2027-01':'enero'};
+const nextMonth = m => ({'2026-09':'2026-10','2026-10':'2026-11','2026-11':'2026-12','2026-12':'2027-01'})[m];
+const cap = t => t.charAt(0).toUpperCase()+t.slice(1);
+const abono = (s,m=CUR) => s.ledger.find(x=>x.kind==='abono'&&x.month===m);
+const paidMonth = s => (abono(s)||{}).status==='pagado';
+const isPaused = (s,m=CUR) => !!(s.pause && m>=s.pause.from && (!s.pause.until || m<s.pause.until));
 function debtItems(s){
-  const items=[];
-  if(!s.paidMonth) items.push({id:'month',label:'Mensualidad de noviembre',sub:`${S.settings.clases} clases + 1 pieza mediana`,amount:S.settings.mensualidad});
-  s.extras.filter(e=>!e.paid).forEach(e=>items.push({id:e.id,label:e.label,sub:`Pieza extra ${e.size}`,amount:e.amount}));
-  return items;
+  return s.ledger.filter(x=>x.status==='pendiente').slice().sort((a,b)=>a.month<b.month?-1:a.month>b.month?1:0)
+    .map(x=>Object.assign({},x,{sub: x.kind==='abono' ? (x.month<CUR?'Vencida':x.month===CUR?`${S.settings.clases} clases + 1 pieza mediana`:`Vence el ${S.settings.pagoHasta} de ${MES[x.month]}`) : (x.sub||'')}));
 }
 const debt = s => debtItems(s).reduce((a,b)=>a+b.amount,0);
+const dueNow = s => debtItems(s).filter(x=>x.month<=CUR).reduce((a,b)=>a+b.amount,0);
+const overdue = s => debtItems(s).some(x=>x.kind==='abono'&&x.month<=CUR);
 function payState(s){
   if(s.pending) return {k:'rev',t:'Revisar comprobante'};
-  const d=debt(s); if(!d) return {k:'ok',t:'Al día'};
-  return {k:s.paidMonth?'warn':'bad',t:'Debe '+fmt(d)};
+  const d=debt(s);
+  if(isPaused(s)&&!d) return {k:'pause',t:'En pausa'};
+  if(!d) return {k:'ok',t:'Al día'};
+  const old=debtItems(s).find(x=>x.month<CUR);
+  if(old) return {k:'bad',t:`Debe ${fmt(d)} desde ${MES[old.month].slice(0,3)}`};
+  return overdue(s)?{k:'bad',t:'Debe '+fmt(d)}:{k:'warn',t:'Por pagar '+fmt(d)};
+}
+function itemStatusText(i){
+  if(i.status==='pagado') return `pagado el ${i.paidOn}`;
+  if(i.status==='pausa') return 'en pausa, sin cargo';
+  if(i.status==='condonado') return 'sin cargo';
+  return i.month<CUR?'vencido':i.month===CUR?'pendiente':`vence el ${S.settings.pagoHasta}`;
+}
+function monthState(items, m){
+  if(items.every(i=>i.status==='pausa')) return {k:'pause',t:'En pausa'};
+  if(items.some(i=>i.status==='pendiente'&&i.kind==='abono'&&m<=CUR)) return {k:'bad',t:'Debe'};
+  if(items.some(i=>i.status==='pendiente')) return {k:'warn',t:'Por pagar'};
+  return {k:'ok',t:'Pagado'};
+}
+const ledgerMonths = s => [...new Set(s.ledger.map(x=>x.month))].sort().reverse();
+function renewPreview(){
+  const charge=S.students.filter(s=>!isPaused(s,NEXT)&&!abono(s,NEXT));
+  const pause=S.students.filter(s=>isPaused(s,NEXT));
+  const debtors=charge.filter(s=>debtItems(s).some(x=>x.month<CUR));
+  return {charge,pause,debtors,total:charge.length*S.settings.mensualidad};
 }
 const cartCount = () => S.cart.reduce((a,c)=>a+c.qty,0);
 const cartTotal = () => S.cart.reduce((a,c)=>a+c.qty*S.products.find(p=>p.id===c.pid).price,0);
@@ -537,6 +606,7 @@ function alumnaView(){
 }
 
 function classMeter(s, big=true){
+  if(isPaused(s)) return `<p class="small muted">Este mes no tiene clases ni se le cobra.</p>`;
   const b = bookedSlots(s.id).length, out=[];
   for(let i=0;i<s.total;i++){
     if(i<s.used) out.push(star(C.bordo,{size:52}));
@@ -550,15 +620,16 @@ function classMeter(s, big=true){
 const longDate = d => d ? d.replace(' nov',' de noviembre') : '';
 function planLine(s){
   const parts=[];
+  if(isPaused(s)) return `<p class="tiny muted mt6">En pausa desde ${MES[s.pause.from]}${s.pause.until?`, vuelve en ${MES[s.pause.until]}`:''}. No se cobra mientras está en pausa.</p>`;
   if(s.fixed) parts.push(`Turno fijo: ${s.fixed.dow.toLowerCase()} de ${s.fixed.time}.`);
-  parts.push(s.paidMonth&&s.paidOn ? `Abono habilitado el ${longDate(s.paidOn)}.` : 'Abono de noviembre sin pagar.');
+  const a=abono(s); parts.push(a&&a.status==='pagado' ? `Abono habilitado el ${longDate(a.paidOn)}.` : 'Abono de noviembre sin pagar.');
   return `<p class="tiny muted mt6">${parts.join(' ')}</p>`;
 }
 function classDates(s){
   const rows=[], taken=s.taken||[];
   for(let i=0;i<s.used;i++){ const t=taken[i]; rows.push({c:C.bordo,label:t?t.label:'Clase tomada',note:t&&t.note?t.note:'Tomada'}); }
   bookedSlots(s.id).sort((a,b)=>a.d-b.d).forEach(sl=>{ const moved=s.fixed&&sl.dow!==s.fixed.dow; rows.push({c:C.naranja,label:`${sl.dow} ${sl.d}`,note:moved?'Cambiada de día':'Reservada'}); });
-  for(let i=0;i<available(s);i++) rows.push({c:null,label:'Clase para reprogramar',note:'Elegí otro día'});
+  for(let i=0;i<available(s);i++){ const r=(s.recover||[])[i]; rows.push({c:null,label:'Clase para recuperar',note:r?r.note:'Elegí otro día'}); }
   return `<div class="cdates">${rows.map(r=>`<div class="cd"><i style="${r.c?'background:'+r.c:'border:1.5px dashed '+C.bordo}"></i><span>${r.label}</span><span class="tiny muted">${r.note}</span></div>`).join('')}</div>`;
 }
 
@@ -569,15 +640,16 @@ function aInicio(s){
   let money;
   if(s.pending) money = `<div class="panel lila"><div class="row between"><h3>Tu pago</h3><span class="chip rev">En revisión</span></div>
       <p class="mt10">Recibimos tu comprobante por <b>${fmt(s.pending.amount)}</b>. Pauli lo revisa y te avisamos acá.</p></div>`;
-  else if(d) money = `<div class="panel"><div class="row between"><h3>Para abonar</h3><span class="chip ${s.paidMonth?'warn':'bad'}">${s.paidMonth?'Piezas extra':'Mensualidad'}</span></div>
+  else if(d) money = `<div class="panel"><div class="row between"><h3>Para abonar</h3><span class="chip ${overdue(s)?'bad':'warn'}">${overdue(s)?'Vencido':'Por pagar'}</span></div>
       <div class="money mt10">${fmt(d)}</div>
       <div class="mt14">${items.map(it=>`<div class="line-item"><div><div>${esc(it.label)}</div><div class="tiny muted">${it.sub}</div></div><span class="num">${fmt(it.amount)}</span></div>`).join('')}</div>
       <button class="btn block mt14" data-act="pay">Pagar ${fmt(d)}</button></div>`;
-  else money = `<div class="panel oliva"><div class="row"><span>${star(C.oliva,{size:34})}</span><div><h3>Estás al día</h3><p class="small muted">La próxima mensualidad vence el 10 de diciembre.</p></div></div></div>`;
+  else money = `<div class="panel oliva"><div class="row"><span>${star(C.oliva,{size:34})}</span><div><h3>Estás al día</h3><p class="small muted">${isPaused(s)?'Estás en pausa: no se te cobra ni se suma deuda.':`La próxima mensualidad vence el ${S.settings.pagoHasta} de diciembre.`}</p></div></div></div>`;
 
   return `<section class="mt10">
     <h1>Hola, ${esc(s.short)}.</h1>
     <p class="muted mt6" style="font-size:18px">${next?`Tu próxima clase es el <b style="color:${C.ink}">${next.dow.toLowerCase()} ${next.d}</b>, de ${next.time}.`:'No tenés clases reservadas todavía.'}</p>
+    ${next&&s.remind&&S.settings.rem.clase?'<p class="tiny muted mt6">Te lo recordamos por WhatsApp el día anterior.</p>':''}
   </section>
   <section class="section"><div class="panel rosa">
     <div class="row between"><h3>Tus clases de noviembre</h3><span class="tiny muted">${s.total} por mes</span></div>
@@ -594,9 +666,15 @@ function aInicio(s){
   </section>
   <section class="section">
     <div class="sec-head"><h2>Avisos de Pauli</h2></div>
-    <div class="panel" style="padding:18px"><p>${esc(S.avisos[0].text)}</p><p class="tiny muted mt6">${S.avisos[0].date}</p></div>
+    ${avisoCard(S.avisos[0])}
   </section>`;
 }
+
+function avisoCard(a){
+  if(a.kind==='cierre') return `<div class="panel aviso-cierre" style="padding:16px 18px"><div class="row" style="gap:8px;margin-bottom:6px">${star(C.naranja,{size:20})}<b>Taller cerrado</b></div><p>${esc(a.text)}</p><p class="tiny muted mt6">${a.date}</p></div>`;
+  return `<div class="panel" style="padding:16px 18px"><p>${esc(a.text)}</p><p class="tiny muted mt6">${a.date}</p></div>`;
+}
+function rulesLink(){ return `<button class="rules-link" data-act="rules">${ic('info',15)} Reglas del taller</button>`; }
 
 function pieceRow(p){
   return `<div class="piece"><div class="art">${art(p.art,C.rosa2,p.color)}</div>
@@ -606,6 +684,7 @@ function pieceRow(p){
 }
 
 function slotRow(sl, action){
+  if(sl.closed) return `<div class="slot" style="opacity:.7"><div class="datebox" style="background:#EEE8E6;color:#6B5551"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.time}</b><div class="tiny muted mt6">Taller cerrado: ${esc(sl.closed.reason.toLowerCase())}</div></div><span class="chip pause">Cerrado</span></div>`;
   const free = sl.cap - sl.list.length;
   const mine = sl.list.includes(S.me);
   return `<div class="slot"><div class="datebox"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div>
@@ -632,7 +711,7 @@ function aClases(s){
   return `<h1 class="mt10">Clases</h1>${seg}
   <section class="section"><div class="panel rosa" style="padding:18px 20px">
     <div class="row between"><b>Te ${available(s)===1?'queda':'quedan'} ${available(s)} ${available(s)===1?'clase':'clases'} para reservar</b><span class="tiny muted">de ${s.total}</span></div>
-    <p class="small muted mt6">Podés cambiar de día hasta ${S.settings.horas} hs antes. Si avisás a tiempo, la clase vuelve a tu cuenta.</p>
+    ${rulesLink()}
   </div></section>
   ${mine.length?`<section class="section"><h2 style="margin-bottom:12px">Tus reservas</h2>${mine.map(sl=>`<div class="slot" style="flex-wrap:wrap"><div class="datebox" style="background:${C.naranja};color:#fff"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.dow} ${sl.d} de noviembre</b><div class="small muted">${sl.time}</div></div>
     <div class="row" style="gap:8px;width:100%"><button class="btn ghost sm" style="flex:1" data-act="reprog" data-slot="${sl.id}">${ic('swap',18)} Cambiar día</button><button class="btn ghost sm" style="flex:1" data-act="cancel" data-slot="${sl.id}">No voy a ir</button></div></div>`).join('')}</section>`:''}
@@ -692,14 +771,16 @@ function aCuenta(s){
   return `<div class="row mt10" style="gap:16px"><div class="avatar" style="width:72px;height:72px;font-size:32px;border-radius:22px;background:${s.av};color:${C.bordo}">${s.short[0]}</div><div><h2>${esc(s.name)}</h2><p class="muted small">Alumna desde marzo</p></div></div>
   <section class="section panel rosa"><div class="row between"><h3>Tu plan</h3><span class="chip ok">Activo</span></div>
     <p class="mt10"><b>Mensualidad ${fmt(S.settings.mensualidad)}</b></p><p class="small muted">${S.settings.clases} clases de 2 horas por mes, materiales y 1 pieza mediana incluida.</p>${planLine(s)}</section>
-  <section class="section"><h2 style="margin-bottom:12px">Tus pagos</h2><div class="list">
-    ${s.pending?`<div class="li"><div style="flex:1"><b>${fmt(s.pending.amount)}</b><div class="tiny muted">${s.pending.date}, ${s.pending.method}</div></div><span class="chip rev">En revisión</span></div>`:''}
-    ${s.history.map(h=>`<div class="li"><div style="flex:1"><b>${esc(h.concept)}</b><div class="tiny muted">${h.date}, ${h.method}</div></div><span class="num">${fmt(h.amount)}</span></div>`).join('')}
-  </div></section>
+  <section class="section"><h2 style="margin-bottom:12px">Tu cuenta</h2><div class="list">
+    ${s.pending?`<div class="li"><div style="flex:1"><b>Pago de ${fmt(s.pending.amount)}</b><div class="tiny muted">${s.pending.date}, ${s.pending.method}</div></div><span class="chip rev">En revisión</span></div>`:''}
+    ${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st=monthState(items,m);return `<div class="li" style="align-items:flex-start"><div style="flex:1;min-width:0"><b>${cap(MES[m])}</b>${items.map(i=>`<div class="tiny muted">${esc(i.kind==='abono'?'Mensualidad':i.label)}${i.status==='pendiente'?' '+fmt(i.amount):''}, ${itemStatusText(i)}</div>`).join('')}</div><span class="chip ${st.k}">${st.t}</span></div>`}).join('')}
+  </div>
+  ${s.pauseReq?`<p class="tiny muted mt10">Pediste pausar ${MES[s.pauseReq]}. Pauli te confirma por acá.</p>`:isPaused(s)?'':`<button class="rules-link" data-act="askPause">${ic('pause',14)} ¿Necesitás pausar un mes?</button>`}
+  </section>
   <section class="section"><h2 style="margin-bottom:12px">Tus datos</h2><div class="list">
     <div class="li"><span class="muted" style="flex:1">Celular</span><b>${s.phone}</b></div>
-    <div class="li"><span class="muted" style="flex:1">Recordatorios</span><span>WhatsApp, 1 día antes</span></div>
-  </div></section>
+    <div class="li"><div style="flex:1"><span>Recordatorios por WhatsApp</span><div class="tiny muted">Clases, pagos y piezas listas</div></div><button class="toggle ${s.remind?'on':''}" data-act="remindToggle" role="switch" aria-checked="${s.remind}" aria-label="Recordatorios por WhatsApp"></button></div>
+  </div>${rulesLink()}</section>
   <section class="section"><button class="btn ghost block" data-act="logout">${ic('logout',20)} Salir</button></section>`;
 }
 
@@ -724,15 +805,17 @@ function ownerTop(title,sub,extra=''){
   return `<div class="owner-top"><div><h1>${title}</h1>${sub?`<p class="muted mt6" style="font-size:18px">${sub}</p>`:''}</div>${extra}</div>`;
 }
 function oHoy(){
-  const paid = S.students.filter(s=>s.paidMonth).length, total=S.students.length;
-  const cobrado = S.students.reduce((a,s)=>a+(s.paidMonth?S.settings.mensualidad:0)+s.extras.filter(e=>e.paid).reduce((x,e)=>x+e.amount,0),0) + S.orders.filter(o=>o.paid).reduce((a,o)=>a+o.total,0);
-  const porCobrar = S.students.reduce((a,s)=>a+debt(s),0);
+  const activeSt = S.students.filter(s=>!isPaused(s));
+  const paid = activeSt.filter(paidMonth).length, total=activeSt.length;
+  const cobrado = S.students.reduce((a,s)=>a+s.ledger.filter(x=>x.status==='pagado'&&x.month===CUR).reduce((y,x)=>y+x.amount,0),0) + S.orders.filter(o=>o.paid).reduce((a,o)=>a+o.total,0);
+  const reqs = S.students.filter(s=>s.pauseReq);
+  const porCobrar = S.students.reduce((a,s)=>a+dueNow(s),0);
   const today = S.slots[0], tomorrow=S.slots[1];
   const ready = S.students.flatMap(s=>s.pieces.filter(p=>p.stage===4).map(p=>({s,p})));
   return ownerTop('Buen día, Pauli.', `${paid} de tus ${total} alumnas ya pagaron noviembre.`, `<button class="btn soft" data-act="aviso">${ic('bell',20)} Mandar un aviso</button>`)+
   `<div class="stats">
     <div class="stat" style="background:${C.bordo};color:#fff"><div class="small" style="opacity:.85">Cobrado en noviembre</div><div class="big">${fmt(cobrado)}</div><div class="tiny" style="opacity:.8;margin-top:4px">Clases, piezas extra y tienda</div></div>
-    <button class="stat" style="background:${C.naranja}22" data-act="otab" data-v="cobros"><div class="small muted">Falta cobrar</div><div class="big" style="color:#9A4417">${fmt(porCobrar)}</div><div class="tiny muted" style="margin-top:4px">${S.students.filter(s=>debt(s)>0&&!s.pending).length} alumnas deben</div></button>
+    <button class="stat" style="background:${C.naranja}22" data-act="otab" data-v="cobros"><div class="small muted">Falta cobrar</div><div class="big" style="color:#9A4417">${fmt(porCobrar)}</div><div class="tiny muted" style="margin-top:4px">${S.students.filter(s=>dueNow(s)>0&&!s.pending).length} alumnas deben</div></button>
     <button class="stat" style="background:${C.lila}88" data-act="otab" data-v="cobros"><div class="small muted">Comprobantes para revisar</div><div class="big" style="color:#5A4573">${pendingReceipts()}</div><div class="tiny muted" style="margin-top:4px">Tocá para aprobarlos</div></button>
   </div>
   <div class="cols">
@@ -744,7 +827,9 @@ function oHoy(){
       <div class="list"><div class="li"><div style="flex:1">${tomorrow.list.map(id=>stu(id).short).join(', ')}</div></div></div>
     </div>
     <div>
-      <div class="sec-head" style="margin-top:8px"><h2>Listas para retirar</h2></div>
+      <div style="margin-top:8px">${renewCard()}</div>
+      ${reqs.length?`<div class="sec-head" style="margin-top:22px"><h2>Pedidos de pausa</h2></div><div class="list">${reqs.map(s=>`<div class="li" style="flex-wrap:wrap"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:150px"><b>${esc(s.name)}</b><div class="tiny muted">Quiere pausar ${MES[s.pauseReq]}${debt(s)?`. Debe ${fmt(debt(s))}`:', sin deuda'}</div></div><button class="btn sm olive" data-act="approvePause" data-s="${s.id}">Aprobar</button><button class="btn ghost sm" data-act="denyPause" data-s="${s.id}">Hablarlo</button></div>`).join('')}</div>`:''}
+      <div class="sec-head" style="margin-top:22px"><h2>Listas para retirar</h2></div>
       <div class="list">${ready.length?ready.map(({s,p})=>`<div class="li"><div class="art" style="width:46px;height:46px;border-radius:12px;overflow:hidden;flex:none">${art(p.art,C.rosa2,p.color)}</div><div style="flex:1"><b>${esc(p.name)}</b><div class="tiny muted">${esc(s.name)}</div></div><button class="btn ghost sm" data-act="delivered" data-s="${s.id}" data-p="${p.id}">Entregada</button></div>`).join(''):'<div class="li muted">No hay piezas esperando.</div>'}</div>
       <div class="sec-head" style="margin-top:22px"><h2>Tienda</h2><button class="link small" data-act="otab" data-v="tienda">Ver pedidos</button></div>
       <div class="list">${S.orders.slice(0,3).map(o=>`<div class="li"><div style="flex:1"><b>${esc(o.who)}</b><div class="tiny muted">${esc(o.items)}</div></div><span class="chip ${o.status==='Nuevo'?'warn':o.status==='Entregado'?'ok':'rev'}">${o.status}</span></div>`).join('')}</div>
@@ -752,8 +837,8 @@ function oHoy(){
   </div>`;
 }
 function oAgenda(){
-  return ownerTop('Agenda','Tocá una clase para ver quién viene, sumar a alguien o marcar asistencia.')+
-  `<div class="stack gap10">${S.slots.map(sl=>{const pct=sl.list.length/sl.cap*100;return `<button class="slot" style="width:100%;text-align:left;margin:0" data-act="oslot" data-slot="${sl.id}">
+  return ownerTop('Agenda','Tocá una clase para ver quién viene, sumar a alguien o marcar asistencia.', `<button class="btn soft" data-act="closeDay">${ic('lock',20)} Cerrar un día</button>`)+
+  `<div class="stack gap10">${S.slots.map(sl=>{const pct=sl.list.length/sl.cap*100; if(sl.closed) return `<button class="slot" style="width:100%;text-align:left;margin:0;opacity:.75" data-act="oslot" data-slot="${sl.id}"><div class="datebox" style="background:#EEE8E6;color:#6B5551"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.dow} ${sl.d}, ${sl.time}</b><div class="tiny muted mt6">Cerrado: ${esc(sl.closed.reason)}. Las alumnas de ese día ya tienen su clase para recuperar.</div></div><span class="chip pause">Cerrado</span></button>`;return `<button class="slot" style="width:100%;text-align:left;margin:0" data-act="oslot" data-slot="${sl.id}">
     <div class="datebox"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div>
     <div style="flex:1"><div class="row between"><b>${sl.dow} ${sl.d}, ${sl.time}</b><span class="small ${pct>=100?'':'muted'}" style="${pct>=100?'color:'+C.bordo+';font-weight:700':''}">${sl.list.length} de ${sl.cap}</span></div>
     <div class="bar mt6"><i style="width:${pct}%;background:${pct>=100?C.bordo:pct>=67?C.naranja:C.oliva}"></i></div>
@@ -766,9 +851,11 @@ function oAlumnas(){
   const q=S.aluQuery.toLowerCase(), f=S.aluFilter;
   let list=S.students.filter(s=>s.name.toLowerCase().includes(q));
   if(f==='deben') list=list.filter(s=>debt(s)>0);
-  if(f==='sin') list=list.filter(s=>available(s)===0);
-  const fl=[['todas','Todas'],['deben','Deben'],['sin','Sin clases']];
-  return ownerTop('Alumnas',`${S.students.length} alumnas activas este mes.`, `<button class="btn" data-act="newStudent">${ic('plus',20)} Nueva alumna</button>`)+
+  if(f==='sin') list=list.filter(s=>available(s)===0&&!isPaused(s));
+  if(f==='pausa') list=list.filter(s=>isPaused(s));
+  const fl=[['todas','Todas'],['deben','Deben'],['pausa','En pausa']];
+  const np=S.students.filter(s=>isPaused(s)).length;
+  return ownerTop('Alumnas',`${S.students.length-np} activas este mes, ${np} en pausa.`, `<button class="btn" data-act="newStudent">${ic('plus',20)} Nueva alumna</button>`)+
   `<div class="row" style="flex-wrap:wrap;gap:10px;margin-bottom:14px"><input class="input" style="max-width:340px;flex:1" placeholder="Buscar por nombre" value="${esc(S.aluQuery)}" data-input="aluQuery" aria-label="Buscar alumna">
    <div class="seg" style="min-width:300px">${fl.map(([k,l])=>`<button class="${f===k?'on':''}" data-act="aluFilter" data-v="${k}">${l}</button>`).join('')}</div></div>
   <div class="list">${list.map(s=>{const ps=payState(s);return `<button class="li" data-act="ostu" data-s="${s.id}"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span>
@@ -780,17 +867,17 @@ function receiptCard(s){
   const p=s.pending;
   return `<div class="receipt"><div class="thumb">${p.file?`<img src="${p.file}" alt="Comprobante de ${esc(s.name)}">`:`${ic('bank',26)}<b style="font-size:15px">${fmt(p.amount)}</b><span>Comprobante de ejemplo</span>`}</div>
     <div style="flex:1"><div class="row between"><b style="font-size:18px">${esc(s.name)}</b><span class="tiny muted">${p.date}</span></div>
-    <div class="money mt6" style="font-size:30px">${fmt(p.amount)}</div><p class="small muted">${p.method}. Paga: ${p.items.map(id=>id==='month'?'mensualidad':s.extras.find(e=>e.id===id)?.label.toLowerCase()).join(', ')}</p>
+    <div class="money mt6" style="font-size:30px">${fmt(p.amount)}</div><p class="small muted">${p.method}. Paga: ${p.items.map(id=>((s.ledger.find(x=>x.id===id)||{}).label||'').toLowerCase()).join(', ')}</p>
     <div class="row mt14" style="gap:8px"><button class="btn sm olive" data-act="approve" data-s="${s.id}">${ic('check',18,2.5)} Aprobar</button><button class="btn ghost sm" data-act="reject" data-s="${s.id}">No llegó</button></div></div></div>`;
 }
 function oCobros(){
-  const pend=S.students.filter(s=>s.pending), deben=S.students.filter(s=>debt(s)>0&&!s.pending), orderRev=S.orders.filter(o=>o.needsReview);
+  const pend=S.students.filter(s=>s.pending), deben=S.students.filter(s=>dueNow(s)>0&&!s.pending), orderRev=S.orders.filter(o=>o.needsReview);
   return ownerTop('Cobros','Comprobantes de transferencia, pagos con Mercado Pago y quién debe.')+
   `<h2 style="margin-bottom:12px">Para revisar ${pend.length+orderRev.length?`<span class="chip rev" style="vertical-align:middle">${pend.length+orderRev.length}</span>`:''}</h2>
   <div class="stack gap10">${pend.map(receiptCard).join('')}${orderRev.map(o=>`<div class="receipt"><div class="thumb">${o.file?`<img src="${o.file}" alt="Comprobante">`:ic('bag',26)}</div><div style="flex:1"><div class="row between"><b style="font-size:18px">${esc(o.who)}</b><span class="tiny muted">Tienda</span></div><div class="money mt6" style="font-size:30px">${fmt(o.total)}</div><p class="small muted">${esc(o.items)}</p><div class="row mt14" style="gap:8px"><button class="btn sm olive" data-act="approveOrder" data-o="${o.id}">${ic('check',18,2.5)} Aprobar</button></div></div></div>`).join('')}
   ${!pend.length&&!orderRev.length?`<div class="panel oliva"><p>No hay comprobantes pendientes. Todo revisado ✶</p></div>`:''}</div>
   <h2 class="mt24" style="margin-bottom:12px">Deben</h2>
-  <div class="list">${deben.map(s=>`<div class="li" style="flex-wrap:wrap"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b><div class="tiny muted">${debtItems(s).map(i=>i.label).join(', ')}</div></div><span class="num">${fmt(debt(s))}</span><button class="btn ghost sm" data-act="remind" data-s="${s.id}">${ic('wa',18)} Recordar</button><button class="btn ghost sm" data-act="cash" data-s="${s.id}">Pagó en efectivo</button></div>`).join('')||'<div class="li muted">Nadie debe nada.</div>'}</div>
+  <div class="list">${deben.map(s=>`<div class="li" style="flex-wrap:wrap"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b><div class="tiny muted">${debtItems(s).map(i=>i.label).join(', ')}</div></div><span class="num">${fmt(debt(s))}</span><button class="btn ghost sm" data-act="remind" data-s="${s.id}">${ic('wa',18)} Recordar</button><button class="btn ghost sm" data-act="regPay" data-s="${s.id}">Registrar pago</button></div>`).join('')||'<div class="li muted">Nadie debe nada.</div>'}</div>
   <p class="small muted mt14">Los pagos con Mercado Pago se acreditan solos y no necesitan revisión.</p>`;
 }
 function oTienda(){
@@ -810,7 +897,9 @@ function oAjustes(){
   `<div class="cols" style="margin-top:0"><div class="panel"><h3>Mensualidad</h3><div class="mt14">${f('mensualidad','Precio por mes')}${f('clases','Clases por mes')}${f('suelta','Clase suelta')}</div><p class="small muted">Incluye 1 pieza mediana por mes.</p></div>
   <div class="panel"><h3>Piezas extra</h3><div class="mt14">${f('chica','Pieza chica')}${f('mediana','Pieza mediana')}${f('grande','Pieza grande')}</div></div>
   <div class="panel"><h3>Cobros por transferencia</h3><div class="mt14"><div class="field"><label for="set-alias">Alias</label><input id="set-alias" class="input" data-set="alias" value="${esc(st.alias)}"></div><div class="field"><label for="set-titular">Titular</label><input id="set-titular" class="input" data-set="titular" value="${esc(st.titular)}"></div></div></div>
-  <div class="panel"><h3>Reprogramar clases</h3><div class="mt14">${f('horas','Hasta cuántas horas antes se puede cambiar')}</div><p class="small muted">Si avisan a tiempo, la clase vuelve a su cuenta.</p></div></div>
+  <div class="panel"><h3>Reglas del taller</h3><p class="small muted mt6">Las alumnas las ven en un link chiquito, sin ocupar lugar.</p><div class="mt14">${f('horas','Cambiar de día hasta cuántas horas antes')}${f('pagoHasta','El abono se paga hasta el día')}<div class="field"><label for="set-recupera">Las clases a recuperar valen hasta</label><select id="set-recupera" class="input" data-set="recupera">${['fin de mes','fin del mes siguiente','2 meses'].map(o=>`<option ${st.recupera===o?'selected':''}>${o}</option>`).join('')}</select></div></div></div>
+  <div class="panel"><h3>Recordatorios automáticos</h3><p class="small muted mt6">Salen solos por WhatsApp. Cada alumna puede apagarlos desde su cuenta.</p>
+    <div class="stack mt14">${[['clase','Clase, el día anterior','Hola Sofi ✶ Mañana tenés clase a las 18 hs. ¿No podés venir? Cambiá el día desde la app.'],['pago',`Pago, los días 5 y ${st.pagoHasta} si no pagó`,`Hola Sofi, te recordamos que el abono de diciembre vence el día ${st.pagoHasta}.`],['pieza','Pieza lista para retirar','Tu cuenco ya salió del horno ✶ Retiralo en tu próxima clase.'],['cierre','Taller cerrado, apenas lo cargás','El sábado 28 el taller está cerrado. Tu clase queda para recuperar.']].map(([k,l,ex])=>`<div class="row" style="gap:12px;padding:10px 0;border-bottom:1.5px solid var(--line);align-items:flex-start"><div style="flex:1"><b class="small">${l}</b><div class="tiny muted mt6">“${ex}”</div></div><button class="toggle ${st.rem[k]?'on':''}" data-act="remToggle" data-k="${k}" role="switch" aria-checked="${st.rem[k]}" aria-label="${l}"></button></div>`).join('')}</div></div></div>
   <button class="btn mt18" data-act="saveSettings">Guardar cambios</button>`;
 }
 
@@ -852,9 +941,11 @@ function stuSheet(id){
   <h3 class="mt18">Sus piezas</h3>
   <div class="stack gap10 mt10">${s.pieces.map(p=>`<div class="piece" style="padding:10px 12px"><div class="art" style="width:52px;height:52px;border-radius:14px">${art(p.art,C.rosa2,p.color)}</div><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="tiny muted">${p.included?'Incluida':'Extra'}, ${p.size}</div></div>
     <select class="input" style="width:auto;min-height:42px" data-stage="${p.id}" data-s="${id}" aria-label="Estado de ${esc(p.name)}">${STAGES.map((t,i)=>`<option value="${i}" ${p.stage===i?'selected':''}>${t}</option>`).join('')}</select></div>`).join('')}</div>
-  <h3 class="mt18">Pagos</h3>
-  <div class="list mt10">${debtItems(s).map(i=>`<div class="li"><div style="flex:1">${esc(i.label)}<div class="tiny muted">${i.sub}</div></div><span class="num">${fmt(i.amount)}</span></div>`).join('')||'<div class="li">Está al día.</div>'}</div>
-  <div class="row mt14" style="gap:8px;flex-wrap:wrap">${debt(s)&&!s.pending?`<button class="btn ghost sm" data-act="remind" data-s="${id}">${ic('wa',18)} Recordarle el pago</button><button class="btn ghost sm" data-act="cash" data-s="${id}">Pagó en efectivo</button>`:''}${s.pending?`<button class="btn sm olive" data-act="approve" data-s="${id}">Aprobar comprobante de ${fmt(s.pending.amount)}</button>`:''}</div>`;
+  <div class="row between mt18"><h3>Cuenta mes a mes</h3>${debt(s)?`<span class="num" style="color:${C.bordo}">Debe ${fmt(debt(s))}</span>`:''}</div>
+  <div class="list mt10">${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st2=monthState(items,m);return `<div class="li" style="flex-direction:column;align-items:stretch;gap:4px"><div class="row between"><b>${cap(MES[m])}</b><span class="chip ${st2.k}">${st2.t}</span></div>
+    ${items.map(i=>`<div class="ledger-item"><span class="lbl">${esc(i.label)} <span class="tiny muted">${itemStatusText(i)}</span></span><span class="num">${i.status==='pendiente'||i.status==='pagado'?fmt(i.amount):'$0'}</span>${i.status==='pendiente'?`${i.kind==='abono'?`<button class="tlink" data-act="itemPause" data-s="${id}" data-i="${i.id}">Pausar</button>`:''}<button class="tlink" data-act="itemForgive" data-s="${id}" data-i="${i.id}">No cobrar</button>`:''}</div>`).join('')}</div>`}).join('')}</div>
+  <p class="tiny muted mt6">Cada mes queda separado: lo viejo no se mezcla con lo nuevo y vos elegís qué cobra cada pago.</p>
+  <div class="row mt14" style="gap:8px;flex-wrap:wrap">${s.pending?`<button class="btn sm olive" data-act="approve" data-s="${id}">Aprobar comprobante de ${fmt(s.pending.amount)}</button>`:''}${debt(s)&&!s.pending?`<button class="btn sm" data-act="regPay" data-s="${id}">Registrar pago</button><button class="btn ghost sm" data-act="remind" data-s="${id}">${ic('wa',18)} Recordarle</button>`:''}${isPaused(s)||(s.pause&&s.pause.from>CUR)?`<button class="btn ghost sm" data-act="resume" data-s="${id}">Retomar en ${MES[NEXT]}</button>`:`<button class="btn ghost sm" data-act="pauseStu" data-s="${id}">${ic('pause',16)} Pausar</button>`}</div>`;
 }
 function remindSheet(id){
   const s=stu(id), msg=`Hola ${s.short}! ¿Cómo estás? Te escribo de Hipatia para recordarte que tenés ${fmt(debt(s))} pendiente (${debtItems(s).map(i=>i.label.toLowerCase()).join(', ')}). Podés pagar desde la app con transferencia o Mercado Pago. ¡Gracias! ✶`;
@@ -880,7 +971,28 @@ const A = {
   cat(el){ S.storeCat=el.dataset.v; render(); },
   storeSeg(el){ S.storeSeg=el.dataset.v; render(); },
   aluFilter(el){ S.aluFilter=el.dataset.v; render(); },
-  avisos(){ S.seenAvisos=S.avisos.length; openSheet(head('Avisos de Pauli')+`<div class="stack gap10">${S.avisos.map(a=>`<div class="panel" style="padding:16px 18px"><p>${esc(a.text)}</p><p class="tiny muted mt6">${a.date}</p></div>`).join('')}</div>`); },
+  avisos(){ S.seenAvisos=S.avisos.length; openSheet(head('Avisos de Pauli')+`<div class="stack gap10">${S.avisos.map(avisoCard).join('')}</div>`); },
+  rules(){ const st=S.settings; openSheet(head('Reglas del taller')+`<div class="stack gap10">${[`Podés cambiar de día hasta ${st.horas} hs antes de tu clase.`,`Si avisás a tiempo, la clase queda para recuperar hasta ${st.recupera}.`,'Si no avisás, la clase se pierde.','Si el taller cierra, tu clase siempre se recupera.',`El abono se paga del 1 al ${st.pagoHasta} de cada mes.`,'¿Necesitás frenar? Pedí una pausa antes del día 1: ese mes no se cobra ni se suma deuda.'].map(t=>`<div class="row" style="gap:10px;align-items:flex-start"><span style="margin-top:3px">${star(C.bordo,{size:14})}</span><p class="small">${t}</p></div>`).join('')}</div><button class="btn ghost block mt24" data-act="close">Entendido</button>`); },
+  remindToggle(){ const s=me(); s.remind=!s.remind; render(); toast(s.remind?'Recordatorios activados':'Recordatorios apagados'); },
+  remToggle(el){ const k=el.dataset.k; S.settings.rem[k]=!S.settings.rem[k]; render(); },
+  askPause(){ openSheet(head('Pausar un mes','Ese mes no se cobra y no se te suma deuda. Pauli lo confirma.')+`<div class="stack gap10">${[NEXT,'2027-01'].map(m=>`<button class="choice" data-act="sendPause" data-m="${m}"><span class="ic" style="background:${C.lila};color:#5A4573">${ic('pause')}</span><span><b>Pausar ${MES[m]}</b><br><span class="small muted">Retomás cuando quieras, en tu mismo turno si hay lugar</span></span></button>`).join('')}</div>`); },
+  sendPause(el){ const s=me(); s.pauseReq=el.dataset.m; openSheet(successSheet('Le avisamos a Pauli',`Te confirma la pausa de ${MES[el.dataset.m]} por acá y por WhatsApp.`)); },
+  approvePause(el){ const s=stu(el.dataset.s), m=s.pauseReq; s.pause={from:m,until:nextMonth(m)}; s.pauseReq=null; const a=abono(s,m); if(a&&a.status==='pendiente'){a.status='pausa';} render(); toast(`${s.short} queda en pausa en ${MES[m]}. Ese mes no se cobra`); },
+  denyPause(el){ const s=stu(el.dataset.s); s.pauseReq=null; render(); toast(`Le escribimos a ${s.short} para hablarlo`); },
+  pauseStu(el){ const s=stu(el.dataset.s); openSheet(head(`Pausar a ${esc(s.short)}`,'Mientras esté en pausa no se generan abonos ni se le suma deuda. Si debe algo de antes, eso queda como está.')+`<div class="stack gap10">
+      <button class="choice" data-act="doPause" data-s="${s.id}" data-from="${NEXT}"><span class="ic" style="background:${C.lila};color:#5A4573">${ic('pause')}</span><span><b>Desde ${MES[NEXT]}</b><br><span class="small muted">Termina noviembre normal</span></span></button>
+      <button class="choice" data-act="doPause" data-s="${s.id}" data-from="${CUR}"><span class="ic" style="background:${C.lila};color:#5A4573">${ic('pause')}</span><span><b>Desde este mes</b><br><span class="small muted">${paidMonth(s)?'Noviembre ya está pagado y queda así':'No se le cobra noviembre'}. Se liberan sus lugares del mes</span></span></button></div>`); },
+  doPause(el){ const s=stu(el.dataset.s), from=el.dataset.from; s.pause={from,until:null}; if(from===CUR){ const a=abono(s); if(a&&a.status==='pendiente') a.status='pausa'; S.slots.forEach(sl=>{ if(sl.id!=='s1') sl.list=sl.list.filter(i=>i!==s.id); }); } closeSheet(); toast(`${s.short} quedó en pausa desde ${MES[from]}`); },
+  resume(el){ const s=stu(el.dataset.s); if(s.pause && s.pause.from>CUR){ s.pause=null; } else { s.pause.until=NEXT; } sheetHTML=stuSheet(s.id); render(); toast(`${s.short} retoma en ${MES[NEXT]}. Se le genera el abono con la renovación`); },
+  itemPause(el){ const s=stu(el.dataset.s), i=s.ledger.find(x=>x.id===el.dataset.i); i.status='pausa'; sheetHTML=stuSheet(s.id); render(); toast(`${cap(MES[i.month])} queda en pausa, sin cargo`); },
+  itemForgive(el){ const s=stu(el.dataset.s), i=s.ledger.find(x=>x.id===el.dataset.i); i.status='condonado'; sheetHTML=stuSheet(s.id); render(); toast(`No se le cobra: ${i.label.toLowerCase()}`); },
+  regPay(el){ const s=stu(el.dataset.s); sheetCtx={s:s.id,sel:debtItems(s).map(i=>i.id),method:'Efectivo'}; openSheet(regPaySheet(),sheetCtx); },
+  confirmReg(){ const s=stu(sheetCtx.s); const items=debtItems(s).filter(i=>sheetCtx.sel.includes(i.id)); const tot=items.reduce((a,b)=>a+b.amount,0); payItems(s,items.map(i=>i.id),sheetCtx.method); closeSheet(); toast(`Registraste ${fmt(tot)} de ${s.short}. ${debt(s)?'Sigue debiendo '+fmt(debt(s)):'Quedó al día'}`); },
+  renewDetail(){ openSheet(renewSheet()); },
+  renewNow(){ const pv=renewPreview(); pv.charge.forEach(s=>s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:S.settings.mensualidad,status:'pendiente'})); pv.pause.forEach(s=>{ if(!abono(s,NEXT)) s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:0,status:'pausa'}); }); S.renewed[NEXT]={count:pv.charge.length,total:pv.total}; closeSheet(); toast(`Diciembre generado: ${pv.charge.length} abonos`); },
+  closeDay(){ sheetCtx={}; openSheet(closeDaySheet(),{}); },
+  reason(el){ sheetCtx.reason=el.dataset.v; sheetHTML=closeDaySheet(); render(); },
+  confirmClose(){ const sl=S.slots.find(x=>x.id===sheetCtx.slot); if(!sl){ toast('Elegí qué día cerrás'); return; } const reason=sheetCtx.reason||'Feriado'; const n=sl.list.length; sl.list.forEach(id=>stu(id).recover.push({note:`Cierre del ${sl.dow.toLowerCase()} ${sl.d}`})); sl.list=[]; sl.closed={reason}; S.avisos.unshift({kind:'cierre',text:`El ${sl.dow.toLowerCase()} ${sl.d} el taller está cerrado por ${reason.toLowerCase()}. Si tenías clase ese día, ya la tenés para recuperar: elegí otro día desde Clases.`,date:'Recién'}); closeSheet(); toast(`Listo. Avisamos a ${n} alumnas y su clase queda para recuperar`); },
   trial(){ openSheet(head('Clase de prueba','Vení a conocer el taller. Dura 2 horas y te llevás tu pieza.')+`<form data-form="trial"><div class="field"><label for="tr-n">Tu nombre</label><input id="tr-n" class="input" required></div><div class="field"><label for="tr-p">Tu celular</label><input id="tr-p" class="input" inputmode="tel" required></div><div class="field"><label for="tr-d">¿Qué día te queda mejor?</label><select id="tr-d" class="input">${S.slots.filter(s=>s.list.length<s.cap&&s.id!=='s1').map(s=>`<option>${s.dow} ${s.d}, ${s.time}</option>`).join('')}</select></div><button class="btn block mt10" type="submit">Pedir mi lugar</button></form>`); },
 
   /* alumna: clases */
@@ -891,16 +1003,16 @@ const A = {
       <p class="mt14">Usás 1 de tus clases. Te ${available(s)-1===1?'queda':'quedan'} <b>${available(s)-1}</b> después de esta.</p><p class="small muted mt6">Te mandamos un recordatorio por WhatsApp el día anterior.</p>
       <button class="btn block mt18" data-act="confirmBook" data-slot="${sl.id}">Sí, reservar</button>`);
   },
-  confirmBook(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list.push(S.me); openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d} de ${sl.time}. Traé ropa que se pueda manchar.`)); },
+  confirmBook(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list.push(S.me); if(me().recover&&me().recover.length) me().recover.shift(); openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d} de ${sl.time}. Traé ropa que se pueda manchar.`)); },
   buySuelta(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sheetCtx={kind:'suelta',slot:sl.id,amount:S.settings.suelta,title:'Clase suelta'}; openSheet(paySheet(sheetCtx),sheetCtx); },
   reprog(el){
     const from=S.slots.find(x=>x.id===el.dataset.slot);
-    const opts=S.slots.filter(x=>x.id!=='s1'&&x.id!==from.id&&x.list.length<x.cap&&!x.list.includes(S.me));
+    const opts=S.slots.filter(x=>x.id!=='s1'&&!x.closed&&x.id!==from.id&&x.list.length<x.cap&&!x.list.includes(S.me));
     openSheet(head('Cambiar de día',`Ahora estás en el ${from.dow.toLowerCase()} ${from.d}, ${from.time}. Elegí otro horario:`)+opts.map(sl=>slotRow(sl,'moveTo').replace('data-act="moveTo"',`data-act="moveTo" data-from="${from.id}"`)).join(''),{});
   },
   moveTo(el){ const from=S.slots.find(x=>x.id===el.dataset.from), to=S.slots.find(x=>x.id===el.dataset.slot); from.list=from.list.filter(i=>i!==S.me); to.list.push(S.me); closeSheet(); toast(`Listo, te pasamos al ${to.dow.toLowerCase()} ${to.d}`); },
   cancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); openSheet(head('¿No podés ir?')+`<p>Avisaste con más de ${S.settings.horas} hs, así que la clase del <b>${sl.dow.toLowerCase()} ${sl.d}</b> vuelve a tu cuenta para que la uses otro día.</p><p class="small muted mt10">Se libera tu lugar para otra alumna.</p><button class="btn block mt18" data-act="confirmCancel" data-slot="${sl.id}">Sí, liberar mi lugar</button><button class="btn ghost block mt10" data-act="close">Mejor no</button>`); },
-  confirmCancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list=sl.list.filter(i=>i!==S.me); closeSheet(); toast('Liberaste tu lugar. La clase volvió a tu cuenta'); },
+  confirmCancel(el){ const sl=S.slots.find(x=>x.id===el.dataset.slot); sl.list=sl.list.filter(i=>i!==S.me); me().recover.push({note:`Avisaste que no ibas el ${sl.dow.toLowerCase()} ${sl.d}`}); closeSheet(); toast('Liberaste tu lugar. La clase volvió a tu cuenta'); },
   wait(){ toast('Te avisamos por WhatsApp si se libera un lugar'); },
   libre(){ openSheet(head('Pedir horario libre','Contale a Pauli cuándo podés venir.')+`<form data-form="libre"><div class="field"><label for="lb">Días y horarios que te quedan</label><textarea id="lb" class="input" placeholder="Por ejemplo: martes a la tarde o jueves a la mañana" required></textarea></div><button class="btn block" type="submit">Enviar a Pauli</button></form>`); },
   wsBook(el){ const w=S.workshops.find(x=>x.id===el.dataset.w); sheetCtx={kind:'taller',w:w.id,amount:w.price,title:'Tallercito: '+w.name}; openSheet(paySheet(sheetCtx),sheetCtx); },
@@ -938,12 +1050,12 @@ const A = {
   extraSize(el){ sheetCtx.extraSize=el.dataset.v; sheetHTML=stuSheet(el.closest('.sheet').querySelector('[data-act="clsAdj"]').dataset.s); render(); setTimeout(()=>document.getElementById('extra-name')?.focus(),30); },
   addExtra(el){ const s=stu(el.dataset.s), size=sheetCtx.extraSize, name=(document.getElementById('extra-name').value||'Pieza extra').trim(); const id='e'+Date.now();
     const nm = name.charAt(0).toUpperCase()+name.slice(1);
-    s.extras.push({id,label:nm,size,amount:S.settings[size],paid:false});
+    s.ledger.push({id,month:CUR,kind:'extra',label:nm,sub:'Pieza extra '+size,amount:S.settings[size],status:'pendiente'});
     s.pieces.push({id:'p'+id,name:nm,size,extra:id,stage:0,art:size==='chica'?'plato':size==='grande'?'florero':'cuenco',color:[C.naranja,C.oliva,'#C9A0D9'][s.pieces.length%3]});
     sheetCtx.extraSize=null; sheetHTML=stuSheet(s.id); render(); toast(`Sumaste ${nm} (+${fmt(S.settings[size])}) a ${s.short}`); },
   remind(el){ openSheet(remindSheet(el.dataset.s)); },
   copyMsg(){ const t=document.getElementById('wa-msg').textContent; try{navigator.clipboard.writeText(t).then(()=>toast('Mensaje copiado'),()=>toast('Seleccioná el texto para copiarlo'));}catch(e){} },
-  cash(el){ const s=stu(el.dataset.s); const amt=debt(s); payItems(s,debtItems(s).map(i=>i.id),'Efectivo',amt); closeSheet(); toast(`Registraste ${fmt(amt)} en efectivo de ${s.short}`); },
+  cash(el){ A.regPay(el); },
   approve(el){ const s=stu(el.dataset.s); const p=s.pending; payItems(s,p.items,p.method,p.amount); s.pending=null; closeSheet(); toast(`Aprobado. ${s.short} ya lo ve en su app`); },
   reject(el){ const s=stu(el.dataset.s); s.pending=null; render(); toast(`Le avisamos a ${s.short} que el pago no llegó`); },
   approveOrder(el){ const o=S.orders.find(x=>x.id===el.dataset.o); o.needsReview=false; o.paid=true; render(); toast('Pedido aprobado'); },
@@ -953,12 +1065,11 @@ const A = {
   newProduct(){ openSheet(head('Nuevo producto')+`<form data-form="product"><div class="field"><label for="np-n">Nombre</label><input id="np-n" class="input" required></div><div class="field"><label for="np-p">Precio</label><input id="np-p" class="input" inputmode="numeric" required></div><div class="field"><label for="np-c">Categoría</label><select id="np-c" class="input"><option value="casa">En casa</option><option value="joyitas">Joyitas</option></select></div><label class="row small" style="gap:10px;margin:6px 0 14px"><input type="checkbox" id="np-u" style="width:22px;height:22px"> Es pieza única</label><div class="field"><label>Foto</label><label class="drop" id="np-drop" for="np-f">${ic('upload',26)}<span class="small">Sacá una foto o elegila de tu galería</span></label><input id="np-f" type="file" accept="image/*" hidden data-file="newprod"></div><button class="btn block" type="submit">Publicar en la tienda</button></form>`); },
   newStudent(){ openSheet(head('Nueva alumna','Le llega un WhatsApp con su acceso a la app.')+`<form data-form="student"><div class="field"><label for="ns-n">Nombre y apellido</label><input id="ns-n" class="input" required></div><div class="field"><label for="ns-p">Celular</label><input id="ns-p" class="input" inputmode="tel" required></div><div class="field"><label for="ns-c">Clases por mes</label><input id="ns-c" class="input" inputmode="numeric" value="${S.settings.clases}"></div><button class="btn block" type="submit">Sumar alumna</button></form>`); },
   aviso(){ openSheet(head('Mandar un aviso','Les llega a todas en la app y por WhatsApp.')+`<form data-form="aviso"><div class="field"><label for="av">Mensaje</label><textarea id="av" class="input" required placeholder="Ej: Este sábado no hay clase por feriado"></textarea></div><button class="btn block" type="submit">Mandar a las ${S.students.length} alumnas</button></form>`); },
-  saveSettings(){ document.querySelectorAll('[data-set]').forEach(i=>{const k=i.dataset.set; S.settings[k]= (k==='alias'||k==='titular')? i.value : (parseInt(i.value.replace(/\D/g,''))||0);}); S.students.forEach(s=>{ if(!s.customTotal) s.total=S.settings.clases; }); render(); toast('Guardado. Las alumnas ya ven los precios nuevos'); }
+  saveSettings(){ document.querySelectorAll('[data-set]').forEach(i=>{const k=i.dataset.set; S.settings[k]= (k==='alias'||k==='titular'||k==='recupera')? i.value : (parseInt(i.value.replace(/\D/g,''))||0);}); S.students.forEach(s=>{ if(!s.customTotal) s.total=S.settings.clases; }); render(); toast('Guardado. Las alumnas ya ven los precios nuevos'); }
 };
 
-function payItems(s, ids, method, amount){
-  ids.forEach(id=>{ if(id==='month'){ s.paidMonth=true; s.paidOn='13 nov'; } else { const e=s.extras.find(x=>x.id===id); if(e) e.paid=true; } });
-  s.history.unshift({date:'13 nov',concept: ids.length===1&&ids[0]==='month'?'Mensualidad de noviembre': ids.includes('month')?'Mensualidad y piezas extra':'Piezas extra',amount,method});
+function payItems(s, ids, method){
+  ids.forEach(id=>{ const it=s.ledger.find(x=>x.id===id); if(it&&it.status==='pendiente'){ it.status='pagado'; it.paidOn='13 nov'; it.method=method; } });
 }
 
 function finishPay(method, file){
@@ -977,7 +1088,7 @@ function finishPay(method, file){
     openSheet(successSheet('¡Tenés tu lugar!',`${w.name}, ${w.date.toLowerCase()}. ${method==='Mercado Pago'?'Pago confirmado.':'Pauli confirma tu transferencia en breve.'}`));
   } else if(ctx.kind==='suelta'){
     const sl=S.slots.find(x=>x.id===ctx.slot); s.total++; s.customTotal=true; sl.list.push(S.me);
-    s.history.unshift({date:'13 nov',concept:'Clase suelta',amount:ctx.amount,method});
+    s.ledger.push({id:'su'+Date.now(),month:CUR,kind:'suelta',label:'Clase suelta',amount:ctx.amount,status:'pagado',paidOn:'13 nov',method});
     openSheet(successSheet('¡Te esperamos!',`${sl.dow} ${sl.d}, ${sl.time}.`));
   }
 }
@@ -995,8 +1106,44 @@ function cartSheet(){
     <div class="field"><label for="g-phone">WhatsApp</label><input id="g-phone" class="input" inputmode="tel" data-guest="phone" value="${esc(sheetCtx.gphone||'')}"></div>`:''}
   <button class="btn block mt18" data-act="checkout">Continuar al pago</button>`;
 }
+function renewCard(){
+  const done=S.renewed[NEXT];
+  if(done) return `<div class="panel oliva"><div class="row" style="gap:10px">${star(C.oliva,{size:26})}<h3>Diciembre ya está generado</h3></div><p class="small mt6">${done.count} abonos por ${fmt(done.total)}. Vencen el ${S.settings.pagoHasta} de diciembre y el recordatorio sale solo.</p></div>`;
+  const pv=renewPreview();
+  return `<div class="panel"><div class="row between"><h3>Renovación de diciembre</h3><span class="chip rev">1 dic</span></div>
+    <p class="small mt10">El 1 de diciembre se generan solos los abonos de <b>${pv.charge.length} alumnas</b> por <b>${fmt(pv.total)}</b>. ${pv.pause.length} en pausa no se cobran.${pv.debtors.length?` ${pv.debtors.length} arrastra${pv.debtors.length>1?'n':''} deuda vieja, que queda aparte.`:''}</p>
+    <div class="row mt14" style="gap:8px"><button class="btn ghost sm" data-act="renewDetail">Revisar</button><button class="btn sm" data-act="renewNow">Generar ahora</button></div>
+    <p class="tiny muted mt10">En la app real se hace sola. Acá lo podés probar.</p></div>`;
+}
+function renewSheet(){
+  const pv=renewPreview(), reqs=S.students.filter(s=>s.pauseReq);
+  const names=l=>l.map(s=>esc(s.short)).join(', ')||'Nadie';
+  return head('Renovación de diciembre',`Se generan ${pv.charge.length} abonos de ${fmt(S.settings.mensualidad)}, que vencen el ${S.settings.pagoHasta} de diciembre.`)+
+  `<div class="panel" style="padding:16px 18px"><b>Se les cobra diciembre (${pv.charge.length})</b><p class="small muted mt6">${names(pv.charge)}</p></div>
+   <div class="panel lila mt10" style="padding:16px 18px"><b>En pausa, no se cobra (${pv.pause.length})</b><p class="small mt6">${pv.pause.map(s=>`${esc(s.short)} (desde ${MES[s.pause.from]})`).join(', ')||'Nadie'}</p></div>
+   ${pv.debtors.length?`<div class="panel mt10" style="padding:16px 18px;background:#FADBD8;border-color:transparent"><b>Tienen deuda de meses anteriores</b>${pv.debtors.map(s=>`<p class="small mt6">${esc(s.name)}: ${debtItems(s).filter(x=>x.month<CUR).map(x=>MES[x.month]).join(', ')}. Diciembre se suma aparte, no se mezcla.</p>`).join('')}</div>`:''}
+   ${reqs.length?`<div class="panel mt10" style="padding:16px 18px"><b>Pidieron pausa</b>${reqs.map(s=>`<div class="row between mt10"><span class="small">${esc(s.short)} quiere pausar ${MES[s.pauseReq]}</span><button class="btn sm olive" data-act="approvePause" data-s="${s.id}">Aprobar</button></div>`).join('')}<p class="tiny muted mt6">Si no la aprobás antes del 1, se le cobra normal.</p></div>`:''}
+   <button class="btn block mt18" data-act="renewNow">Generar diciembre</button>`;
+}
+function regPaySheet(){
+  const s=stu(sheetCtx.s), items=debtItems(s), sel=sheetCtx.sel;
+  const tot=items.filter(i=>sel.includes(i.id)).reduce((a,b)=>a+b.amount,0);
+  return head(`Registrar pago de ${esc(s.short)}`,'Marcá qué está pagando. Lo que no marques sigue pendiente, en su mes.')+
+  `<div class="list">${items.map(i=>`<label class="check"><input type="checkbox" data-regsel="${i.id}" ${sel.includes(i.id)?'checked':''}><div style="flex:1"><b>${esc(i.label)}</b><div class="tiny muted">${i.sub}</div></div><span class="num">${fmt(i.amount)}</span></label>`).join('')}</div>
+  <div class="field mt14"><label for="reg-m">Cómo pagó</label><select id="reg-m" class="input" data-regmethod>${['Efectivo','Transferencia','Mercado Pago'].map(m=>`<option ${sheetCtx.method===m?'selected':''}>${m}</option>`).join('')}</select></div>
+  <button class="btn block mt10" data-act="confirmReg" ${tot?'':'disabled'}>Registrar ${fmt(tot)}</button>`;
+}
+function closeDaySheet(){
+  const open=S.slots.filter(x=>x.id!=='s1'&&!x.closed), sl=S.slots.find(x=>x.id===sheetCtx.slot), r=sheetCtx.reason||'Feriado';
+  return head('Cerrar un día','Las alumnas de ese día reciben un aviso y la clase les queda para recuperar.')+
+  `<div class="field"><label for="cd-slot">¿Qué día?</label><select id="cd-slot" class="input" data-closeslot><option value="">Elegí un día…</option>${open.map(x=>`<option value="${x.id}" ${sheetCtx.slot===x.id?'selected':''}>${x.dow} ${x.d}, ${x.time} (${x.list.length} alumnas)</option>`).join('')}</select></div>
+  <div class="field"><label>¿Por qué?</label><div class="reason-grid">${['Feriado','Remodelación','Mantenimiento del horno','Viaje'].map(x=>`<button class="${r===x?'on':''}" data-act="reason" data-v="${x}">${x}</button>`).join('')}</div></div>
+  ${sl?`<div class="panel rosa mt10" style="padding:14px 16px"><p class="small">Se avisa a <b>${sl.list.length} alumnas</b>${sl.list.length?`: ${sl.list.map(id=>stu(id).short).join(', ')}`:''}. Cada una ve el cierre en sus avisos y le queda una clase para recuperar.</p></div>`:''}
+  <button class="btn block mt18" data-act="confirmClose" ${sl?'':'disabled'}>Cerrar y avisar</button>`;
+}
 function oslotSheet(id){
-  const sl=S.slots.find(x=>x.id===id); const others=S.students.filter(s=>!sl.list.includes(s.id));
+  const sl=S.slots.find(x=>x.id===id);
+  if(sl.closed) return head(`${sl.dow} ${sl.d}, ${sl.time}`,'Taller cerrado')+`<div class="panel aviso-cierre"><p>Cerrado por ${esc(sl.closed.reason.toLowerCase())}. Las alumnas de ese día ya recibieron el aviso y tienen la clase para recuperar.</p></div>`; const others=S.students.filter(s=>!sl.list.includes(s.id));
   return head(`${sl.dow} ${sl.d}, ${sl.time}`,`${sl.list.length} de ${sl.cap} lugares ocupados`)+
   `<div class="list">${sl.list.map(sid=>{const s=stu(sid);return `<div class="li"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1"><b>${esc(s.name)}</b><div class="tiny muted">${available(s)} clases libres</div></div><span class="chip ${payState(s).k}">${payState(s).t}</span><button class="close" data-act="rmFromSlot" data-slot="${id}" data-s="${sid}" aria-label="Sacar a ${esc(s.name)}">${ic('x',16)}</button></div>`}).join('')||'<div class="li muted">Todavía no se anotó nadie.</div>'}</div>
   ${sl.list.length<sl.cap?`<div class="row mt14" style="gap:8px"><select class="input" id="add-stu" style="flex:1" aria-label="Elegir alumna"><option value="">Anotar a una alumna…</option>${others.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('')}</select><button class="btn" data-act="addToSlot" data-slot="${id}">Anotar</button></div>`:''}
@@ -1018,7 +1165,7 @@ document.addEventListener('submit',e=>{
   if(f==='quote'){ const en=S.encargos.find(x=>x.id===e.target.dataset.e); en.status='Presupuestado'; closeSheet(); toast('Presupuesto enviado a '+en.who.split(' ')[0]); return; }
   if(f==='product'){ const n=document.getElementById('np-n').value, p=parseInt(document.getElementById('np-p').value.replace(/\D/g,''))||0, c=document.getElementById('np-c').value, u=document.getElementById('np-u').checked;
     S.products.unshift({id:'pr'+Date.now(),name:n,cat:c,price:p,unique:u,available:true,stock:u?1:5,art:c==='joyitas'?'aros':'cuenco',bg:C.lila,fg:C.bordo,desc:'Nueva en la tienda.',img:sheetCtx.newImg||null}); closeSheet(); toast('Publicado en la tienda'); return; }
-  if(f==='student'){ const n=document.getElementById('ns-n').value.trim(); const id='n'+Date.now(); S.students.push({id,name:n,short:n.split(' ')[0],phone:document.getElementById('ns-p').value,used:0,total:parseInt(document.getElementById('ns-c').value)||4,paidMonth:false,extras:[],pending:null,pieces:[],history:[],attended:{},av:C.rosa}); closeSheet(); toast(n+' ya es parte de Hipatia'); return; }
+  if(f==='student'){ const n=document.getElementById('ns-n').value.trim(); const id='n'+Date.now(); S.students.push({id,name:n,short:n.split(' ')[0],phone:document.getElementById('ns-p').value,used:0,total:parseInt(document.getElementById('ns-c').value)||4,ledger:[{id:id+'-nov',month:CUR,kind:'abono',label:'Mensualidad de noviembre',amount:S.settings.mensualidad,status:'pendiente'}],recover:[],remind:true,pending:null,pieces:[],attended:{},av:C.rosa}); closeSheet(); toast(n+' ya es parte de Hipatia'); return; }
 });
 document.addEventListener('input',e=>{
   if(e.target.dataset.guest){ sheetCtx[e.target.dataset.guest==='name'?'gname':'gphone']=e.target.value; return; }
@@ -1026,6 +1173,9 @@ document.addEventListener('input',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.dataset.regsel!==undefined){ const id=t.dataset.regsel; sheetCtx.sel = t.checked ? [...sheetCtx.sel,id] : sheetCtx.sel.filter(x=>x!==id); sheetHTML=regPaySheet(); render(); return; }
+  if(t.dataset.regmethod!==undefined){ sheetCtx.method=t.value; return; }
+  if(t.dataset.closeslot!==undefined){ sheetCtx.slot=t.value; sheetHTML=closeDaySheet(); render(); return; }
   if(t.dataset.stage){ const s=stu(t.dataset.s); const p=s.pieces.find(x=>x.id===t.dataset.stage); p.stage=+t.value; sheetHTML=stuSheet(s.id); render(); toast(`${p.name}: ${STAGES[p.stage].toLowerCase()}`); }
   if(t.dataset.file==='receipt' && t.files[0]){ const f=t.files[0]; sheetCtx.file = f.type.startsWith('image/')? URL.createObjectURL(f) : null; if(!sheetCtx.file) sheetCtx.file='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120"><rect width="200" height="120" fill="#EEE9F3"/><text x="100" y="66" text-anchor="middle" font-family="sans-serif" font-size="16" fill="#5A4573">PDF adjunto</text></svg>'); sheetHTML=paySheet(sheetCtx); render(); }
   if(t.dataset.file==='pimg' && t.files[0]){ const pr=S.products.find(x=>x.id===t.dataset.p); resizeImg(t.files[0]).then(d=>{ pr.img=d; render(); toast('Foto actualizada. Ya se ve en la tienda'); }).catch(()=>toast('No pudimos leer esa imagen. Probá con otra foto')); }
