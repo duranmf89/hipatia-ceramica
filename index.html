@@ -257,6 +257,8 @@ button.li:hover{background:var(--rosa-2)}
 .attrow .who{flex:1;min-width:0}
 .attrow .who .chip{margin-top:6px}
 .attbtns{display:flex;gap:6px;flex:none}
+.alu-chip{min-width:132px;justify-content:center}
+@media (max-width:600px){.alu-search{max-width:none!important;flex-basis:100%!important}.alu-seg{min-width:0!important;width:100%}.alu-stars{display:none}.alu-chip{min-width:0;white-space:normal;text-align:center}}
 .receipt{background:#fff;border:1.5px solid var(--line);border-radius:var(--r-xl);padding:18px;display:flex;gap:16px;align-items:stretch}
 .receipt .thumb{width:110px;flex:none;border-radius:14px;background:var(--lila-2);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:10px;text-align:center;font-size:12px;color:#5A4573;overflow:hidden}
 .receipt .thumb img{width:100%;height:100%;object-fit:cover;border-radius:10px}
@@ -266,6 +268,9 @@ button.li:hover{background:var(--rosa-2)}
 .extra-grid button{padding:12px 6px;border-radius:16px;background:#fff;border:1.5px solid var(--line);font-weight:600;font-size:15px;line-height:1.2}
 .extra-grid button:hover,.extra-grid button.on{border-color:var(--bordo);background:var(--rosa-2)}
 .owner-bottom{display:none}
+.owner-topbar{display:none}
+.owner-topbar .iconbtn.on{background:var(--rosa);color:var(--bordo)}
+.logout-mobile{display:none}
 select.input{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23962019' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 14px center;padding-right:38px}
 
 @media (max-width:900px){
@@ -273,6 +278,8 @@ select.input{appearance:none;background:#fff url("data:image/svg+xml,%3Csvg xmln
   .side{display:none}
   .owner-main{padding:18px 18px 120px}
   .owner-bottom{display:flex}
+  .owner-topbar{display:flex;padding-top:0}
+  .logout-mobile{display:flex}
   .cols{grid-template-columns:1fr}
 }
 @media (max-width:600px){
@@ -512,6 +519,9 @@ function venceRecupero(dateIso){
   const fin=new Date(d.getFullYear(), d.getMonth()+(r==='fin de mes'?1:2), 0, 12);
   return fin.toISOString().slice(0,10);
 }
+/* Libera las reservas futuras y sin asistencia marcada de una alumna en un mes ('2026-11'). Devuelve cuántas liberó. */
+function liberarReservas(s, m){ let n=0; S.slots.forEach(sl=>{ if(sl.date.slice(0,7)===m && sl.list.includes(s.id) && !isPast(sl) && !(s.attended||{})[sl.id]){ sl.list=sl.list.filter(i=>i!==s.id); if(s.recUsed) delete s.recUsed[sl.id]; n++; } }); return n; }
+const reservasDelMes = (s,m) => bookedSlots(s.id).filter(sl=>sl.date.slice(0,7)===m && !isPast(sl));
 const recuperoNota = r => r.vence ? `${r.note}. Vence el ${fechaLarga(r.vence)}` : r.note;
 function debtItems(s){
   return s.ledger.filter(x=>x.status==='pendiente').slice().sort((a,b)=>a.month<b.month?-1:a.month>b.month?1:0)
@@ -699,7 +709,7 @@ function aInicio(s){
     ${available(s)?`<button class="btn block mt18" data-act="tab" data-v="clases">Reservar ${available(s)===1?'mi clase':'mis clases'}</button>`:`<p class="small mt14">Ya organizaste todas tus clases del mes ✶</p>`}
     ${next?`<div class="row mt10" style="gap:8px"><button class="btn ghost sm" style="flex:1;background:#fff" data-act="reprog" data-slot="${next.id}">${ic('swap',18)} Cambiar día</button><button class="btn ghost sm" style="flex:1;background:#fff" data-act="cancel" data-slot="${next.id}">No voy a ir</button></div>`:''}
   </div></section>
-  <section class="section">${money}</section>
+  <section class="section">${s.notice&&s.notice.kind==='rechazo'?`<div class="panel" style="background:#FADBD8;border-color:transparent;margin-bottom:12px"><h3>Pauli no encontró tu transferencia</h3><p class="mt6">No le llegó el pago de <b>${fmt(s.notice.amount)}</b> que mandaste. Revisá el comprobante o escribile, y volvé a pagar cuando lo tengas.</p><button class="btn ghost sm mt14" style="background:#fff" data-act="dismissNotice">Entendido</button></div>`:''}${money}</section>
   <section class="section">
     <div class="sec-head"><h2>Tus piezas</h2><button class="link small" data-act="tab" data-v="piezas">Ver todas</button></div>
     ${ready.length?`<div class="panel oliva" style="padding:16px 18px;margin-bottom:10px"><p><b>${esc(ready[0].name)}</b> ya salió del horno. Retirala en tu próxima clase.</p></div>`:''}
@@ -839,7 +849,7 @@ function ownerView(){
       ${nav.map(([k,l,i,b])=>`<button class="navbtn ${S.otab===k?'on':''}" data-act="otab" data-v="${k}">${ic(i)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`).join('')}
       <div style="margin-top:auto"><button class="navbtn" data-act="logout">${ic('logout')}<span>Salir</span></button></div>
     </aside>
-    <main class="owner-main">${body}</main>
+    <main class="owner-main"><header class="topbar owner-topbar"><div class="brand">${logo(42)}<span>Hipatia</span></div><button class="iconbtn ${S.otab==='ajustes'?'on':''}" data-act="otab" data-v="ajustes" aria-label="Precios y ajustes">${ic('cog')}</button></header>${body}</main>
   </div>
   <nav class="bottomnav owner-bottom" aria-label="Secciones">${nav.slice(0,5).map(([k,l,i,b])=>`<button class="${S.otab===k?'on':''}" data-act="otab" data-v="${k}">${ic(i)}<span>${l}</span>${b?`<span class="badge">${b}</span>`:''}</button>`).join('')}</nav>`;
 }
@@ -898,12 +908,12 @@ function oAlumnas(){
   const fl=[['todas','Todas'],['deben','Deben'],['pausa','En pausa']];
   const np=S.students.filter(s=>isPaused(s)).length;
   return ownerTop('Alumnas',`${S.students.length-np} activas este mes, ${np} en pausa.`, `<button class="btn" data-act="newStudent">${ic('plus',20)} Nueva alumna</button>`)+
-  `<div class="row" style="flex-wrap:wrap;gap:10px;margin-bottom:14px"><input class="input" style="max-width:340px;flex:1" placeholder="Buscar por nombre" value="${esc(S.aluQuery)}" data-input="aluQuery" aria-label="Buscar alumna">
-   <div class="seg" style="min-width:300px">${fl.map(([k,l])=>`<button class="${f===k?'on':''}" data-act="aluFilter" data-v="${k}">${l}</button>`).join('')}</div></div>
+  `<div class="row" style="flex-wrap:wrap;gap:10px;margin-bottom:14px"><input class="input alu-search" style="max-width:340px;flex:1" placeholder="Buscar por nombre" value="${esc(S.aluQuery)}" data-input="aluQuery" aria-label="Buscar alumna">
+   <div class="seg alu-seg" style="min-width:300px">${fl.map(([k,l])=>`<button class="${f===k?'on':''}" data-act="aluFilter" data-v="${k}">${l}</button>`).join('')}</div></div>
   <div class="list">${list.map(s=>{const ps=payState(s);return `<button class="li" data-act="ostu" data-s="${s.id}"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span>
     <div style="flex:1;min-width:0"><b>${esc(s.name)}</b><div class="tiny muted">${s.used} tomadas, ${bookedSlots(s.id).length} reservadas, ${available(s)} libres</div></div>
-    <div class="row" style="gap:3px" aria-hidden="true">${Array.from({length:s.total},(_,i)=>star(i<s.used?C.bordo:i<s.used+bookedSlots(s.id).length?C.naranja:'#fff',{size:18,stroke:C.bordo,sw:5})).join('')}</div>
-    <span class="chip ${ps.k}" style="min-width:132px;justify-content:center">${ps.t}</span>${ic('chev',18)}</button>`}).join('')||'<div class="li muted">No hay alumnas con ese filtro.</div>'}</div>`;
+    <div class="row alu-stars" style="gap:3px" aria-hidden="true">${Array.from({length:s.total},(_,i)=>star(i<s.used?C.bordo:i<s.used+bookedSlots(s.id).length?C.naranja:'#fff',{size:18,stroke:C.bordo,sw:5})).join('')}</div>
+    <span class="chip alu-chip ${ps.k}">${ps.t}</span>${ic('chev',18)}</button>`}).join('')||'<div class="li muted">No hay alumnas con ese filtro.</div>'}</div>`;
 }
 function receiptCard(s){
   const p=s.pending;
@@ -942,7 +952,8 @@ function oAjustes(){
   <div class="panel"><h3>Reglas del taller</h3><p class="small muted mt6">Las alumnas las ven en un link chiquito, sin ocupar lugar.</p><div class="mt14">${f('horas','Cambiar de día hasta cuántas horas antes')}${f('pagoHasta','El abono se paga hasta el día')}<div class="field"><label for="set-recupera">Las clases a recuperar valen hasta</label><select id="set-recupera" class="input" data-set="recupera">${['fin de mes','fin del mes siguiente','2 meses'].map(o=>`<option ${st.recupera===o?'selected':''}>${o}</option>`).join('')}</select></div></div></div>
   <div class="panel"><h3>Recordatorios automáticos</h3><p class="small muted mt6">Salen solos por WhatsApp. Cada alumna puede apagarlos desde su cuenta.</p>
     <div class="stack mt14">${[['clase','Clase, el día anterior','Hola Sofi ✶ Mañana tenés clase a las 18 hs. ¿No podés venir? Cambiá el día desde la app.'],['pago',`Pago, los días 5 y ${st.pagoHasta} si no pagó`,`Hola Sofi, te recordamos que el abono de diciembre vence el día ${st.pagoHasta}.`],['pieza','Pieza lista para retirar','Tu cuenco ya salió del horno ✶ Retiralo en tu próxima clase.'],['cierre','Taller cerrado, apenas lo cargás','El sábado 28 el taller está cerrado. Tu clase queda para recuperar.']].map(([k,l,ex])=>`<div class="row" style="gap:12px;padding:10px 0;border-bottom:1.5px solid var(--line);align-items:flex-start"><div style="flex:1"><b class="small">${l}</b><div class="tiny muted mt6">“${ex}”</div></div><button class="toggle ${st.rem[k]?'on':''}" data-act="remToggle" data-k="${k}" role="switch" aria-checked="${st.rem[k]}" aria-label="${l}"></button></div>`).join('')}</div></div></div>
-  <button class="btn mt18" data-act="saveSettings">Guardar cambios</button>`;
+  <button class="btn mt18" data-act="saveSettings">Guardar cambios</button>
+  <button class="btn ghost block mt24 logout-mobile" data-act="logout">${ic('logout',20)} Salir</button>`;
 }
 
 /* =========================================================
@@ -985,7 +996,7 @@ function stuSheet(id){
     <select class="input" style="width:auto;min-height:42px" data-stage="${p.id}" data-s="${id}" aria-label="Estado de ${esc(p.name)}">${STAGES.map((t,i)=>`<option value="${i}" ${p.stage===i?'selected':''}>${t}</option>`).join('')}</select></div>`).join('')}</div>
   <div class="row between mt18"><h3>Cuenta mes a mes</h3>${debt(s)?`<span class="num" style="color:${C.bordo}">Debe ${fmt(debt(s))}</span>`:''}</div>
   <div class="list mt10">${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st2=monthState(items,m,s);return `<div class="li" style="flex-direction:column;align-items:stretch;gap:4px"><div class="row between"><b>${cap(MES[m])}</b><span class="chip ${st2.k}">${st2.t}</span></div>
-    ${items.map(i=>`<div class="ledger-item"><span class="lbl">${esc(i.label)} <span class="tiny muted">${itemStatusText(i,s)}</span></span><span class="num">${i.status==='pendiente'||i.status==='pagado'?fmt(i.amount):'$0'}</span>${i.status==='pendiente'?`${i.kind==='abono'?`<button class="tlink" data-act="itemPause" data-s="${id}" data-i="${i.id}">Pausar</button>`:''}<button class="tlink" data-act="itemForgive" data-s="${id}" data-i="${i.id}">No cobrar</button>`:''}</div>`).join('')}</div>`}).join('')}</div>
+    ${items.map(i=>`<div class="ledger-item"><span class="lbl">${esc(i.label)} <span class="tiny muted">${itemStatusText(i,s)}</span></span><span class="num">${i.status==='pendiente'||i.status==='pagado'?fmt(i.amount):'$0'}</span>${i.status==='pendiente'?`${i.kind==='abono'&&i.month>=CUR?`<button class="tlink" data-act="itemPause" data-s="${id}" data-i="${i.id}">Pausar</button>`:''}<button class="tlink" data-act="itemForgive" data-s="${id}" data-i="${i.id}">No cobrar</button>`:''}</div>`).join('')}</div>`}).join('')}</div>
   <p class="tiny muted mt6">Cada mes queda separado: lo viejo no se mezcla con lo nuevo y vos elegís qué cobra cada pago.</p>
   <div class="row mt14" style="gap:8px;flex-wrap:wrap">${s.pending?`<button class="btn sm olive" data-act="approve" data-s="${id}">Aprobar comprobante de ${fmt(s.pending.amount)}</button>`:''}${debt(s)&&!s.pending?`<button class="btn sm" data-act="regPay" data-s="${id}">Registrar pago</button><button class="btn ghost sm" data-act="remind" data-s="${id}">${ic('wa',18)} Recordarle</button>`:''}${isPaused(s)||(s.pause&&s.pause.from>CUR)?`<button class="btn ghost sm" data-act="resume" data-s="${id}">Retomar en ${MES[NEXT]}</button>`:`<button class="btn ghost sm" data-act="pauseStu" data-s="${id}">${ic('pause',16)} Pausar</button>`}</div>`;
 }
@@ -1024,9 +1035,11 @@ const A = {
   pauseStu(el){ const s=stu(el.dataset.s); openSheet(head(`Pausar a ${esc(s.short)}`,'Mientras esté en pausa no se generan abonos ni se le suma deuda. Si debe algo de antes, eso queda como está.')+`<div class="stack gap10">
       <button class="choice" data-act="doPause" data-s="${s.id}" data-from="${NEXT}"><span class="ic" style="background:${C.lila};color:#5A4573">${ic('pause')}</span><span><b>Desde ${MES[NEXT]}</b><br><span class="small muted">Termina noviembre normal</span></span></button>
       <button class="choice" data-act="doPause" data-s="${s.id}" data-from="${CUR}"><span class="ic" style="background:${C.lila};color:#5A4573">${ic('pause')}</span><span><b>Desde este mes</b><br><span class="small muted">${paidMonth(s)?'Noviembre ya está pagado y queda así':'No se le cobra noviembre'}. Se liberan sus lugares del mes</span></span></button></div>`); },
-  doPause(el){ const s=stu(el.dataset.s), from=el.dataset.from; s.pause={from,until:null}; if(from===CUR){ const a=abono(s); if(a&&a.status==='pendiente') a.status='pausa'; S.slots.forEach(sl=>{ if(sl.id!=='s1') sl.list=sl.list.filter(i=>i!==s.id); }); } closeSheet(); toast(`${s.short} quedó en pausa desde ${MES[from]}`); },
+  doPause(el){ const s=stu(el.dataset.s), from=el.dataset.from; s.pause={from,until:null}; if(from===CUR){ const a=abono(s); if(a&&a.status==='pendiente') a.status='pausa'; liberarReservas(s,CUR); } closeSheet(); toast(`${s.short} quedó en pausa desde ${MES[from]}`); },
   resume(el){ const s=stu(el.dataset.s); if(s.pause && s.pause.from>CUR){ s.pause=null; } else { s.pause.until=NEXT; } sheetHTML=stuSheet(s.id); render(); toast(`${s.short} retoma en ${MES[NEXT]}. Se le genera el abono con la renovación`); },
-  itemPause(el){ const s=stu(el.dataset.s), i=s.ledger.find(x=>x.id===el.dataset.i); i.status='pausa'; sheetHTML=stuSheet(s.id); render(); toast(`${cap(MES[i.month])} queda en pausa, sin cargo`); },
+  itemPause(el){ const s=stu(el.dataset.s), i=s.ledger.find(x=>x.id===el.dataset.i), m=i.month, n=reservasDelMes(s,m).length;
+    sheetHTML=head(`Pausar ${MES[m]} a ${esc(s.short)}`,'Es lo mismo que pausarla ese mes.')+`<p>No se le cobra ${MES[m]}${n?` y se liberan sus <b>${n} ${n===1?'clase reservada':'clases reservadas'}</b> de ese mes para otras alumnas`:''}.</p><p class="small muted mt10">Retoma sola en ${MES[nextMonth(m)]}. Si debe algo de antes, eso queda como está.</p><button class="btn block mt18" data-act="doPauseMonth" data-s="${s.id}" data-m="${m}">Pausar ${MES[m]}</button><button class="btn ghost block mt10" data-act="ostu" data-s="${s.id}">Volver</button>`; render(); },
+  doPauseMonth(el){ const s=stu(el.dataset.s), m=el.dataset.m; s.pause={from:m,until:nextMonth(m)}; const a=abono(s,m); if(a&&a.status==='pendiente') a.status='pausa'; const n=liberarReservas(s,m); sheetHTML=stuSheet(s.id); render(); toast(`${s.short} queda en pausa en ${MES[m]}${n?`. Se liberaron ${n} lugares`:''}`); },
   itemForgive(el){ const s=stu(el.dataset.s), i=s.ledger.find(x=>x.id===el.dataset.i); i.status='condonado'; sheetHTML=stuSheet(s.id); render(); toast(`No se le cobra: ${i.label.toLowerCase()}`); },
   regPay(el){ const s=stu(el.dataset.s); sheetCtx={s:s.id,sel:debtItems(s).map(i=>i.id),method:'Efectivo'}; openSheet(regPaySheet(),sheetCtx); },
   confirmReg(){ const s=stu(sheetCtx.s); const items=debtItems(s).filter(i=>sheetCtx.sel.includes(i.id)); const tot=items.reduce((a,b)=>a+b.amount,0); payItems(s,items.map(i=>i.id),sheetCtx.method); closeSheet(); toast(`Registraste ${fmt(tot)} de ${s.short}. ${debt(s)?'Sigue debiendo '+fmt(debt(s)):'Quedó al día'}`); },
@@ -1113,8 +1126,9 @@ const A = {
   remind(el){ openSheet(remindSheet(el.dataset.s)); },
   copyMsg(){ const t=document.getElementById('wa-msg').textContent; try{navigator.clipboard.writeText(t).then(()=>toast('Mensaje copiado'),()=>toast('Seleccioná el texto para copiarlo'));}catch(e){} },
   cash(el){ A.regPay(el); },
-  approve(el){ const s=stu(el.dataset.s); const p=s.pending; payItems(s,p.items,p.method,p.amount); s.pending=null; closeSheet(); toast(`Aprobado. ${s.short} ya lo ve en su app`); },
-  reject(el){ const s=stu(el.dataset.s); s.pending=null; render(); toast(`Le avisamos a ${s.short} que el pago no llegó`); },
+  dismissNotice(){ me().notice=null; render(); },
+  approve(el){ const s=stu(el.dataset.s); const p=s.pending; s.notice=null; payItems(s,p.items,p.method,p.amount); s.pending=null; closeSheet(); toast(`Aprobado. ${s.short} ya lo ve en su app`); },
+  reject(el){ const s=stu(el.dataset.s); s.notice={kind:'rechazo',amount:s.pending.amount}; s.pending=null; render(); toast(`Le avisamos a ${s.short} que el pago no llegó`); },
   approveOrder(el){ const o=S.orders.find(x=>x.id===el.dataset.o); o.needsReview=false; o.paid=true; render(); toast('Pedido aprobado'); },
   ptoggle(el){ const p=S.products.find(x=>x.id===el.dataset.p); p.available=!p.available; render(); },
   ostatus(el){ const o=S.orders.find(x=>x.id===el.dataset.o); const seq=['Nuevo','Preparando','Entregado']; o.status=seq[(seq.indexOf(o.status)+1)%3]; render(); },
@@ -1133,8 +1147,8 @@ function finishPay(method, file){
   const ctx=sheetCtx, s=me();
   if(ctx.kind==='deuda'){
     const ids=debtItems(s).map(i=>i.id);
-    if(method==='Mercado Pago'){ payItems(s,ids,method,ctx.amount); openSheet(successSheet('¡Pago aprobado!',`Pagaste ${fmt(ctx.amount)} con Mercado Pago. Ya estás al día.`)); }
-    else { s.pending={amount:ctx.amount,method,date:'13 nov',items:ids,file}; openSheet(successSheet('Comprobante enviado','Pauli lo revisa y te avisamos acá cuando esté confirmado.')); }
+    if(method==='Mercado Pago'){ s.notice=null; payItems(s,ids,method,ctx.amount); openSheet(successSheet('¡Pago aprobado!',`Pagaste ${fmt(ctx.amount)} con Mercado Pago. Ya estás al día.`)); }
+    else { s.notice=null; s.pending={amount:ctx.amount,method,date:'13 nov',items:ids,file}; openSheet(successSheet('Comprobante enviado','Pauli lo revisa y te avisamos acá cuando esté confirmado.')); }
   } else if(ctx.kind==='orden'){
     const items=S.cart.map(c=>{const p=S.products.find(x=>x.id===c.pid); if(p.unique){p.available=false;} else {p.stock-=c.qty; if(p.stock<=0)p.available=false;} return `${p.name} x${c.qty}`}).join(', ');
     S.orders.unshift({id:'o'+Date.now(),who:S.view==='tienda'?S.guest.name+' (sin cuenta)':s.name,items,total:ctx.amount,delivery:ctx.delivery==='envio'?'Envío en Córdoba':'Retiro en el taller',method,status:'Nuevo',paid:method==='Mercado Pago',needsReview:method!=='Mercado Pago',file});
