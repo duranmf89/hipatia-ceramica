@@ -446,10 +446,13 @@ function seed(){
   // Día cerrado
   const s12=slots.find(x=>x.id==='s12'); s12.closed={reason:'Mantenimiento del horno'};
   s12.list.forEach(id=>st.find(x=>x.id===id).recover.push({note:'Cierre del sábado 28',from:'sábado 28',cierre:true})); s12.list=[];
+  // Anotadas de prueba en los tallercitos (nombres inventados)
+  const NOMBRES=['Rocío Herrera','Inés Carranza','Agustina Molina','Florencia Sosa','Victoria Romero','Carla Medina','Belén Ortiz','Natalia Díaz','Paula Rey','Sol Vega'];
+  const gente=(from,n)=>NOMBRES.slice(from,from+n).map((name,i)=>({id:'wp'+(from+i),sid:null,name,phone:'351 555 '+String(200+from+i).padStart(4,'0'),method:'Mercado Pago',status:'confirmado'}));
   const workshops = [
-    {id:'w1',name:'Tazas con asa',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,taken:5,art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
-    {id:'w2',name:'Joyitas de cerámica',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,taken:3,art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
-    {id:'w3',name:'Adornos navideños',date:'Sábado 5 de diciembre',time:'16 a 18 hs',price:20000,cap:10,taken:2,art:'corazon',color:C.oliva,desc:'Estrellas, corazones y colgantes para el arbolito. Ideal para venir con amigas o con tu mamá.'}
+    {id:'w1',name:'Tazas con asa',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,people:gente(0,5),art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
+    {id:'w2',name:'Joyitas de cerámica',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,people:gente(5,3),art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
+    {id:'w3',name:'Adornos navideños',date:'Sábado 5 de diciembre',time:'16 a 18 hs',price:20000,cap:10,people:gente(8,2),art:'corazon',color:C.oliva,desc:'Estrellas, corazones y colgantes para el arbolito. Ideal para venir con amigas o con tu mamá.'}
   ];
   const products = [
     {id:'pr1',name:'Aros estrella',cat:'joyitas',price:9500,unique:false,available:true,stock:6,art:'aros',bg:C.rosa,fg:C.bordo,desc:'Esmaltados a mano, con ganchos de acero quirúrgico. Livianos para usar todo el día.'},
@@ -462,15 +465,17 @@ function seed(){
     {id:'pr8',name:'Colgante corazón',cat:'joyitas',price:7000,unique:false,available:true,stock:10,art:'corazon',bg:'#F6D0E8',fg:C.bordo,desc:'Para colgar en la pared, la ventana o el arbolito.'}
   ];
   return {
-    v:5, renewed:{},
+    v:6, renewed:{},
     view:'login', loginRole:'alumna', tab:'inicio', otab:'hoy', clsSeg:'clases', storeCat:'todo', storeSeg:'productos', aluFilter:'todas', aluQuery:'',
     me:'sofia',
     settings:{mensualidad:45000,clases:4,chica:2000,mediana:3500,grande:5000,suelta:13000,alias:'hipatia.ceramica',titular:'Paula González',horas:24,pagoHasta:10,recupera:'fin del mes siguiente',rem:{clase:true,pago:true,pieza:true,cierre:true}},
-    students:st, slots, workshops, myWorkshops:[],
+    students:st, slots, workshops,
     products, cart:[],
-    orders:[{id:'o1',who:'Rocío Herrera',items:'Aros estrella x2',total:19000,delivery:'Retiro en el taller',method:'Mercado Pago',status:'Nuevo',paid:true},
-            {id:'o2',who:'Inés Carranza',items:'Florero rosa x1',total:24000,delivery:'Envío en Córdoba',method:'Transferencia',status:'Preparando',paid:true}],
-    encargos:[{id:'en1',who:'Carolina Peralta',what:'Juego de 6 platos playos con borde rojo para un casamiento',when:'Fines de diciembre',status:'Nuevo'}],
+    orders:[{id:'o1',who:'Rocío Herrera',phone:'351 555 0200',items:'Aros estrella x2',total:19000,delivery:'Retiro en el taller',method:'Mercado Pago',status:'Nuevo',paid:true},
+            {id:'o2',who:'Inés Carranza',phone:'351 555 0201',items:'Florero rosa x1',total:24000,delivery:'Envío en Córdoba',method:'Transferencia',status:'Preparando',paid:true}],
+    encargos:[{id:'en1',who:'Carolina Peralta',phone:'351 555 0110',what:'Juego de 6 platos playos con borde rojo para un casamiento',when:'Fines de diciembre',status:'Nuevo'},
+              {id:'en2',sid:'sofia',who:'Sofía Paz',what:'Una fuente grande para ensalada, con la estrella de Hipatia en el centro',when:'Para Navidad',status:'Presupuestado',quote:{price:32000,sena:16000,demora:'3 semanas'}}],
+    trials:[{id:'tr1',name:'Lara Giménez',phone:'351 555 0120',dia:'Martes 17, 18 a 20 hs',status:'Nueva'}],
     storeReviews:[],
     avisos:[{kind:'cierre',text:'El sábado 28 el taller está cerrado por mantenimiento del horno. Si tenías clase ese día, ya la tenés para recuperar: elegí otro día desde Clases.',date:'12 nov'},{text:'El jueves 19 hay hornada. Si tenés piezas secas, dejalas en el estante de la entrada.',date:'Ayer'},{text:'Ya están las fechas de los tallercitos de noviembre. ¡Quedan pocos lugares para tazas!',date:'10 nov'}],
     seenAvisos:0
@@ -478,7 +483,7 @@ function seed(){
 }
 
 let S;
-try{ S = JSON.parse(localStorage.getItem('hipatia-demo')); if(!S||S.v!==5) S=null; }catch(e){ S=null; }
+try{ S = JSON.parse(localStorage.getItem('hipatia-demo')); if(!S||S.v!==6) S=null; }catch(e){ S=null; }
 if(!S) S = seed();
 S.view = 'login';
 function save(){ try{ localStorage.setItem('hipatia-demo', JSON.stringify(S)); }catch(e){} }
@@ -566,7 +571,11 @@ function renewPreview(){
 }
 const cartCount = () => S.cart.reduce((a,c)=>a+c.qty,0);
 const cartTotal = () => S.cart.reduce((a,c)=>a+c.qty*S.products.find(p=>p.id===c.pid).price,0);
-const pendingReceipts = () => S.students.filter(s=>s.pending).length + S.orders.filter(o=>o.needsReview).length;
+const wsTaken = w => w.people.length;
+const wsMine = w => w.people.find(x=>x.sid&&x.sid===S.me);
+const wsRevision = () => S.workshops.flatMap(w=>w.people.filter(x=>x.status==='revision').map(x=>({w,x})));
+const senaRevision = () => S.encargos.filter(e=>e.status==='Seña en revisión');
+const pendingReceipts = () => S.students.filter(s=>s.pending).length + S.orders.filter(o=>o.needsReview).length + wsRevision().length + senaRevision().length;
 
 /* ---------- render ---------- */
 const root = document.getElementById('root');
@@ -709,7 +718,8 @@ function aInicio(s){
     ${available(s)?`<button class="btn block mt18" data-act="tab" data-v="clases">Reservar ${available(s)===1?'mi clase':'mis clases'}</button>`:`<p class="small mt14">Ya organizaste todas tus clases del mes ✶</p>`}
     ${next?`<div class="row mt10" style="gap:8px"><button class="btn ghost sm" style="flex:1;background:#fff" data-act="reprog" data-slot="${next.id}">${ic('swap',18)} Cambiar día</button><button class="btn ghost sm" style="flex:1;background:#fff" data-act="cancel" data-slot="${next.id}">No voy a ir</button></div>`:''}
   </div></section>
-  <section class="section">${s.notice&&s.notice.kind==='rechazo'?`<div class="panel" style="background:#FADBD8;border-color:transparent;margin-bottom:12px"><h3>Pauli no encontró tu transferencia</h3><p class="mt6">No le llegó el pago de <b>${fmt(s.notice.amount)}</b> que mandaste. Revisá el comprobante o escribile, y volvé a pagar cuando lo tengas.</p><button class="btn ghost sm mt14" style="background:#fff" data-act="dismissNotice">Entendido</button></div>`:''}${money}</section>
+  ${encargoPanel(s)}
+  <section class="section">${s.notice&&s.notice.kind==='rechazo'?`<div class="panel" style="background:#FADBD8;border-color:transparent;margin-bottom:12px"><h3>Pauli no encontró tu transferencia</h3><p class="mt6">No le llegó el pago de <b>${fmt(s.notice.amount)}</b> que mandaste${s.notice.what?' por '+esc(s.notice.what):''}. ${esc(s.notice.extra||'Revisá el comprobante o escribile, y volvé a pagar cuando lo tengas.')}</p><button class="btn ghost sm mt14" style="background:#fff" data-act="dismissNotice">Entendido</button></div>`:''}${money}</section>
   <section class="section">
     <div class="sec-head"><h2>Tus piezas</h2><button class="link small" data-act="tab" data-v="piezas">Ver todas</button></div>
     ${ready.length?`<div class="panel oliva" style="padding:16px 18px;margin-bottom:10px"><p><b>${esc(ready[0].name)}</b> ya salió del horno. Retirala en tu próxima clase.</p></div>`:''}
@@ -746,16 +756,24 @@ function slotRow(sl, action){
   </div>`;
 }
 
+function encargoPanel(s){
+  const list=S.encargos.filter(e=>e.sid===s.id&&['Presupuestado','Seña en revisión'].includes(e.status));
+  if(!list.length) return '';
+  return `<section class="section">${list.map(e=>{const q=e.quote;
+    if(e.status==='Seña en revisión') return `<div class="panel lila"><div class="row between" style="gap:10px"><h3>Tu encargo</h3><span class="chip rev">En revisión</span></div><p class="mt10">Recibimos el comprobante de la seña de <b>${fmt(q.sena)}</b>. Pauli lo revisa y empieza tu ${esc(e.what.toLowerCase())}.</p></div>`;
+    return `<div class="panel"><div class="row between" style="gap:10px"><h3>Pauli te pasó el presupuesto</h3><span class="chip rev">Encargo</span></div>
+      <p class="small muted mt6">${esc(e.what)}</p>
+      <div class="mt14"><div class="line-item"><span>Precio total</span><span class="num">${fmt(q.price)}</span></div>${q.sena?`<div class="line-item"><span>Seña para empezar</span><span class="num">${fmt(q.sena)}</span></div>`:''}${q.demora?`<div class="line-item"><span>Demora</span><span>${esc(q.demora)}</span></div>`:''}</div>
+      <button class="btn block mt14" data-act="acceptQuote" data-e="${e.id}">${q.sena?'Aceptar y pagar la seña de '+fmt(q.sena):'Aceptar el presupuesto'}</button>
+      <button class="btn ghost block mt10" data-act="declineQuote" data-e="${e.id}">No, gracias</button></div>`}).join('')}</section>`;
+}
+
 function aClases(s){
   const mine = bookedSlots(s.id).filter(sl=>!isPast(sl));
   const seg = `<div class="seg mt10" role="tablist"><button class="${S.clsSeg==='clases'?'on':''}" data-act="clsSeg" data-v="clases">Mis clases</button><button class="${S.clsSeg==='talleres'?'on':''}" data-act="clsSeg" data-v="talleres">Tallercitos</button></div>`;
   if(S.clsSeg==='talleres'){
     return `<h1 class="mt10">Tallercitos</h1><p class="muted mt6">Encuentros de una tarde, con todo incluido. Se pagan aparte de tu mensualidad.</p>${seg}
-    <div class="stack gap14 section">${S.workshops.map(w=>{const left=w.cap-w.taken, mineW=S.myWorkshops.includes(w.id);return `<div class="panel" style="padding:0;overflow:hidden">
-      <div style="height:150px">${art(w.art,C.rosa,w.color)}</div>
-      <div style="padding:18px 20px 20px"><h3>${esc(w.name)}</h3><p class="small muted mt6">${w.date}, ${w.time}</p><p class="small mt10">${esc(w.desc)}</p>
-      <div class="row between mt14"><div><div class="serif" style="font-size:24px;font-weight:650;color:${C.bordo}">${fmt(w.price)}</div><div class="tiny muted">${mineW?'Tenés tu lugar':`Quedan ${left} lugares`}</div></div>
-      ${mineW?`<span class="chip ok">${ic('check',14,3)} Anotada</span>`:`<button class="btn sm" data-act="wsBook" data-w="${w.id}">Quiero ir</button>`}</div></div></div>`}).join('')}</div>`;
+    ${wsCards(false)}`;
   }
   const days = S.slots.filter(sl=>sl.id!=='s1'&&!isPast(sl));
   const weeks = [['Esta semana',days.filter(d=>d.d<=21)],['La semana que viene',days.filter(d=>d.d>21)]];
@@ -771,6 +789,17 @@ function aClases(s){
     ${weeks.map(([t,list])=>`<div class="daygroup"><p class="daylabel">${t}</p>${list.map(sl=>slotRow(sl,'book')).join('')}</div>`).join('')}
     <div class="panel lila mt10"><h3>¿Ningún horario te queda?</h3><p class="small mt6">Pauli tiene horarios libres según disponibilidad. Contale cuándo podés y te responde.</p><button class="btn soft sm mt14" data-act="libre">Pedir horario libre</button></div>
   </section>`;
+}
+
+function wsCards(pub){
+  return `<div class="stack gap14 section">${S.workshops.map(w=>{const left=w.cap-wsTaken(w), mine=pub?null:wsMine(w);
+    const side = mine ? (mine.status==='revision'?`<span class="chip rev">En revisión</span>`:`<span class="chip ok">${ic('check',14,3)} Anotada</span>`)
+      : left<=0 ? `<span class="chip bad">Completo</span>` : `<button class="btn sm" data-act="wsBook" data-w="${w.id}">Quiero ir</button>`;
+    const sub = mine ? (mine.status==='revision'?'Lugar reservado. Pauli confirma tu transferencia':'Tenés tu lugar') : left<=0 ? 'No quedan lugares' : `Quedan ${left} ${left===1?'lugar':'lugares'}`;
+    return `<div class="panel" style="padding:0;overflow:hidden">
+      <div style="height:150px">${art(w.art,C.rosa,w.color)}</div>
+      <div style="padding:18px 20px 20px"><h3>${esc(w.name)}</h3><p class="small muted mt6">${w.date}, ${w.time}</p><p class="small mt10">${esc(w.desc)}</p>
+      <div class="row between mt14" style="gap:10px"><div><div class="serif" style="font-size:24px;font-weight:650;color:${C.bordo}">${fmt(w.price)}</div><div class="tiny muted">${sub}</div></div>${side}</div></div></div>`}).join('')}</div>`;
 }
 
 function aPiezas(s){
@@ -789,11 +818,14 @@ function aPiezas(s){
 
 const CATS = [['todo','Todo',C.rosa,C.bordo],['joyitas','Joyitas','#E9ECCB',C.oliva],['casa','En casa','#FBE4D8',C.naranja],['unicas','Únicas',C.lila,'#8E6FAE'],['encargo','Encargos','#F6D0E8',C.bordo]];
 function aTienda(pub=false){
-  const cat=S.storeCat;
+  const cat=(!pub&&S.storeCat==='talleres')?'todo':S.storeCat;
   let list = S.products;
   if(cat==='joyitas'||cat==='casa') list=list.filter(p=>p.cat===cat);
   if(cat==='unicas') list=list.filter(p=>p.unique);
-  const hl = `<div class="highlights" role="tablist">${CATS.map(([k,l,bg,fg])=>`<button class="hl ${cat===k?'on':''}" data-act="cat" data-v="${k}" role="tab" aria-selected="${cat===k}"><span class="ring"><div style="background:${bg}">${star(fg,{size:36})}</div></span>${l}</button>`).join('')}</div>`;
+  const cats = pub ? [...CATS.slice(0,4),['talleres','Tallercitos','#E9ECCB',C.naranja],CATS[4]] : CATS;
+  const hl = `<div class="highlights" role="tablist">${cats.map(([k,l,bg,fg])=>`<button class="hl ${cat===k?'on':''}" data-act="cat" data-v="${k}" role="tab" aria-selected="${cat===k}"><span class="ring"><div style="background:${bg}">${star(fg,{size:36})}</div></span>${l}</button>`).join('')}</div>`;
+  if(cat==='talleres'&&pub) return `<h1 class="mt10">Tienda</h1><div class="mt14">${hl}</div>
+    <section class="section"><h2>Tallercitos</h2><p class="muted mt6">Encuentros de una tarde, con todo incluido. No hace falta ser alumna ni tener cuenta.</p></section>${wsCards(true)}`;
   if(cat==='encargo') return `<h1 class="mt10">Tienda</h1>${pub?'<p class="muted mt6">No necesitás cuenta para comprar ni para pedir.</p>':''}<div class="mt14">${hl}</div>
     <section class="section panel"><h2>Pedí una pieza a medida</h2><p class="muted mt6">Vajilla para tu casa, regalos, souvenirs. Contale a Pauli qué imaginás y te pasa presupuesto.</p>
     <form data-form="encargo" class="mt18">
@@ -881,6 +913,7 @@ function oHoy(){
     <div>
       <div style="margin-top:8px">${renewCard()}</div>
       ${reqs.length?`<div class="sec-head" style="margin-top:22px"><h2>Pedidos de pausa</h2></div><div class="list">${reqs.map(s=>`<div class="li" style="flex-wrap:wrap"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:150px"><b>${esc(s.name)}</b><div class="tiny muted">Quiere pausar ${MES[s.pauseReq]}${debt(s)?`. Debe ${fmt(debt(s))}`:', sin deuda'}</div></div><button class="btn sm olive" data-act="approvePause" data-s="${s.id}">Aprobar</button><button class="btn ghost sm" data-act="denyPause" data-s="${s.id}">Hablarlo</button></div>`).join('')}</div>`:''}
+      ${S.trials.length?`<div class="sec-head" style="margin-top:22px"><h2>Clases de prueba</h2></div><div class="list">${S.trials.map(t=>`<div class="li" style="flex-wrap:wrap"><div style="flex:1;min-width:150px"><b>${esc(t.name)}</b><div class="tiny muted">${esc(t.dia)}. WhatsApp ${esc(t.phone)}</div></div>${t.status==='Confirmada'?'<span class="chip ok">Confirmada</span>':`<button class="btn sm olive" data-act="trialOk" data-t="${t.id}">Confirmar</button>`}</div>`).join('')}</div>`:''}
       <div class="sec-head" style="margin-top:22px"><h2>Listas para retirar</h2></div>
       <div class="list">${ready.length?ready.map(({s,p})=>`<div class="li"><div class="art" style="width:46px;height:46px;border-radius:12px;overflow:hidden;flex:none">${art(p.art,C.rosa2,p.color)}</div><div style="flex:1"><b>${esc(p.name)}</b><div class="tiny muted">${esc(s.name)}</div></div><button class="btn ghost sm" data-act="delivered" data-s="${s.id}" data-p="${p.id}">Entregada</button></div>`).join(''):'<div class="li muted">No hay piezas esperando.</div>'}</div>
       <div class="sec-head" style="margin-top:22px"><h2>Tienda</h2><button class="link small" data-act="otab" data-v="tienda">Ver pedidos</button></div>
@@ -889,14 +922,14 @@ function oHoy(){
   </div>`;
 }
 function oAgenda(){
-  return ownerTop('Agenda','Tocá una clase para ver quién viene, sumar a alguien o marcar asistencia.', `<button class="btn soft" data-act="closeDay">${ic('lock',20)} Cerrar un día</button>`)+
+  return ownerTop('Agenda','Tocá una clase o un tallercito para ver quién viene, sumar a alguien o marcar asistencia.', `<button class="btn soft" data-act="closeDay">${ic('lock',20)} Cerrar un día</button>`)+
   `<div class="stack gap10">${S.slots.map(sl=>{const pct=sl.list.length/sl.cap*100; if(sl.closed) return `<button class="slot" style="width:100%;text-align:left;margin:0;opacity:.75" data-act="oslot" data-slot="${sl.id}"><div class="datebox" style="background:#EEE8E6;color:#6B5551"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div><div style="flex:1"><b>${sl.dow} ${sl.d}, ${sl.time}</b><div class="tiny muted mt6">Cerrado: ${esc(sl.closed.reason)}. Las alumnas de ese día ya tienen su clase para recuperar.</div></div><span class="chip pause">Cerrado</span></button>`;return `<button class="slot" style="width:100%;text-align:left;margin:0" data-act="oslot" data-slot="${sl.id}">
     <div class="datebox"><small>${sl.dow.slice(0,3)}</small><b>${sl.d}</b></div>
     <div style="flex:1"><div class="row between"><b>${sl.dow} ${sl.d}, ${sl.time}</b><span class="small ${pct>=100?'':'muted'}" style="${pct>=100?'color:'+C.bordo+';font-weight:700':''}">${sl.list.length} de ${sl.cap}</span></div>
     <div class="bar mt6"><i style="width:${pct}%;background:${pct>=100?C.bordo:pct>=67?C.naranja:C.oliva}"></i></div>
     <div class="tiny muted mt6">${sl.list.map(id=>stu(id).short).join(', ')||'Nadie anotada todavía'}</div></div>${ic('chev',20)}</button>`}).join('')}
     <h2 class="mt18">Tallercitos</h2>
-    ${S.workshops.map(w=>`<div class="slot" style="margin:0"><div class="datebox" style="background:#E9ECCB;color:${C.oliva}">${star(C.oliva,{size:30})}</div><div style="flex:1"><b>${esc(w.name)}</b><div class="small muted">${w.date}, ${w.time}</div><div class="bar mt6"><i style="width:${w.taken/w.cap*100}%;background:${C.oliva}"></i></div></div><span class="small"><b>${w.taken}</b> de ${w.cap}</span></div>`).join('')}
+    ${S.workshops.map(w=>{const rev=w.people.filter(x=>x.status==='revision').length;return `<button class="slot" style="width:100%;text-align:left;margin:0" data-act="ows" data-w="${w.id}"><div class="datebox" style="background:#E9ECCB;color:${C.oliva}">${star(C.oliva,{size:30})}</div><div style="flex:1;min-width:0"><div class="row between"><b>${esc(w.name)}</b><span class="small"><b>${wsTaken(w)}</b> de ${w.cap}</span></div><div class="small muted">${w.date}, ${w.time}</div><div class="bar mt6"><i style="width:${wsTaken(w)/w.cap*100}%;background:${C.oliva}"></i></div>${rev?`<div class="tiny muted mt6">${rev} con transferencia en revisión</div>`:''}</div>${ic('chev',20)}</button>`}).join('')}
   </div>`;
 }
 function oAlumnas(){
@@ -923,11 +956,16 @@ function receiptCard(s){
     <div class="row mt14" style="gap:8px"><button class="btn sm olive" data-act="approve" data-s="${s.id}">${ic('check',18,2.5)} Aprobar</button><button class="btn ghost sm" data-act="reject" data-s="${s.id}">No llegó</button></div></div></div>`;
 }
 function oCobros(){
-  const pend=S.students.filter(s=>s.pending), deben=S.students.filter(s=>dueNow(s)>0&&!s.pending), orderRev=S.orders.filter(o=>o.needsReview);
+  const pend=S.students.filter(s=>s.pending), deben=S.students.filter(s=>dueNow(s)>0&&!s.pending), orderRev=S.orders.filter(o=>o.needsReview), wsRev=wsRevision(), senaRev=senaRevision();
+  const nRev=pend.length+orderRev.length+wsRev.length+senaRev.length;
+  const otherCard=(file,icon,who,tag,amount,detail,ok,no)=>`<div class="receipt"><div class="thumb">${file?`<img src="${file}" alt="Comprobante">`:ic(icon,26)}</div><div style="flex:1"><div class="row between"><b style="font-size:18px">${esc(who)}</b><span class="tiny muted">${tag}</span></div><div class="money mt6" style="font-size:30px">${fmt(amount)}</div><p class="small muted">${detail}</p><div class="row mt14" style="gap:8px"><button class="btn sm olive" ${ok}>${ic('check',18,2.5)} Aprobar</button><button class="btn ghost sm" ${no}>No llegó</button></div></div></div>`;
   return ownerTop('Cobros','Comprobantes de transferencia, pagos con Mercado Pago y quién debe.')+
-  `<h2 style="margin-bottom:12px">Para revisar ${pend.length+orderRev.length?`<span class="chip rev" style="vertical-align:middle">${pend.length+orderRev.length}</span>`:''}</h2>
-  <div class="stack gap10">${pend.map(receiptCard).join('')}${orderRev.map(o=>`<div class="receipt"><div class="thumb">${o.file?`<img src="${o.file}" alt="Comprobante">`:ic('bag',26)}</div><div style="flex:1"><div class="row between"><b style="font-size:18px">${esc(o.who)}</b><span class="tiny muted">Tienda</span></div><div class="money mt6" style="font-size:30px">${fmt(o.total)}</div><p class="small muted">${esc(o.items)}</p><div class="row mt14" style="gap:8px"><button class="btn sm olive" data-act="approveOrder" data-o="${o.id}">${ic('check',18,2.5)} Aprobar</button></div></div></div>`).join('')}
-  ${!pend.length&&!orderRev.length?`<div class="panel oliva"><p>No hay comprobantes pendientes. Todo revisado ✶</p></div>`:''}</div>
+  `<h2 style="margin-bottom:12px">Para revisar ${nRev?`<span class="chip rev" style="vertical-align:middle">${nRev}</span>`:''}</h2>
+  <div class="stack gap10">${pend.map(receiptCard).join('')}
+  ${orderRev.map(o=>otherCard(o.file,'bag',o.who,'Tienda',o.total,esc(o.items)+'. Si no llegó, se cancela y las piezas vuelven a la tienda.',`data-act="approveOrder" data-o="${o.id}"`,`data-act="rejectOrder" data-o="${o.id}"`)).join('')}
+  ${wsRev.map(({w,x})=>otherCard(x.file,'cal',x.name,'Tallercito',x.amount||w.price,`${esc(w.name)}, ${w.date.toLowerCase()}. Si no llegó, se libera el lugar.`,`data-act="approveWs" data-w="${w.id}" data-p="${x.id}"`,`data-act="rejectWs" data-w="${w.id}" data-p="${x.id}"`)).join('')}
+  ${senaRev.map(en=>otherCard(en.file,'vase',en.who,'Seña de encargo',en.quote.sena,esc(en.what),`data-act="approveSena" data-e="${en.id}"`,`data-act="rejectSena" data-e="${en.id}"`)).join('')}
+  ${!nRev?`<div class="panel oliva"><p>No hay comprobantes pendientes. Todo revisado ✶</p></div>`:''}</div>
   <h2 class="mt24" style="margin-bottom:12px">Deben</h2>
   <div class="list">${deben.map(s=>`<div class="li" style="flex-wrap:wrap"><span class="mini-av" style="background:${s.av};color:${C.bordo}">${s.short[0]}</span><div style="flex:1;min-width:140px"><b>${esc(s.name)}</b><div class="tiny muted">${debtItems(s).map(i=>i.label).join(', ')}</div></div><span class="num">${fmt(debt(s))}</span><button class="btn ghost sm" data-act="remind" data-s="${s.id}">${ic('wa',18)} Recordar</button><button class="btn ghost sm" data-act="regPay" data-s="${s.id}">Registrar pago</button></div>`).join('')||'<div class="li muted">Nadie debe nada.</div>'}</div>
   <p class="small muted mt14">Los pagos con Mercado Pago se acreditan solos y no necesitan revisión.</p>`;
@@ -936,10 +974,16 @@ function oTienda(){
   const seg=S.storeSeg;
   const tabs=`<div class="seg" style="max-width:480px;margin-bottom:16px">${[['productos','Productos'],['pedidos','Pedidos'],['encargos','Encargos']].map(([k,l])=>`<button class="${seg===k?'on':''}" data-act="storeSeg" data-v="${k}">${l}</button>`).join('')}</div>`;
   let body='';
-  if(seg==='productos') body=`<div class="list">${S.products.map(p=>`<div class="li"><label title="Cambiar foto" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none;position:relative;cursor:pointer">${pimg(p)}<span style="position:absolute;right:3px;bottom:3px;width:24px;height:24px;border-radius:8px;background:#fffffff0;color:${C.bordo};display:grid;place-items:center">${ic('upload',14,2.4)}</span><input type="file" accept="image/*" hidden data-file="pimg" data-p="${p.id}" aria-label="Cambiar foto de ${esc(p.name)}"></label><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="tiny muted">${p.unique?'Pieza única':`${p.stock} en stock`}, ${p.cat==='joyitas'?'Joyitas':'En casa'}</div></div><span class="num">${fmt(p.price)}</span><span class="small muted" style="width:76px;text-align:right">${p.available?'Visible':'Agotado'}</span><button class="toggle ${p.available?'on':''}" data-act="ptoggle" data-p="${p.id}" role="switch" aria-checked="${p.available}" aria-label="Mostrar ${esc(p.name)} en la tienda"></button></div>`).join('')}</div>`;
+  if(seg==='productos') body=`<div class="list">${S.products.map(p=>`<div class="li"><label title="Cambiar foto" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none;position:relative;cursor:pointer">${pimg(p)}<span style="position:absolute;right:3px;bottom:3px;width:24px;height:24px;border-radius:8px;background:#fffffff0;color:${C.bordo};display:grid;place-items:center">${ic('upload',14,2.4)}</span><input type="file" accept="image/*" hidden data-file="pimg" data-p="${p.id}" aria-label="Cambiar foto de ${esc(p.name)}"></label><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="num small">${fmt(p.price)}</div><div class="tiny muted">${p.unique?'Pieza única':`${p.stock} en stock`}, ${p.cat==='joyitas'?'Joyitas':'En casa'}${p.available?'':'. No se ve en la tienda'}</div></div><button class="toggle ${p.available?'on':''}" data-act="ptoggle" data-p="${p.id}" role="switch" aria-checked="${p.available}" aria-label="Mostrar ${esc(p.name)} en la tienda"></button></div>`).join('')}</div>`;
   if(seg==='productos') body=`<div class="panel rosa" style="padding:14px 18px;margin-bottom:12px"><p class="small"><b>Tocá la foto de un producto para cambiarla.</b> Podés sacarla con el celu en el momento o elegirla de tu galería.</p></div>`+body;
-  if(seg==='pedidos') body=`<div class="list">${S.orders.map(o=>`<div class="li" style="flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>${esc(o.who)}</b><div class="small">${esc(o.items)}</div><div class="tiny muted">${o.delivery}, ${o.method}${o.needsReview?', comprobante para revisar':''}</div></div><span class="num">${fmt(o.total)}</span><button class="chip ${o.status==='Nuevo'?'warn':o.status==='Entregado'?'ok':'rev'}" data-act="ostatus" data-o="${o.id}" title="Cambiar estado">${o.status} ${ic('chev',14,2.5)}</button></div>`).join('')}</div><p class="small muted mt10">Tocá el estado para pasarlo de Nuevo a Preparando y a Entregado.</p>`;
-  if(seg==='encargos') body=`<div class="stack gap10">${S.encargos.map(e=>`<div class="panel"><div class="row between"><b>${esc(e.who)}</b><span class="chip ${e.status==='Nuevo'?'warn':'ok'}">${e.status}</span></div><p class="mt10">${esc(e.what)}</p><p class="small muted mt6">Para: ${esc(e.when||'sin fecha')}</p>${e.status==='Nuevo'?`<button class="btn sm mt14" data-act="quote" data-e="${e.id}">Pasar presupuesto</button>`:''}</div>`).join('')}</div>`;
+  if(seg==='pedidos') body=`<div class="list">${S.orders.map(o=>`<div class="li" style="flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>${esc(o.who)}</b><div class="small">${esc(o.items)}</div><div class="tiny muted">${o.delivery}, ${o.method}${o.needsReview?', comprobante para revisar':''}</div>${o.phone?`<div class="tiny muted">WhatsApp ${esc(o.phone)}</div>`:''}</div><span class="num">${fmt(o.total)}</span>${o.status==='Cancelado'?'<span class="chip bad">Cancelado</span>':`<button class="chip ${o.status==='Nuevo'?'warn':o.status==='Entregado'?'ok':'rev'}" data-act="ostatus" data-o="${o.id}" title="Cambiar estado">${o.status} ${ic('chev',14,2.5)}</button>`}</div>`).join('')}</div><p class="small muted mt10">Tocá el estado para pasarlo de Nuevo a Preparando y a Entregado.</p>`;
+  if(seg==='encargos') body=`<div class="stack gap10">${S.encargos.map(e=>{const q=e.quote, k={'Nuevo':'warn','Presupuestado':'rev','Seña en revisión':'rev','No aceptado':'bad'}[e.status]||'ok';
+    const btn={'Nuevo':`<button class="btn sm mt14" data-act="quote" data-e="${e.id}">Pasar presupuesto</button>`,
+      'Presupuestado':`<button class="btn ghost sm mt14" data-act="senaPaid" data-e="${e.id}">${q&&q.sena?'Ya pagó la seña':'Ya lo aceptó'}</button>`,
+      'Seña en revisión':`<p class="tiny muted mt10">El comprobante de la seña está en Cobros.</p>`,
+      'Seña pagada':`<button class="btn ghost sm mt14" data-act="encDelivered" data-e="${e.id}">Entregado</button>`,
+      'Aceptado':`<button class="btn ghost sm mt14" data-act="encDelivered" data-e="${e.id}">Entregado</button>`}[e.status]||'';
+    return `<div class="panel"><div class="row between" style="gap:10px"><b>${esc(e.who)}</b><span class="chip ${k}">${e.status}</span></div>${e.phone?`<p class="tiny muted mt6">WhatsApp ${esc(e.phone)}</p>`:''}<p class="mt10">${esc(e.what)}</p><p class="small muted mt6">Para: ${esc(e.when||'sin fecha')}</p>${q?`<p class="small mt6">Presupuesto: <b>${fmt(q.price)}</b>${q.sena?`, seña ${fmt(q.sena)}`:', sin seña'}${q.demora?`, ${esc(q.demora)}`:''}</p>`:''}${btn}</div>`}).join('')}</div>`;
   return ownerTop('Tienda','Lo que se ve en la tienda, los pedidos y los encargos a medida.', seg==='productos'?`<button class="btn" data-act="newProduct">${ic('plus',20)} Nuevo producto</button>`:'')+tabs+body;
 }
 function oAjustes(){
@@ -1075,8 +1119,16 @@ const A = {
     if(late){ s.used++; (s.taken=s.taken||[]).push({label:`${sl.dow} ${sl.d}`,note:'Perdida: avisaste tarde'}); closeSheet(); toast('Liberaste tu lugar. Esa clase se pierde'); return; }
     s.recover.push({note:`Avisaste que no ibas el ${dia}`,from:dia,vence:venceRecupero(sl.date)}); closeSheet(); toast('Liberaste tu lugar. La clase volvió a tu cuenta'); },
   wait(){ toast('Te avisamos por WhatsApp si se libera un lugar'); },
+  waitProd(){ closeSheet(); toast(S.view==='tienda'?'Escribile a Pauli por WhatsApp y te avisa cuando vuelva':'Te avisamos por WhatsApp cuando vuelva'); },
   libre(){ openSheet(head('Pedir horario libre','Contale a Pauli cuándo podés venir.')+`<form data-form="libre"><div class="field"><label for="lb">Días y horarios que te quedan</label><textarea id="lb" class="input" placeholder="Por ejemplo: martes a la tarde o jueves a la mañana" required></textarea></div><button class="btn block" type="submit">Enviar a Pauli</button></form>`); },
-  wsBook(el){ const w=S.workshops.find(x=>x.id===el.dataset.w); sheetCtx={kind:'taller',w:w.id,amount:w.price,title:'Tallercito: '+w.name}; openSheet(paySheet(sheetCtx),sheetCtx); },
+  wsBook(el){ const w=S.workshops.find(x=>x.id===el.dataset.w);
+    if(S.view==='tienda'){ openSheet(head('Tallercito: '+esc(w.name),`${w.date}, ${w.time}. ${fmt(w.price)}`)+`<p class="small muted" style="margin-bottom:10px">Para guardarte el lugar y avisarte por WhatsApp. No hace falta crear una cuenta.</p>
+      <div class="field"><label for="g-name">Nombre</label><input id="g-name" class="input" data-guest="name"></div>
+      <div class="field"><label for="g-phone">WhatsApp</label><input id="g-phone" class="input" inputmode="tel" data-guest="phone"></div>
+      <button class="btn block mt10" data-act="wsGuestPay">Continuar al pago</button>`,{w:w.id}); return; }
+    sheetCtx={kind:'taller',w:w.id,amount:w.price,title:'Tallercito: '+w.name}; openSheet(paySheet(sheetCtx),sheetCtx); },
+  wsGuestPay(){ const w=S.workshops.find(x=>x.id===sheetCtx.w); if(!(sheetCtx.gname||'').trim()||!(sheetCtx.gphone||'').trim()){ toast('Completá tu nombre y WhatsApp para seguir'); return; }
+    S.guest={name:sheetCtx.gname.trim(),phone:sheetCtx.gphone.trim()}; const c={kind:'taller',w:w.id,amount:w.price,title:'Tallercito: '+w.name}; openSheet(paySheet(c),c); },
 
   /* pagos */
   pay(){ const s=me(); sheetCtx={kind:'deuda',amount:debt(s),title:'Pagar'}; openSheet(paySheet(sheetCtx),sheetCtx); },
@@ -1092,7 +1144,7 @@ const A = {
       ${p.unique?`<span class="chip rev mt10">Pieza única, hay una sola</span>`:''}
       <p class="mt14">${esc(p.desc)}</p>
       ${p.img?'':'<p class="small muted mt10">Esta pieza todavía no tiene foto. Pauli la sube desde su panel, en Tienda.</p>'}
-      ${p.available?`<button class="btn block mt18" data-act="addCart" data-p="${p.id}" ${p.unique&&inCart?'disabled':''}>${p.unique&&inCart?'Ya está en tu carrito':'Agregar al carrito'}</button>`:`<button class="btn ghost block mt18" data-act="wait">Avisarme cuando vuelva</button>`}`); },
+      ${p.available?`<button class="btn block mt18" data-act="addCart" data-p="${p.id}" ${p.unique&&inCart?'disabled':''}>${p.unique&&inCart?'Ya está en tu carrito':'Agregar al carrito'}</button>`:`<button class="btn ghost block mt18" data-act="waitProd">Avisarme cuando vuelva</button>`}`); },
   addCart(el){ const c=S.cart.find(x=>x.pid===el.dataset.p); if(c) c.qty++; else S.cart.push({pid:el.dataset.p,qty:1}); closeSheet(); toast('Lo sumamos a tu carrito'); },
   cart(){ openSheet(cartSheet()); },
   qty(el){ const c=S.cart.find(x=>x.pid===el.dataset.p); const p=S.products.find(x=>x.id===c.pid); c.qty+=+el.dataset.d; if(p.unique&&c.qty>1)c.qty=1; if(c.qty<=0) S.cart=S.cart.filter(x=>x!==c); if(!S.cart.length){closeSheet();return;} sheetHTML=cartSheet(); render(); },
@@ -1128,10 +1180,32 @@ const A = {
   cash(el){ A.regPay(el); },
   dismissNotice(){ me().notice=null; render(); },
   approve(el){ const s=stu(el.dataset.s); const p=s.pending; s.notice=null; payItems(s,p.items,p.method,p.amount); s.pending=null; closeSheet(); toast(`Aprobado. ${s.short} ya lo ve en su app`); },
-  reject(el){ const s=stu(el.dataset.s); s.notice={kind:'rechazo',amount:s.pending.amount}; s.pending=null; render(); toast(`Le avisamos a ${s.short} que el pago no llegó`); },
+  reject(el){ const s=stu(el.dataset.s); s.notice={kind:'rechazo',amount:s.pending.amount,extra:'Revisá el comprobante o escribile, y volvé a pagar cuando lo tengas.'}; s.pending=null; render(); toast(`Le avisamos a ${s.short} que el pago no llegó`); },
   approveOrder(el){ const o=S.orders.find(x=>x.id===el.dataset.o); o.needsReview=false; o.paid=true; render(); toast('Pedido aprobado'); },
+  rejectOrder(el){ const o=S.orders.find(x=>x.id===el.dataset.o); o.needsReview=false; o.status='Cancelado';
+    (o.lines||[]).forEach(l=>{ const p=S.products.find(x=>x.id===l.pid); if(!p) return; if(!p.unique) p.stock+=l.qty; p.available=true; });
+    if(o.sid) stu(o.sid).notice={kind:'rechazo',amount:o.total,what:'tu compra',extra:'La compra se canceló y las piezas volvieron a la tienda.'};
+    render(); toast(`Pedido cancelado. Le avisamos a ${o.who.split(' ')[0]}${o.sid?'':' por WhatsApp'}`); },
+  approveWs(el){ const w=S.workshops.find(x=>x.id===el.dataset.w), x=w.people.find(y=>y.id===el.dataset.p); x.status='confirmado'; render(); toast(`${x.name.split(' ')[0]} tiene su lugar en ${w.name}`); },
+  rejectWs(el){ const w=S.workshops.find(x=>x.id===el.dataset.w), x=w.people.find(y=>y.id===el.dataset.p); w.people=w.people.filter(y=>y!==x);
+    if(x.sid) stu(x.sid).notice={kind:'rechazo',amount:x.amount||w.price,what:'el tallercito '+w.name,extra:'Se liberó el lugar. Si todavía quedan, podés volver a anotarte.'};
+    render(); toast(`Se liberó el lugar. Le avisamos a ${x.name.split(' ')[0]}${x.sid?'':' por WhatsApp'}`); },
+  approveSena(el){ const en=S.encargos.find(x=>x.id===el.dataset.e); en.status='Seña pagada'; render(); toast('Seña aprobada. Ya podés empezar el encargo'); },
+  rejectSena(el){ const en=S.encargos.find(x=>x.id===el.dataset.e); en.status='Presupuestado';
+    if(en.sid) stu(en.sid).notice={kind:'rechazo',amount:en.quote.sena,what:'la seña de tu encargo',extra:'El presupuesto sigue en pie: podés volver a pagar la seña.'};
+    render(); toast(`Le avisamos a ${en.who.split(' ')[0]} que la seña no llegó`); },
+  senaPaid(el){ const en=S.encargos.find(x=>x.id===el.dataset.e); en.status=en.quote&&en.quote.sena?'Seña pagada':'Aceptado'; render(); toast('Encargo en marcha'); },
+  encDelivered(el){ const en=S.encargos.find(x=>x.id===el.dataset.e); en.status='Entregado'; render(); toast('Encargo entregado'); },
+  acceptQuote(el){ const en=S.encargos.find(x=>x.id===el.dataset.e);
+    if(!en.quote.sena){ en.status='Aceptado'; render(); toast('Le avisamos a Pauli que aceptaste'); return; }
+    const c={kind:'sena',e:en.id,amount:en.quote.sena,title:'Seña de tu encargo'}; openSheet(paySheet(c),c); },
+  declineQuote(el){ const en=S.encargos.find(x=>x.id===el.dataset.e); en.status='No aceptado'; render(); toast('Le avisamos a Pauli'); },
+  ows(el){ const w=S.workshops.find(x=>x.id===el.dataset.w);
+    openSheet(head(esc(w.name),`${w.date}, ${w.time}. ${wsTaken(w)} de ${w.cap} lugares`)+`<div class="list">${w.people.map(x=>`<div class="li"><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="tiny muted">${x.phone?'WhatsApp '+esc(x.phone)+', ':''}${x.method}</div></div><span class="chip ${x.status==='revision'?'rev':'ok'}">${x.status==='revision'?'En revisión':'Pagado'}</span></div>`).join('')||'<div class="li muted">Nadie anotada todavía.</div>'}</div>
+    <p class="tiny muted mt10">Las transferencias en revisión se aprueban desde Cobros.</p>`); },
+  trialOk(el){ const t=S.trials.find(x=>x.id===el.dataset.t); t.status='Confirmada'; render(); toast(`Le avisamos a ${t.name.split(' ')[0]} por WhatsApp`); },
   ptoggle(el){ const p=S.products.find(x=>x.id===el.dataset.p); p.available=!p.available; render(); },
-  ostatus(el){ const o=S.orders.find(x=>x.id===el.dataset.o); const seq=['Nuevo','Preparando','Entregado']; o.status=seq[(seq.indexOf(o.status)+1)%3]; render(); },
+  ostatus(el){ const o=S.orders.find(x=>x.id===el.dataset.o); if(o.status==='Cancelado') return; const seq=['Nuevo','Preparando','Entregado']; o.status=seq[(seq.indexOf(o.status)+1)%3]; render(); },
   quote(el){ const e=S.encargos.find(x=>x.id===el.dataset.e); openSheet(head('Pasar presupuesto',esc(e.who))+`<p class="panel" style="padding:14px 16px">${esc(e.what)}</p><form data-form="quote" data-e="${e.id}" class="mt14"><div class="field"><label for="q-p">Precio total</label><input id="q-p" class="input" inputmode="numeric" placeholder="Ej: 60000" required></div><div class="field"><label for="q-s">Seña para empezar</label><input id="q-s" class="input" inputmode="numeric" placeholder="Ej: 30000"></div><div class="field"><label for="q-t">Demora</label><input id="q-t" class="input" placeholder="Ej: 3 semanas"></div><button class="btn block" type="submit">Enviar presupuesto</button></form>`); },
   newProduct(){ openSheet(head('Nuevo producto')+`<form data-form="product"><div class="field"><label for="np-n">Nombre</label><input id="np-n" class="input" required></div><div class="field"><label for="np-p">Precio</label><input id="np-p" class="input" inputmode="numeric" required></div><div class="field"><label for="np-c">Categoría</label><select id="np-c" class="input"><option value="casa">En casa</option><option value="joyitas">Joyitas</option></select></div><label class="row small" style="gap:10px;margin:6px 0 14px"><input type="checkbox" id="np-u" style="width:22px;height:22px"> Es pieza única</label><div class="field"><label>Foto</label><label class="drop" id="np-drop" for="np-f">${ic('upload',26)}<span class="small">Sacá una foto o elegila de tu galería</span></label><input id="np-f" type="file" accept="image/*" hidden data-file="newprod"></div><button class="btn block" type="submit">Publicar en la tienda</button></form>`); },
   newStudent(){ openSheet(head('Nueva alumna','Le llega un WhatsApp con su acceso a la app.')+`<form data-form="student"><div class="field"><label for="ns-n">Nombre y apellido</label><input id="ns-n" class="input" required></div><div class="field"><label for="ns-p">Celular</label><input id="ns-p" class="input" inputmode="tel" required></div><div class="field"><label for="ns-c">Clases por mes</label><input id="ns-c" class="input" inputmode="numeric" value="${S.settings.clases}"></div><button class="btn block" type="submit">Sumar alumna</button></form>`); },
@@ -1150,13 +1224,21 @@ function finishPay(method, file){
     if(method==='Mercado Pago'){ s.notice=null; payItems(s,ids,method,ctx.amount); openSheet(successSheet('¡Pago aprobado!',`Pagaste ${fmt(ctx.amount)} con Mercado Pago. Ya estás al día.`)); }
     else { s.notice=null; s.pending={amount:ctx.amount,method,date:'13 nov',items:ids,file}; openSheet(successSheet('Comprobante enviado','Pauli lo revisa y te avisamos acá cuando esté confirmado.')); }
   } else if(ctx.kind==='orden'){
+    const pub=S.view==='tienda', lines=S.cart.map(c=>({pid:c.pid,qty:c.qty}));
     const items=S.cart.map(c=>{const p=S.products.find(x=>x.id===c.pid); if(p.unique){p.available=false;} else {p.stock-=c.qty; if(p.stock<=0)p.available=false;} return `${p.name} x${c.qty}`}).join(', ');
-    S.orders.unshift({id:'o'+Date.now(),who:S.view==='tienda'?S.guest.name+' (sin cuenta)':s.name,items,total:ctx.amount,delivery:ctx.delivery==='envio'?'Envío en Córdoba':'Retiro en el taller',method,status:'Nuevo',paid:method==='Mercado Pago',needsReview:method!=='Mercado Pago',file});
+    if(!pub) s.notice=null;
+    S.orders.unshift({id:'o'+Date.now(),who:pub?S.guest.name+' (sin cuenta)':s.name,sid:pub?null:s.id,phone:pub?S.guest.phone:(s.phone||''),lines,items,total:ctx.amount,delivery:ctx.delivery==='envio'?'Envío en Córdoba':'Retiro en el taller',method,status:'Nuevo',paid:method==='Mercado Pago',needsReview:method!=='Mercado Pago',file});
     S.cart=[];
     openSheet(successSheet('¡Gracias por tu compra!', ctx.delivery==='envio'?(S.view==='tienda'?'Pauli te escribe por WhatsApp para coordinar el envío.':'Pauli te escribe para coordinar el envío.'):'Te avisamos cuando esté lista para retirar en el taller, Barrio Urca.'));
   } else if(ctx.kind==='taller'){
-    const w=S.workshops.find(x=>x.id===ctx.w); w.taken++; S.myWorkshops.push(w.id);
-    openSheet(successSheet('¡Tenés tu lugar!',`${w.name}, ${w.date.toLowerCase()}. ${method==='Mercado Pago'?'Pago confirmado.':'Pauli confirma tu transferencia en breve.'}`));
+    const w=S.workshops.find(x=>x.id===ctx.w), pub=S.view==='tienda', mp=method==='Mercado Pago';
+    if(!pub) s.notice=null;
+    w.people.push({id:'wp'+Date.now(),sid:pub?null:s.id,name:pub?S.guest.name+' (sin cuenta)':s.name,phone:pub?S.guest.phone:(s.phone||''),method,status:mp?'confirmado':'revision',amount:ctx.amount,file});
+    openSheet(successSheet(mp?'¡Tenés tu lugar!':'Te guardamos el lugar',`${w.name}, ${w.date.toLowerCase()}. ${mp?'Pago confirmado.':pub?'Pauli confirma tu transferencia y te avisa por WhatsApp.':'Pauli confirma tu transferencia y te avisamos acá.'}`));
+  } else if(ctx.kind==='sena'){
+    const en=S.encargos.find(x=>x.id===ctx.e); s.notice=null;
+    if(method==='Mercado Pago'){ en.status='Seña pagada'; openSheet(successSheet('¡Seña pagada!','Pauli ya puede empezar tu encargo. Te avisamos cuando esté listo.')); }
+    else { en.status='Seña en revisión'; en.file=file; en.method=method; openSheet(successSheet('Comprobante enviado','Pauli revisa la seña y empieza tu encargo.')); }
   } else if(ctx.kind==='suelta'){
     const sl=S.slots.find(x=>x.id===ctx.slot); s.total++; s.customTotal=true; sl.list.push(S.me);
     s.ledger.push({id:'su'+Date.now(),month:CUR,kind:'suelta',label:'Clase suelta',amount:ctx.amount,status:'pagado',paidOn:'13 nov',method});
@@ -1229,11 +1311,13 @@ document.addEventListener('click',e=>{
 document.addEventListener('submit',e=>{
   e.preventDefault(); const f=e.target.dataset.form;
   if(f==='login'){ S.view=S.loginRole==='alumna'?'alumna':'pauli'; S.tab='inicio'; S.otab='hoy'; window.scrollTo(0,0); render(false); return; }
-  if(f==='encargo'){ S.encargos.unshift({id:'en'+Date.now(),who:S.view==='tienda'?(document.getElementById('en-name').value+' (sin cuenta)'):me().name,what:document.getElementById('en-what').value,when:document.getElementById('en-when').value,status:'Nuevo'}); openSheet(successSheet('Pedido enviado','Pauli te responde con el presupuesto en la app y por WhatsApp.')); return; }
+  if(f==='encargo'){ const pub=S.view==='tienda'; S.encargos.unshift({id:'en'+Date.now(),who:pub?(document.getElementById('en-name').value+' (sin cuenta)'):me().name,sid:pub?null:S.me,phone:pub?document.getElementById('en-phone').value:(me().phone||''),what:document.getElementById('en-what').value,when:document.getElementById('en-when').value,status:'Nuevo'}); openSheet(successSheet('Pedido enviado','Pauli te responde con el presupuesto en la app y por WhatsApp.')); return; }
   if(f==='libre'){ openSheet(successSheet('Le avisamos a Pauli','Te contesta con los horarios libres que tenga.')); return; }
-  if(f==='trial'){ openSheet(successSheet('¡Listo!','Pauli te escribe por WhatsApp para confirmar tu clase de prueba.')); return; }
+  if(f==='trial'){ S.trials.unshift({id:'tr'+Date.now(),name:document.getElementById('tr-n').value.trim(),phone:document.getElementById('tr-p').value.trim(),dia:document.getElementById('tr-d').value,status:'Nueva'}); openSheet(successSheet('¡Listo!','Pauli te escribe por WhatsApp para confirmar tu clase de prueba.')); return; }
   if(f==='aviso'){ S.avisos.unshift({text:document.getElementById('av').value,date:'Recién'}); closeSheet(); toast('Aviso enviado. Las alumnas lo ven en la campanita'); return; }
-  if(f==='quote'){ const en=S.encargos.find(x=>x.id===e.target.dataset.e); en.status='Presupuestado'; closeSheet(); toast('Presupuesto enviado a '+en.who.split(' ')[0]); return; }
+  if(f==='quote'){ const en=S.encargos.find(x=>x.id===e.target.dataset.e), num=id=>parseInt(document.getElementById(id).value.replace(/\D/g,''))||0;
+    en.quote={price:num('q-p'),sena:num('q-s'),demora:document.getElementById('q-t').value.trim()}; en.status='Presupuestado'; closeSheet();
+    toast(en.sid?`Presupuesto enviado. ${en.who.split(' ')[0]} lo ve en la app y por WhatsApp`:`Presupuesto enviado por WhatsApp a ${en.who.split(' ')[0]}`); return; }
   if(f==='product'){ const n=document.getElementById('np-n').value, p=parseInt(document.getElementById('np-p').value.replace(/\D/g,''))||0, c=document.getElementById('np-c').value, u=document.getElementById('np-u').checked;
     S.products.unshift({id:'pr'+Date.now(),name:n,cat:c,price:p,unique:u,available:true,stock:u?1:5,art:c==='joyitas'?'aros':'cuenco',bg:C.lila,fg:C.bordo,desc:'Nueva en la tienda.',img:sheetCtx.newImg||null}); closeSheet(); toast('Publicado en la tienda'); return; }
   if(f==='student'){ const n=document.getElementById('ns-n').value.trim(); const id='n'+Date.now(); S.students.push({id,name:n,short:n.split(' ')[0],phone:document.getElementById('ns-p').value,used:0,total:parseInt(document.getElementById('ns-c').value)||4,ledger:[{id:id+'-nov',month:CUR,kind:'abono',label:'Mensualidad de noviembre',amount:S.settings.mensualidad,status:'pendiente'}],recover:[],remind:true,pending:null,pieces:[],attended:{},av:C.rosa}); closeSheet(); toast(n+' ya es parte de Hipatia'); return; }

@@ -20,7 +20,7 @@ Nunca inventes una política del taller. Si una decisión es de Pauli, anotala c
 
 - **Fase 0 terminada:** publicada en https://duranmf89.github.io/hipatia-ceramica/ e instalable en el celular.
 - **Fase 1 en curso:** recorrer todos los flujos, corregir lo que no cierra y responder las preguntas abiertas.
-- Todo vive en `index.html`: HTML, CSS y JS en un solo archivo. Los datos de prueba se guardan en `localStorage` con la clave `hipatia-demo` (versión 5) y "Empezar de cero" los reinicia.
+- Todo vive en `index.html`: HTML, CSS y JS en un solo archivo. Los datos de prueba se guardan en `localStorage` con la clave `hipatia-demo` (versión 6) y "Empezar de cero" los reinicia.
 - Login, Mercado Pago y WhatsApp están **simulados**. No hay servidor.
 - `manifest.webmanifest`, `sw.js` y los `icon-*.png` sirven para instalarla en el celular. Las etiquetas del `<head>` que los enlazan y el script que registra `sw.js` antes de `</body>` hay que conservarlos.
 
