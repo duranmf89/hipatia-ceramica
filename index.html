@@ -195,6 +195,9 @@ textarea.input{padding:14px 16px;min-height:96px;resize:vertical}
 .prod .price{font-family:var(--serif);font-weight:650;color:var(--bordo);font-size:19px;margin-top:4px}
 .prod.sold{opacity:.55}
 .tag{position:absolute;top:10px;left:10px;background:#fff;color:var(--bordo);border-radius:99px;padding:3px 10px;font-size:12.5px;font-weight:700}
+.savebar{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:31;width:min(560px,calc(100% - 32px));display:none;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;background:var(--ink,#3A1714);color:#fff;border-radius:20px;padding:12px 14px 12px 18px;font-weight:600;box-shadow:0 12px 28px -12px #0008}
+.savebar.show{display:flex}
+@media (max-width:900px){.savebar{bottom:100px}}
 .cartbar{position:fixed;left:50%;transform:translateX(-50%);bottom:96px;z-index:29;width:min(500px,calc(100% - 36px));display:flex;justify-content:space-between;align-items:center;background:var(--bordo);color:#fff;border-radius:20px;padding:14px 18px;font-weight:600;box-shadow:0 12px 28px -12px #962019aa}
 
 /* sheet */
@@ -450,9 +453,9 @@ function seed(){
   const NOMBRES=['Rocío Herrera','Inés Carranza','Agustina Molina','Florencia Sosa','Victoria Romero','Carla Medina','Belén Ortiz','Natalia Díaz','Paula Rey','Sol Vega'];
   const gente=(from,n)=>NOMBRES.slice(from,from+n).map((name,i)=>({id:'wp'+(from+i),sid:null,name,phone:'351 555 '+String(200+from+i).padStart(4,'0'),method:'Mercado Pago',status:'confirmado'}));
   const workshops = [
-    {id:'w1',name:'Tazas con asa',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,people:gente(0,5),art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
-    {id:'w2',name:'Joyitas de cerámica',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,people:gente(5,3),art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
-    {id:'w3',name:'Adornos navideños',date:'Sábado 5 de diciembre',time:'16 a 18 hs',price:20000,cap:10,people:gente(8,2),art:'corazon',color:C.oliva,desc:'Estrellas, corazones y colgantes para el arbolito. Ideal para venir con amigas o con tu mamá.'}
+    {id:'w1',name:'Tazas con asa',iso:'2026-11-21',date:'Sábado 21 de noviembre',time:'16 a 18:30 hs',price:28000,cap:8,people:gente(0,5),art:'taza',color:C.naranja,desc:'Hacés tu taza desde cero con la técnica de pellizco. Incluye materiales, esmalte y horneado. Té y algo rico.'},
+    {id:'w2',name:'Joyitas de cerámica',iso:'2026-11-27',date:'Viernes 27 de noviembre',time:'17 a 19 hs',price:22000,cap:8,people:gente(5,3),art:'aros',color:C.bordo,desc:'Aros y dijes chiquitos, esmaltados a tu gusto. Te los llevás armados a la semana siguiente.'},
+    {id:'w3',name:'Adornos navideños',iso:'2026-12-05',date:'Sábado 5 de diciembre',time:'16 a 18 hs',price:20000,cap:10,people:gente(8,2),art:'corazon',color:C.oliva,desc:'Estrellas, corazones y colgantes para el arbolito. Ideal para venir con amigas o con tu mamá.'}
   ];
   const products = [
     {id:'pr1',name:'Aros estrella',cat:'joyitas',price:9500,unique:false,available:true,stock:6,art:'aros',bg:C.rosa,fg:C.bordo,desc:'Esmaltados a mano, con ganchos de acero quirúrgico. Livianos para usar todo el día.'},
@@ -468,7 +471,7 @@ function seed(){
     v:6, renewed:{},
     view:'login', loginRole:'alumna', tab:'inicio', otab:'hoy', clsSeg:'clases', storeCat:'todo', storeSeg:'productos', aluFilter:'todas', aluQuery:'',
     me:'sofia',
-    settings:{mensualidad:45000,clases:4,chica:2000,mediana:3500,grande:5000,suelta:13000,alias:'hipatia.ceramica',titular:'Paula González',horas:24,pagoHasta:10,recupera:'fin del mes siguiente',rem:{clase:true,pago:true,pieza:true,cierre:true}},
+    settings:{mensualidad:45000,clases:4,chica:2000,mediana:3500,grande:5000,suelta:13000,alias:'hipatia.ceramica',titular:'Paula González',horas:24,pagoHasta:10,recupera:'fin del mes siguiente',envio:3500,prox:null,rem:{clase:true,pago:true,pieza:true,cierre:true}},
     students:st, slots, workshops,
     products, cart:[],
     orders:[{id:'o1',who:'Rocío Herrera',phone:'351 555 0200',items:'Aros estrella x2',total:19000,delivery:'Retiro en el taller',method:'Mercado Pago',status:'Nuevo',paid:true},
@@ -563,11 +566,13 @@ function monthState(items, m, s){
   return {k:'ok',t:'Pagado'};
 }
 const ledgerMonths = s => [...new Set(s.ledger.map(x=>x.month))].sort().reverse();
+const precioProx = () => (S.settings.prox||{}).mensualidad ?? S.settings.mensualidad;
+const clasesProx = () => (S.settings.prox||{}).clases ?? S.settings.clases;
 function renewPreview(){
   const charge=S.students.filter(s=>!isPaused(s,NEXT)&&!abono(s,NEXT));
   const pause=S.students.filter(s=>isPaused(s,NEXT));
   const debtors=charge.filter(s=>debtItems(s).some(x=>x.month<CUR));
-  return {charge,pause,debtors,total:charge.length*S.settings.mensualidad};
+  return {charge,pause,debtors,total:charge.length*precioProx()};
 }
 const cartCount = () => S.cart.reduce((a,c)=>a+c.qty,0);
 const cartTotal = () => S.cart.reduce((a,c)=>a+c.qty*S.products.find(p=>p.id===c.pid).price,0);
@@ -854,7 +859,7 @@ function publicView(){
 function aCuenta(s){
   return `<div class="row mt10" style="gap:16px"><div class="avatar" style="width:72px;height:72px;font-size:32px;border-radius:22px;background:${s.av};color:${C.bordo}">${s.short[0]}</div><div><h2>${esc(s.name)}</h2><p class="muted small">Alumna desde marzo</p></div></div>
   <section class="section panel rosa"><div class="row between"><h3>Tu plan</h3><span class="chip ok">Activo</span></div>
-    <p class="mt10"><b>Mensualidad ${fmt(S.settings.mensualidad)}</b></p><p class="small muted">${S.settings.clases} clases de 2 horas por mes, materiales y 1 pieza mediana incluida.</p>${planLine(s)}</section>
+    <p class="mt10"><b>Mensualidad ${fmt(S.settings.mensualidad)}</b></p><p class="small muted">${S.settings.clases} clases de 2 horas por mes, materiales y 1 pieza mediana incluida.</p>${S.settings.prox?`<p class="small mt6"><b>Desde ${MES[S.settings.prox.desde]}:</b> ${fmt(S.settings.prox.mensualidad)} por mes, ${S.settings.prox.clases} clases.</p>`:''}${planLine(s)}</section>
   <section class="section"><h2 style="margin-bottom:12px">Tu cuenta</h2><div class="list">
     ${s.pending?`<div class="li"><div style="flex:1"><b>Pago de ${fmt(s.pending.amount)}</b><div class="tiny muted">${s.pending.date}, ${s.pending.method}</div></div><span class="chip rev">En revisión</span></div>`:''}
     ${ledgerMonths(s).map(m=>{const items=s.ledger.filter(x=>x.month===m), st=monthState(items,m,s);return `<div class="li" style="align-items:flex-start"><div style="flex:1;min-width:0"><b>${cap(MES[m])}</b>${items.map(i=>`<div class="tiny muted">${esc(i.kind==='abono'?'Mensualidad':i.label)}${i.status==='pendiente'?' '+fmt(i.amount):''}, ${itemStatusText(i,s)}</div>`).join('')}</div><span class="chip ${st.k}">${st.t}</span></div>`}).join('')}
@@ -863,7 +868,7 @@ function aCuenta(s){
   </section>
   <section class="section"><h2 style="margin-bottom:12px">Tus datos</h2><div class="list">
     <div class="li"><span class="muted" style="flex:1">Celular</span><b>${s.phone}</b></div>
-    <div class="li"><div style="flex:1"><span>Recordatorios por WhatsApp</span><div class="tiny muted">Clases, pagos y piezas listas</div></div><button class="toggle ${s.remind?'on':''}" data-act="remindToggle" role="switch" aria-checked="${s.remind}" aria-label="Recordatorios por WhatsApp"></button></div>
+    <div class="li"><div style="flex:1"><span>Recordatorios por WhatsApp</span><div class="tiny muted">Clases, pagos y piezas listas. El aviso de taller cerrado te llega siempre.</div></div><button class="toggle ${s.remind?'on':''}" data-act="remindToggle" role="switch" aria-checked="${s.remind}" aria-label="Recordatorios por WhatsApp"></button></div>
   </div>${rulesLink()}</section>
   <section class="section"><button class="btn ghost block" data-act="logout">${ic('logout',20)} Salir</button></section>`;
 }
@@ -928,7 +933,7 @@ function oAgenda(){
     <div style="flex:1"><div class="row between"><b>${sl.dow} ${sl.d}, ${sl.time}</b><span class="small ${pct>=100?'':'muted'}" style="${pct>=100?'color:'+C.bordo+';font-weight:700':''}">${sl.list.length} de ${sl.cap}</span></div>
     <div class="bar mt6"><i style="width:${pct}%;background:${pct>=100?C.bordo:pct>=67?C.naranja:C.oliva}"></i></div>
     <div class="tiny muted mt6">${sl.list.map(id=>stu(id).short).join(', ')||'Nadie anotada todavía'}</div></div>${ic('chev',20)}</button>`}).join('')}
-    <h2 class="mt18">Tallercitos</h2>
+    <div class="row between mt18" style="gap:10px"><h2>Tallercitos</h2><button class="btn soft sm" data-act="wsForm">${ic('plus',18)} Nuevo tallercito</button></div>
     ${S.workshops.map(w=>{const rev=w.people.filter(x=>x.status==='revision').length;return `<button class="slot" style="width:100%;text-align:left;margin:0" data-act="ows" data-w="${w.id}"><div class="datebox" style="background:#E9ECCB;color:${C.oliva}">${star(C.oliva,{size:30})}</div><div style="flex:1;min-width:0"><div class="row between"><b>${esc(w.name)}</b><span class="small"><b>${wsTaken(w)}</b> de ${w.cap}</span></div><div class="small muted">${w.date}, ${w.time}</div><div class="bar mt6"><i style="width:${wsTaken(w)/w.cap*100}%;background:${C.oliva}"></i></div>${rev?`<div class="tiny muted mt6">${rev} con transferencia en revisión</div>`:''}</div>${ic('chev',20)}</button>`}).join('')}
   </div>`;
 }
@@ -974,8 +979,8 @@ function oTienda(){
   const seg=S.storeSeg;
   const tabs=`<div class="seg" style="max-width:480px;margin-bottom:16px">${[['productos','Productos'],['pedidos','Pedidos'],['encargos','Encargos']].map(([k,l])=>`<button class="${seg===k?'on':''}" data-act="storeSeg" data-v="${k}">${l}</button>`).join('')}</div>`;
   let body='';
-  if(seg==='productos') body=`<div class="list">${S.products.map(p=>`<div class="li"><label title="Cambiar foto" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none;position:relative;cursor:pointer">${pimg(p)}<span style="position:absolute;right:3px;bottom:3px;width:24px;height:24px;border-radius:8px;background:#fffffff0;color:${C.bordo};display:grid;place-items:center">${ic('upload',14,2.4)}</span><input type="file" accept="image/*" hidden data-file="pimg" data-p="${p.id}" aria-label="Cambiar foto de ${esc(p.name)}"></label><div style="flex:1;min-width:0"><b>${esc(p.name)}</b><div class="num small">${fmt(p.price)}</div><div class="tiny muted">${p.unique?'Pieza única':`${p.stock} en stock`}, ${p.cat==='joyitas'?'Joyitas':'En casa'}${p.available?'':'. No se ve en la tienda'}</div></div><button class="toggle ${p.available?'on':''}" data-act="ptoggle" data-p="${p.id}" role="switch" aria-checked="${p.available}" aria-label="Mostrar ${esc(p.name)} en la tienda"></button></div>`).join('')}</div>`;
-  if(seg==='productos') body=`<div class="panel rosa" style="padding:14px 18px;margin-bottom:12px"><p class="small"><b>Tocá la foto de un producto para cambiarla.</b> Podés sacarla con el celu en el momento o elegirla de tu galería.</p></div>`+body;
+  if(seg==='productos') body=`<div class="list">${S.products.map(p=>`<div class="li"><label title="Cambiar foto" style="width:64px;height:64px;border-radius:14px;overflow:hidden;flex:none;position:relative;cursor:pointer">${pimg(p)}<span style="position:absolute;right:3px;bottom:3px;width:24px;height:24px;border-radius:8px;background:#fffffff0;color:${C.bordo};display:grid;place-items:center">${ic('upload',14,2.4)}</span><input type="file" accept="image/*" hidden data-file="pimg" data-p="${p.id}" aria-label="Cambiar foto de ${esc(p.name)}"></label><div style="flex:1;min-width:0;cursor:pointer" data-act="editProd" data-p="${p.id}" role="button" tabindex="0" aria-label="Editar ${esc(p.name)}"><b>${esc(p.name)}</b><div class="num small">${fmt(p.price)}</div><div class="tiny muted">${p.unique?'Pieza única':`${p.stock} en stock`}, ${p.cat==='joyitas'?'Joyitas':'En casa'}${p.available?'':'. No se ve en la tienda'}</div></div><button class="toggle ${p.available?'on':''}" data-act="ptoggle" data-p="${p.id}" role="switch" aria-checked="${p.available}" aria-label="Mostrar ${esc(p.name)} en la tienda"></button></div>`).join('')}</div>`;
+  if(seg==='productos') body=`<div class="panel rosa" style="padding:14px 18px;margin-bottom:12px"><p class="small"><b>Tocá la foto de un producto para cambiarla</b>, con el celu en el momento o de tu galería. <b>Tocá el nombre</b> para cambiar el precio, el stock o la descripción.</p></div>`+body;
   if(seg==='pedidos') body=`<div class="list">${S.orders.map(o=>`<div class="li" style="flex-wrap:wrap"><div style="flex:1;min-width:180px"><b>${esc(o.who)}</b><div class="small">${esc(o.items)}</div><div class="tiny muted">${o.delivery}, ${o.method}${o.needsReview?', comprobante para revisar':''}</div>${o.phone?`<div class="tiny muted">WhatsApp ${esc(o.phone)}</div>`:''}</div><span class="num">${fmt(o.total)}</span>${o.status==='Cancelado'?'<span class="chip bad">Cancelado</span>':`<button class="chip ${o.status==='Nuevo'?'warn':o.status==='Entregado'?'ok':'rev'}" data-act="ostatus" data-o="${o.id}" title="Cambiar estado">${o.status} ${ic('chev',14,2.5)}</button>`}</div>`).join('')}</div><p class="small muted mt10">Tocá el estado para pasarlo de Nuevo a Preparando y a Entregado.</p>`;
   if(seg==='encargos') body=`<div class="stack gap10">${S.encargos.map(e=>{const q=e.quote, k={'Nuevo':'warn','Presupuestado':'rev','Seña en revisión':'rev','No aceptado':'bad'}[e.status]||'ok';
     const btn={'Nuevo':`<button class="btn sm mt14" data-act="quote" data-e="${e.id}">Pasar presupuesto</button>`,
@@ -986,18 +991,43 @@ function oTienda(){
     return `<div class="panel"><div class="row between" style="gap:10px"><b>${esc(e.who)}</b><span class="chip ${k}">${e.status}</span></div>${e.phone?`<p class="tiny muted mt6">WhatsApp ${esc(e.phone)}</p>`:''}<p class="mt10">${esc(e.what)}</p><p class="small muted mt6">Para: ${esc(e.when||'sin fecha')}</p>${q?`<p class="small mt6">Presupuesto: <b>${fmt(q.price)}</b>${q.sena?`, seña ${fmt(q.sena)}`:', sin seña'}${q.demora?`, ${esc(q.demora)}`:''}</p>`:''}${btn}</div>`}).join('')}</div>`;
   return ownerTop('Tienda','Lo que se ve en la tienda, los pedidos y los encargos a medida.', seg==='productos'?`<button class="btn" data-act="newProduct">${ic('plus',20)} Nuevo producto</button>`:'')+tabs+body;
 }
+let setDraft={}, setErr={};
+const SET_NUM={mensualidad:[1,null,'El precio tiene que ser mayor a 0'],clases:[1,12,'Entre 1 y 12 clases'],suelta:[1,null,'El precio tiene que ser mayor a 0'],chica:[1,null,'El precio tiene que ser mayor a 0'],mediana:[1,null,'El precio tiene que ser mayor a 0'],grande:[1,null,'El precio tiene que ser mayor a 0'],envio:[1,null,'El precio tiene que ser mayor a 0'],horas:[0,168,'Entre 0 y 168 horas'],pagoHasta:[1,28,'Un día entre el 1 y el 28']};
+const setVal = k => setDraft[k] ?? (S.settings.prox&&(k==='mensualidad'||k==='clases') ? S.settings.prox[k] : S.settings[k]);
+const settingsDirty = () => Object.keys(setDraft).length>0;
+function remExamples(){
+  const st=S.settings, fut=S.slots.find(sl=>!isPast(sl)&&!sl.closed&&sl.list.length), a=fut?stu(fut.list[0]):S.students[0];
+  const pz=S.students.flatMap(x=>x.pieces.filter(p=>p.stage===4).map(p=>({x,p})))[0], cerr=S.slots.find(sl=>sl.closed);
+  return [['clase','Clase, el día anterior',fut?`Hola ${a.short} ✶ Mañana tenés clase de ${fut.time}. ¿No podés venir? Cambiá el día desde la app.`:'Hola ✶ Mañana tenés clase.'],
+    ['pago',st.pagoHasta>5?`Pago, los días 5 y ${st.pagoHasta} si no pagó`:`Pago, el día ${st.pagoHasta} si no pagó`,`Hola ${a.short}, te recordamos que la mensualidad de ${MES[CUR]} vence el día ${st.pagoHasta}.`],
+    ['pieza','Pieza lista para retirar',pz?`Hola ${pz.x.short}, tu ${pz.p.name.toLowerCase()} ya salió del horno ✶ Retirala en tu próxima clase.`:'Tu pieza ya salió del horno ✶ Retirala en tu próxima clase.'],
+    ['cierre','Taller cerrado, apenas lo cargás',cerr?`El ${cerr.dow.toLowerCase()} ${cerr.d} el taller está cerrado. Tu clase queda para recuperar.`:'El taller está cerrado ese día. Tu clase queda para recuperar.']];
+}
+function horarios(){
+  const m=new Map(); S.slots.filter(sl=>!isPast(sl)&&!sl.closed).forEach(sl=>{ const k=sl.dow+'|'+sl.time; if(!m.has(k)) m.set(k,{dow:sl.dow,time:sl.time,cap:sl.cap,n:0,max:0,res:0}); const h=m.get(k); h.n++; h.max=Math.max(h.max,sl.list.length); h.res+=sl.list.length; h.cap=sl.cap; });
+  const order=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  return [...m.values()].sort((a,b)=>order.indexOf(a.dow)-order.indexOf(b.dow)||a.time.localeCompare(b.time));
+}
 function oAjustes(){
-  const st=S.settings;
-  const f=(k,l,pre='$')=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" class="input" inputmode="numeric" data-set="${k}" value="${st[k]}"></div>`;
-  return ownerTop('Precios y ajustes','Lo que cambies acá lo ven las alumnas al instante.')+
-  `<div class="cols" style="margin-top:0"><div class="panel"><h3>Mensualidad</h3><div class="mt14">${f('mensualidad','Precio por mes')}${f('clases','Clases por mes')}${f('suelta','Clase suelta')}</div><p class="small muted">Incluye 1 pieza mediana por mes.</p></div>
+  const st=S.settings, px=st.prox;
+  const f=(k,l)=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" class="input" inputmode="numeric" data-set="${k}" value="${esc(String(setVal(k)))}" ${setErr[k]?'aria-invalid="true" style="border-color:'+C.bordo+'"':''}>${setErr[k]?`<p class="tiny mt6" style="color:${C.bordo}">${setErr[k]}</p>`:''}</div>`;
+  const t=(k,l)=>`<div class="field"><label for="set-${k}">${l}</label><input id="set-${k}" class="input" data-set="${k}" value="${esc(setVal(k))}">${setErr[k]?`<p class="tiny mt6" style="color:${C.bordo}">${setErr[k]}</p>`:''}</div>`;
+  return ownerTop('Precios y ajustes','Las alumnas ven los cambios apenas guardás. La mensualidad y las clases por mes rigen desde el mes siguiente.')+
+  `<div class="cols" style="margin-top:0"><div class="panel"><h3>Mensualidad</h3><div class="mt14">${f('mensualidad','Precio por mes')}${f('clases','Clases por mes')}</div>
+    ${px?`<p class="small" style="margin-bottom:12px"><b>Rige desde ${MES[px.desde]}.</b> ${cap(MES[CUR])} sigue a ${fmt(st.mensualidad)} y ${st.clases} clases.</p>`:`<p class="tiny muted" style="margin-bottom:12px">Si lo cambiás, rige desde ${MES[NEXT]}.</p>`}
+    ${f('suelta','Clase suelta')}<p class="small muted">Incluye 1 pieza mediana por mes.</p></div>
   <div class="panel"><h3>Piezas extra</h3><div class="mt14">${f('chica','Pieza chica')}${f('mediana','Pieza mediana')}${f('grande','Pieza grande')}</div></div>
-  <div class="panel"><h3>Cobros por transferencia</h3><div class="mt14"><div class="field"><label for="set-alias">Alias</label><input id="set-alias" class="input" data-set="alias" value="${esc(st.alias)}"></div><div class="field"><label for="set-titular">Titular</label><input id="set-titular" class="input" data-set="titular" value="${esc(st.titular)}"></div></div></div>
-  <div class="panel"><h3>Reglas del taller</h3><p class="small muted mt6">Las alumnas las ven en un link chiquito, sin ocupar lugar.</p><div class="mt14">${f('horas','Cambiar de día hasta cuántas horas antes')}${f('pagoHasta','El abono se paga hasta el día')}<div class="field"><label for="set-recupera">Las clases a recuperar valen hasta</label><select id="set-recupera" class="input" data-set="recupera">${['fin de mes','fin del mes siguiente','2 meses'].map(o=>`<option ${st.recupera===o?'selected':''}>${o}</option>`).join('')}</select></div></div></div>
-  <div class="panel"><h3>Recordatorios automáticos</h3><p class="small muted mt6">Salen solos por WhatsApp. Cada alumna puede apagarlos desde su cuenta.</p>
-    <div class="stack mt14">${[['clase','Clase, el día anterior','Hola Sofi ✶ Mañana tenés clase a las 18 hs. ¿No podés venir? Cambiá el día desde la app.'],['pago',`Pago, los días 5 y ${st.pagoHasta} si no pagó`,`Hola Sofi, te recordamos que el abono de diciembre vence el día ${st.pagoHasta}.`],['pieza','Pieza lista para retirar','Tu cuenco ya salió del horno ✶ Retiralo en tu próxima clase.'],['cierre','Taller cerrado, apenas lo cargás','El sábado 28 el taller está cerrado. Tu clase queda para recuperar.']].map(([k,l,ex])=>`<div class="row" style="gap:12px;padding:10px 0;border-bottom:1.5px solid var(--line);align-items:flex-start"><div style="flex:1"><b class="small">${l}</b><div class="tiny muted mt6">“${ex}”</div></div><button class="toggle ${st.rem[k]?'on':''}" data-act="remToggle" data-k="${k}" role="switch" aria-checked="${st.rem[k]}" aria-label="${l}"></button></div>`).join('')}</div></div></div>
-  <button class="btn mt18" data-act="saveSettings">Guardar cambios</button>
-  <button class="btn ghost block mt24 logout-mobile" data-act="logout">${ic('logout',20)} Salir</button>`;
+  <div class="panel"><h3>Cobros por transferencia</h3><div class="mt14">${t('alias','Alias')}${t('titular','Titular')}</div></div>
+  <div class="panel"><h3>Tienda</h3><div class="mt14">${f('envio','Envío en Córdoba capital')}</div></div>
+  <div class="panel"><h3>Horarios y cupos</h3><p class="small muted mt6">Tocá un horario para cambiar el cupo o quitarlo. Los cambios valen para las clases que vienen.</p>
+    <div class="list mt14">${horarios().map(h=>`<button class="li" data-act="horario" data-dow="${h.dow}" data-time="${esc(h.time)}"><div style="flex:1;min-width:0"><b>${h.dow}, ${esc(h.time)}</b><div class="tiny muted">${h.cap} lugares por clase</div></div>${ic('chev',18)}</button>`).join('')}</div>
+    <button class="btn soft sm mt14" data-act="newHorario">${ic('plus',18)} Sumar horario</button></div>
+  <div class="panel"><h3>Reglas del taller</h3><p class="small muted mt6">Las alumnas las ven en un link chiquito, sin ocupar lugar.</p><div class="mt14">${f('horas','Cambiar de día hasta cuántas horas antes')}${f('pagoHasta','El abono se paga hasta el día')}<div class="field"><label for="set-recupera">Las clases a recuperar valen hasta</label><select id="set-recupera" class="input" data-set="recupera">${['fin de mes','fin del mes siguiente','2 meses'].map(o=>`<option ${setVal('recupera')===o?'selected':''}>${o}</option>`).join('')}</select></div></div></div>
+  <div class="panel"><h3>Recordatorios automáticos</h3><p class="small muted mt6">Salen solos por WhatsApp. Cada alumna puede apagar los de clase, pago y pieza desde su cuenta; el de taller cerrado le llega siempre.</p>
+    <div class="stack mt14">${remExamples().map(([k,l,ex])=>`<div class="row" style="gap:12px;padding:10px 0;border-bottom:1.5px solid var(--line);align-items:flex-start"><div style="flex:1"><b class="small">${l}</b><div class="tiny muted mt6">“${esc(ex)}”</div></div><button class="toggle ${st.rem[k]?'on':''}" data-act="remToggle" data-k="${k}" role="switch" aria-checked="${st.rem[k]}" aria-label="${l}"></button></div>`).join('')}</div></div></div>
+  <div class="savebar ${settingsDirty()?'show':''}" role="status"><span>Tenés cambios sin guardar</span><span class="row" style="gap:8px"><button class="btn ghost sm" style="background:#fff" data-act="discardSettings">Descartar</button><button class="btn sm" data-act="saveSettings">Guardar</button></span></div>
+  <button class="btn ghost block mt24 logout-mobile" data-act="logout">${ic('logout',20)} Salir</button>
+  <div style="height:110px" aria-hidden="true"></div>`;
 }
 
 /* =========================================================
@@ -1059,11 +1089,13 @@ const A = {
   go(el){ S.view=el.dataset.v; sheetHTML=null; window.scrollTo(0,0); render(false); },
   reset(){ try{localStorage.removeItem('hipatia-demo')}catch(e){} S=seed(); sheetHTML=null; render(false); toast('La maqueta volvió al inicio'); },
   role(el){ S.loginRole=el.dataset.v; render(); },
-  logout(){ S.view='login'; render(false); },
+  logout(){ setDraft={}; setErr={}; S.view='login'; render(false); },
   close(){ closeSheet(); },
   scrim(el,e){ if(e.target===el) closeSheet(); },
   tab(el){ S.tab=el.dataset.v; window.scrollTo(0,0); render(false); },
-  otab(el){ S.otab=el.dataset.v; window.scrollTo(0,0); render(false); },
+  otab(el){ const v=el.dataset.v;
+    if(S.otab==='ajustes'&&v!=='ajustes'&&settingsDirty()){ openSheet(head('Tenés cambios sin guardar','Si te vas ahora, se pierden.')+`<button class="btn block" data-act="saveSettings" data-next="${v}">Guardar y seguir</button><button class="btn ghost block mt10" data-act="discardSettings" data-next="${v}">Descartar cambios</button><button class="link block mt14" data-act="close">Volver a Ajustes</button>`); return; }
+    S.otab=v; window.scrollTo(0,0); render(false); },
   clsSeg(el){ S.clsSeg=el.dataset.v; render(); },
   cat(el){ S.storeCat=el.dataset.v; render(); },
   storeSeg(el){ S.storeSeg=el.dataset.v; render(); },
@@ -1088,7 +1120,7 @@ const A = {
   regPay(el){ const s=stu(el.dataset.s); sheetCtx={s:s.id,sel:debtItems(s).map(i=>i.id),method:'Efectivo'}; openSheet(regPaySheet(),sheetCtx); },
   confirmReg(){ const s=stu(sheetCtx.s); const items=debtItems(s).filter(i=>sheetCtx.sel.includes(i.id)); const tot=items.reduce((a,b)=>a+b.amount,0); payItems(s,items.map(i=>i.id),sheetCtx.method); closeSheet(); toast(`Registraste ${fmt(tot)} de ${s.short}. ${debt(s)?'Sigue debiendo '+fmt(debt(s)):'Quedó al día'}`); },
   renewDetail(){ openSheet(renewSheet()); },
-  renewNow(){ const pv=renewPreview(); pv.charge.forEach(s=>s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:S.settings.mensualidad,status:'pendiente'})); pv.pause.forEach(s=>{ if(!abono(s,NEXT)) s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:0,status:'pausa'}); }); S.renewed[NEXT]={count:pv.charge.length,total:pv.total}; closeSheet(); toast(`Diciembre generado: ${pv.charge.length} abonos`); },
+  renewNow(){ const pv=renewPreview(); pv.charge.forEach(s=>s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:precioProx(),status:'pendiente'})); pv.pause.forEach(s=>{ if(!abono(s,NEXT)) s.ledger.push({id:s.id+'-dic',month:NEXT,kind:'abono',label:'Mensualidad de diciembre',amount:0,status:'pausa'}); }); S.renewed[NEXT]={count:pv.charge.length,total:pv.total}; closeSheet(); toast(`Diciembre generado: ${pv.charge.length} abonos`); },
   closeDay(){ sheetCtx={}; openSheet(closeDaySheet(),{}); },
   reason(el){ sheetCtx.reason=el.dataset.v; sheetHTML=closeDaySheet(); render(); },
   confirmClose(){ const sl=S.slots.find(x=>x.id===sheetCtx.slot); if(!sl){ toast('Elegí qué día cerrás'); return; } const reason=sheetCtx.reason||'Feriado'; const n=sl.list.length; sl.list.forEach(id=>stu(id).recover.push({note:`Cierre del ${sl.dow.toLowerCase()} ${sl.d}`,from:`${sl.dow.toLowerCase()} ${sl.d}`,cierre:true})); sl.list=[]; sl.closed={reason}; S.avisos.unshift({kind:'cierre',text:`El ${sl.dow.toLowerCase()} ${sl.d} el taller está cerrado por ${reason.toLowerCase()}. Si tenías clase ese día, ya la tenés para recuperar: elegí otro día desde Clases.`,date:'Recién'}); closeSheet(); toast(`Listo. Avisamos a ${n} alumnas y su clase queda para recuperar`); },
@@ -1149,7 +1181,7 @@ const A = {
   cart(){ openSheet(cartSheet()); },
   qty(el){ const c=S.cart.find(x=>x.pid===el.dataset.p); const p=S.products.find(x=>x.id===c.pid); c.qty+=+el.dataset.d; if(p.unique&&c.qty>1)c.qty=1; if(c.qty<=0) S.cart=S.cart.filter(x=>x!==c); if(!S.cart.length){closeSheet();return;} sheetHTML=cartSheet(); render(); },
   delivery(el){ sheetCtx.delivery=el.dataset.v; sheetHTML=cartSheet(); render(); },
-  checkout(){ if(S.view==='tienda'){ if(!(sheetCtx.gname||'').trim()||!(sheetCtx.gphone||'').trim()){ toast('Completá tu nombre y WhatsApp para seguir'); return; } S.guest={name:sheetCtx.gname.trim(),phone:sheetCtx.gphone.trim()}; } const ship = sheetCtx.delivery==='envio'?3500:0; const d=sheetCtx.delivery; sheetCtx={kind:'orden',amount:cartTotal()+ship,title:'Pagar tu compra',delivery:d}; openSheet(paySheet(sheetCtx),sheetCtx); },
+  checkout(){ if(S.view==='tienda'){ if(!(sheetCtx.gname||'').trim()||!(sheetCtx.gphone||'').trim()){ toast('Completá tu nombre y WhatsApp para seguir'); return; } S.guest={name:sheetCtx.gname.trim(),phone:sheetCtx.gphone.trim()}; } const ship = sheetCtx.delivery==='envio'?S.settings.envio:0; const d=sheetCtx.delivery; sheetCtx={kind:'orden',amount:cartTotal()+ship,title:'Pagar tu compra',delivery:d}; openSheet(paySheet(sheetCtx),sheetCtx); },
 
   /* owner */
   att(el){ const s=stu(el.dataset.s), k=el.dataset.slot, v=el.dataset.v, sl=S.slots.find(x=>x.id===k), prev=asistencia(s,k);
@@ -1202,7 +1234,36 @@ const A = {
   declineQuote(el){ const en=S.encargos.find(x=>x.id===el.dataset.e); en.status='No aceptado'; render(); toast('Le avisamos a Pauli'); },
   ows(el){ const w=S.workshops.find(x=>x.id===el.dataset.w);
     openSheet(head(esc(w.name),`${w.date}, ${w.time}. ${wsTaken(w)} de ${w.cap} lugares`)+`<div class="list">${w.people.map(x=>`<div class="li"><div style="flex:1;min-width:0"><b>${esc(x.name)}</b><div class="tiny muted">${x.phone?'WhatsApp '+esc(x.phone)+', ':''}${x.method}</div></div><span class="chip ${x.status==='revision'?'rev':'ok'}">${x.status==='revision'?'En revisión':'Pagado'}</span></div>`).join('')||'<div class="li muted">Nadie anotada todavía.</div>'}</div>
-    <p class="tiny muted mt10">Las transferencias en revisión se aprueban desde Cobros.</p>`); },
+    <p class="tiny muted mt10">Las transferencias en revisión se aprueban desde Cobros.</p><button class="btn ghost block mt14" data-act="wsForm" data-w="${w.id}">Editar tallercito</button>`); },
+  wsForm(el){ const w=el.dataset.w?S.workshops.find(x=>x.id===el.dataset.w):null, v=k=>w?esc(String(w[k]??'')):'';
+    openSheet(head(w?'Editar tallercito':'Nuevo tallercito',w?`${wsTaken(w)} anotadas`:'Aparece para las alumnas y en la tienda pública.')+`<form data-form="ws" data-w="${w?w.id:''}">
+      <div class="field"><label for="ws-n">Nombre</label><input id="ws-n" class="input" required value="${v('name')}"></div>
+      <div class="field"><label for="ws-d">Fecha</label><input id="ws-d" class="input" type="date" required value="${v('iso')}"></div>
+      <div class="field"><label for="ws-t">Horario</label><input id="ws-t" class="input" required placeholder="Ej: 16 a 18 hs" value="${v('time')}"></div>
+      <div class="field"><label for="ws-p">Precio</label><input id="ws-p" class="input" inputmode="numeric" required value="${v('price')}"></div>
+      <div class="field"><label for="ws-c">Lugares</label><input id="ws-c" class="input" inputmode="numeric" required value="${v('cap')}"></div>
+      <div class="field"><label for="ws-x">Descripción</label><textarea id="ws-x" class="input" required>${v('desc')}</textarea></div>
+      <button class="btn block" type="submit">${w?'Guardar cambios':'Publicar tallercito'}</button></form>`); },
+  editProd(el){ const p=S.products.find(x=>x.id===el.dataset.p);
+    openSheet(head('Editar producto',esc(p.name))+`<form data-form="editprod" data-p="${p.id}">
+      <div class="field"><label for="ep-n">Nombre</label><input id="ep-n" class="input" required value="${esc(p.name)}"></div>
+      <div class="field"><label for="ep-p">Precio</label><input id="ep-p" class="input" inputmode="numeric" required value="${p.price}"></div>
+      ${p.unique?'<p class="small muted" style="margin-bottom:14px">Es pieza única: hay una sola.</p>':`<div class="field"><label for="ep-s">Stock</label><input id="ep-s" class="input" inputmode="numeric" required value="${p.stock}"></div>`}
+      <div class="field"><label for="ep-c">Categoría</label><select id="ep-c" class="input"><option value="casa" ${p.cat==='casa'?'selected':''}>En casa</option><option value="joyitas" ${p.cat==='joyitas'?'selected':''}>Joyitas</option></select></div>
+      <div class="field"><label for="ep-x">Descripción</label><textarea id="ep-x" class="input">${esc(p.desc||'')}</textarea></div>
+      <button class="btn block" type="submit">Guardar cambios</button></form>`); },
+  horario(el){ const h=horarios().find(x=>x.dow===el.dataset.dow&&x.time===el.dataset.time);
+    openSheet(head(`${h.dow}, ${esc(h.time)}`,`${h.n} ${h.n===1?'clase':'clases'} por delante, ${h.res} reservas`)+`<form data-form="horario" data-dow="${h.dow}" data-time="${esc(h.time)}">
+      <div class="field"><label for="hr-c">Lugares por clase</label><input id="hr-c" class="input" inputmode="numeric" required value="${h.cap}"></div>
+      <p class="tiny muted" style="margin-bottom:14px">${h.max?`No puede ser menos de ${h.max}: hay una clase con ${h.max} anotadas.`:'Todavía no hay nadie anotada.'}</p>
+      <button class="btn block" type="submit">Guardar cupo</button></form>
+      ${h.res?`<p class="small muted mt18">Para quitar este horario, primero mové a las alumnas que tienen reserva.</p>`:`<button class="btn ghost block mt14" data-act="delHorario" data-dow="${h.dow}" data-time="${esc(h.time)}">Quitar este horario</button>`}`); },
+  delHorario(el){ S.slots=S.slots.filter(sl=>isPast(sl)||sl.closed||!(sl.dow===el.dataset.dow&&sl.time===el.dataset.time)); closeSheet(); toast('Horario quitado'); },
+  newHorario(){ openSheet(head('Sumar horario','Se crean las clases de lo que queda del mes.')+`<form data-form="newhorario">
+      <div class="field"><label for="nh-d">Día</label><select id="nh-d" class="input">${['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'].map(d=>`<option>${d}</option>`).join('')}</select></div>
+      <div class="field"><label for="nh-t">Horario</label><input id="nh-t" class="input" required placeholder="Ej: 18 a 20 hs"></div>
+      <div class="field"><label for="nh-c">Lugares por clase</label><input id="nh-c" class="input" inputmode="numeric" required value="6"></div>
+      <button class="btn block" type="submit">Sumar horario</button></form>`); },
   trialOk(el){ const t=S.trials.find(x=>x.id===el.dataset.t); t.status='Confirmada'; render(); toast(`Le avisamos a ${t.name.split(' ')[0]} por WhatsApp`); },
   ptoggle(el){ const p=S.products.find(x=>x.id===el.dataset.p); p.available=!p.available; render(); },
   ostatus(el){ const o=S.orders.find(x=>x.id===el.dataset.o); if(o.status==='Cancelado') return; const seq=['Nuevo','Preparando','Entregado']; o.status=seq[(seq.indexOf(o.status)+1)%3]; render(); },
@@ -1210,7 +1271,17 @@ const A = {
   newProduct(){ openSheet(head('Nuevo producto')+`<form data-form="product"><div class="field"><label for="np-n">Nombre</label><input id="np-n" class="input" required></div><div class="field"><label for="np-p">Precio</label><input id="np-p" class="input" inputmode="numeric" required></div><div class="field"><label for="np-c">Categoría</label><select id="np-c" class="input"><option value="casa">En casa</option><option value="joyitas">Joyitas</option></select></div><label class="row small" style="gap:10px;margin:6px 0 14px"><input type="checkbox" id="np-u" style="width:22px;height:22px"> Es pieza única</label><div class="field"><label>Foto</label><label class="drop" id="np-drop" for="np-f">${ic('upload',26)}<span class="small">Sacá una foto o elegila de tu galería</span></label><input id="np-f" type="file" accept="image/*" hidden data-file="newprod"></div><button class="btn block" type="submit">Publicar en la tienda</button></form>`); },
   newStudent(){ openSheet(head('Nueva alumna','Le llega un WhatsApp con su acceso a la app.')+`<form data-form="student"><div class="field"><label for="ns-n">Nombre y apellido</label><input id="ns-n" class="input" required></div><div class="field"><label for="ns-p">Celular</label><input id="ns-p" class="input" inputmode="tel" required></div><div class="field"><label for="ns-c">Clases por mes</label><input id="ns-c" class="input" inputmode="numeric" value="${S.settings.clases}"></div><button class="btn block" type="submit">Sumar alumna</button></form>`); },
   aviso(){ openSheet(head('Mandar un aviso','Les llega a todas en la app y por WhatsApp.')+`<form data-form="aviso"><div class="field"><label for="av">Mensaje</label><textarea id="av" class="input" required placeholder="Ej: Este sábado no hay clase por feriado"></textarea></div><button class="btn block" type="submit">Mandar a las ${S.students.length} alumnas</button></form>`); },
-  saveSettings(){ document.querySelectorAll('[data-set]').forEach(i=>{const k=i.dataset.set; S.settings[k]= (k==='alias'||k==='titular'||k==='recupera')? i.value : (parseInt(i.value.replace(/\D/g,''))||0);}); S.students.forEach(s=>{ if(!s.customTotal) s.total=S.settings.clases; }); render(); toast('Guardado. Las alumnas ya ven los precios nuevos'); }
+  saveSettings(el){ const st=S.settings, vals={}; setErr={};
+    Object.entries(setDraft).forEach(([k,v])=>{ if(SET_NUM[k]){ const [mn,mx,msg]=SET_NUM[k], t=String(v).trim(), n=/^\d+$/.test(t.replace(/\./g,''))?parseInt(t.replace(/\./g,'')):NaN; if(isNaN(n)||n<mn||(mx!==null&&n>mx)) setErr[k]=msg; else vals[k]=n; } else { if(!String(v).trim()) setErr[k]='No puede quedar vacío'; else vals[k]=String(v).trim(); } });
+    if(Object.keys(setErr).length){ if(sheetHTML!==null) closeSheet(); S.otab='ajustes'; render(); toast('Revisá los campos marcados'); return; }
+    let prox=st.prox?{...st.prox}:{mensualidad:st.mensualidad,clases:st.clases,desde:NEXT};
+    ['mensualidad','clases'].forEach(k=>{ if(k in vals){ prox[k]=vals[k]; delete vals[k]; } });
+    st.prox=(prox.mensualidad!==st.mensualidad||prox.clases!==st.clases)?prox:null;
+    Object.assign(st,vals); setDraft={};
+    const next=el&&el.dataset.next; if(next){ S.otab=next; window.scrollTo(0,0); }
+    if(sheetHTML!==null) closeSheet(); else render();
+    toast(st.prox?`Guardado. La mensualidad nueva rige desde ${MES[st.prox.desde]}`:'Guardado'); },
+  discardSettings(el){ setDraft={}; setErr={}; const next=el&&el.dataset.next; if(next){ S.otab=next; window.scrollTo(0,0); } if(sheetHTML!==null) closeSheet(); else render(); },
 };
 
 function payItems(s, ids, method){
@@ -1247,12 +1318,12 @@ function finishPay(method, file){
 }
 
 function cartSheet(){
-  const d=sheetCtx.delivery||'retiro', ship=d==='envio'?3500:0;
+  const d=sheetCtx.delivery||'retiro', ship=d==='envio'?S.settings.envio:0;
   return head('Tu carrito')+
   `<div class="stack gap10">${S.cart.map(c=>{const p=S.products.find(x=>x.id===c.pid);return `<div class="piece" style="padding:10px 12px"><div class="art" style="width:60px;height:60px;border-radius:14px">${pimg(p)}</div><div style="flex:1"><b>${esc(p.name)}</b><div class="num" style="color:${C.bordo}">${fmt(p.price*c.qty)}</div></div><div class="stepper"><button data-act="qty" data-p="${p.id}" data-d="-1" aria-label="Quitar uno">−</button><b>${c.qty}</b><button data-act="qty" data-p="${p.id}" data-d="1" aria-label="Sumar uno" ${p.unique?'disabled style="opacity:.3"':''}>+</button></div></div>`}).join('')}</div>
   <h3 class="mt18" style="margin-bottom:10px">¿Cómo te llega?</h3>
   <button class="choice ${d==='retiro'?'on':''}" data-act="delivery" data-v="retiro"><span class="ic" style="background:${C.rosa};color:${C.bordo}">${ic('pin')}</span><span><b>Retiro en el taller</b><br><span class="small muted">Barrio Urca, en horario de clases. Sin costo</span></span><span class="radio"></span></button>
-  <button class="choice ${d==='envio'?'on':''}" data-act="delivery" data-v="envio"><span class="ic" style="background:#FBE4D8;color:${C.naranja}">${ic('truck')}</span><span><b>Envío en Córdoba capital</b><br><span class="small muted">${fmt(3500)}, llega en 2 a 4 días</span></span><span class="radio"></span></button>
+  <button class="choice ${d==='envio'?'on':''}" data-act="delivery" data-v="envio"><span class="ic" style="background:#FBE4D8;color:${C.naranja}">${ic('truck')}</span><span><b>Envío en Córdoba capital</b><br><span class="small muted">${fmt(S.settings.envio)}, llega en 2 a 4 días</span></span><span class="radio"></span></button>
   <div class="panel mt14" style="padding:16px 18px"><div class="line-item"><span>Productos</span><span class="num">${fmt(cartTotal())}</span></div><div class="line-item"><span>Envío</span><span class="num">${ship?fmt(ship):'Gratis'}</span></div><div class="line-item"><b>Total</b><b class="num" style="color:${C.bordo};font-size:20px">${fmt(cartTotal()+ship)}</b></div></div>
   ${S.view==='tienda'?`<h3 class="mt18" style="margin-bottom:10px">Tus datos</h3><p class="small muted" style="margin-bottom:10px">Para avisarte cuando tu pedido esté listo. No hace falta crear una cuenta.</p>
     <div class="field"><label for="g-name">Nombre</label><input id="g-name" class="input" data-guest="name" value="${esc(sheetCtx.gname||'')}"></div>
@@ -1271,7 +1342,7 @@ function renewCard(){
 function renewSheet(){
   const pv=renewPreview(), reqs=S.students.filter(s=>s.pauseReq);
   const names=l=>l.map(s=>esc(s.short)).join(', ')||'Nadie';
-  return head('Renovación de diciembre',`Se generan ${pv.charge.length} abonos de ${fmt(S.settings.mensualidad)}, que vencen el ${S.settings.pagoHasta} de diciembre.`)+
+  return head('Renovación de diciembre',`Se generan ${pv.charge.length} abonos de ${fmt(precioProx())}, que vencen el ${S.settings.pagoHasta} de diciembre.`)+
   `<div class="panel" style="padding:16px 18px"><b>Se les cobra diciembre (${pv.charge.length})</b><p class="small muted mt6">${names(pv.charge)}</p></div>
    <div class="panel lila mt10" style="padding:16px 18px"><b>En pausa, no se cobra (${pv.pause.length})</b><p class="small mt6">${pv.pause.map(s=>`${esc(s.short)} (desde ${MES[s.pause.from]})`).join(', ')||'Nadie'}</p></div>
    ${pv.debtors.length?`<div class="panel mt10" style="padding:16px 18px;background:#FADBD8;border-color:transparent"><b>Tienen deuda de meses anteriores</b>${pv.debtors.map(s=>`<p class="small mt6">${esc(s.name)}: ${debtItems(s).filter(x=>x.month<CUR).map(x=>MES[x.month]).join(', ')}. Diciembre se suma aparte, no se mezcla.</p>`).join('')}</div>`:''}
@@ -1318,11 +1389,34 @@ document.addEventListener('submit',e=>{
   if(f==='quote'){ const en=S.encargos.find(x=>x.id===e.target.dataset.e), num=id=>parseInt(document.getElementById(id).value.replace(/\D/g,''))||0;
     en.quote={price:num('q-p'),sena:num('q-s'),demora:document.getElementById('q-t').value.trim()}; en.status='Presupuestado'; closeSheet();
     toast(en.sid?`Presupuesto enviado. ${en.who.split(' ')[0]} lo ve en la app y por WhatsApp`:`Presupuesto enviado por WhatsApp a ${en.who.split(' ')[0]}`); return; }
+  const num = id => { const t=document.getElementById(id).value.replace(/\./g,'').trim(); return /^\d+$/.test(t)?parseInt(t):NaN; };
+  if(f==='editprod'){ const p=S.products.find(x=>x.id===e.target.dataset.p), pr=num('ep-p'), stk=p.unique?1:num('ep-s');
+    if(!(pr>0)){ toast('El precio tiene que ser mayor a 0'); return; } if(isNaN(stk)){ toast('Poné el stock en números'); return; }
+    p.name=document.getElementById('ep-n').value.trim()||p.name; p.price=pr; p.cat=document.getElementById('ep-c').value; p.desc=document.getElementById('ep-x').value.trim();
+    if(!p.unique){ const was=p.stock; p.stock=stk; if(stk<=0) p.available=false; else if(was<=0) p.available=true; }
+    closeSheet(); toast('Producto actualizado'); return; }
+  if(f==='ws'){ const id=e.target.dataset.w, w=id?S.workshops.find(x=>x.id===id):null, iso=document.getElementById('ws-d').value, pr=num('ws-p'), capN=num('ws-c');
+    if(!(pr>0)){ toast('El precio tiene que ser mayor a 0'); return; } if(!(capN>0)){ toast('Poné cuántos lugares hay'); return; }
+    if(w&&capN<wsTaken(w)){ toast(`Ya hay ${wsTaken(w)} anotadas: no puede tener menos lugares`); return; }
+    const d=new Date(iso+'T12:00'), dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const data={name:document.getElementById('ws-n').value.trim(),iso,date:`${dias[d.getDay()]} ${fechaLarga(iso)}`,time:document.getElementById('ws-t').value.trim(),price:pr,cap:capN,desc:document.getElementById('ws-x').value.trim()};
+    if(w) Object.assign(w,data); else S.workshops.push({id:'w'+Date.now(),...data,people:[],art:'taza',color:C.naranja});
+    closeSheet(); toast(w?'Tallercito actualizado':'Tallercito publicado'); return; }
+  if(f==='horario'){ const dow=e.target.dataset.dow, time=e.target.dataset.time, h=horarios().find(x=>x.dow===dow&&x.time===time), c=num('hr-c');
+    if(!(c>0)){ toast('Poné cuántos lugares hay'); return; } if(c<h.max){ toast(`No puede ser menos de ${h.max}: hay una clase con ${h.max} anotadas`); return; }
+    S.slots.forEach(sl=>{ if(!isPast(sl)&&sl.dow===dow&&sl.time===time) sl.cap=c; }); closeSheet(); toast(`${dow}, ${time}: ${c} lugares`); return; }
+  if(f==='newhorario'){ const dow=document.getElementById('nh-d').value, time=document.getElementById('nh-t').value.trim(), c=num('nh-c');
+    if(!(c>0)){ toast('Poné cuántos lugares hay'); return; } if(horarios().some(h=>h.dow===dow&&h.time===time)){ toast('Ese horario ya existe'); return; }
+    const dias=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'], hoy=new Date(hoyIso()+'T12:00'), fin=new Date(hoy.getFullYear(),hoy.getMonth()+1,0,12); let n=0;
+    for(let d=new Date(hoy); d<=fin; d.setDate(d.getDate()+1)){ if(dias[d.getDay()]!==dow) continue; const iso=d.toISOString().slice(0,10); S.slots.push({id:'h'+Date.now()+n,date:iso,dow,d:d.getDate(),mon:'nov',time,cap:c,list:[],past:false}); n++; }
+    S.slots.sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+    closeSheet(); toast(n?`Listo: ${n} ${n===1?'clase nueva':'clases nuevas'} los ${dow.toLowerCase()}`:'No quedan días así este mes'); return; }
   if(f==='product'){ const n=document.getElementById('np-n').value, p=parseInt(document.getElementById('np-p').value.replace(/\D/g,''))||0, c=document.getElementById('np-c').value, u=document.getElementById('np-u').checked;
     S.products.unshift({id:'pr'+Date.now(),name:n,cat:c,price:p,unique:u,available:true,stock:u?1:5,art:c==='joyitas'?'aros':'cuenco',bg:C.lila,fg:C.bordo,desc:'Nueva en la tienda.',img:sheetCtx.newImg||null}); closeSheet(); toast('Publicado en la tienda'); return; }
   if(f==='student'){ const n=document.getElementById('ns-n').value.trim(); const id='n'+Date.now(); S.students.push({id,name:n,short:n.split(' ')[0],phone:document.getElementById('ns-p').value,used:0,total:parseInt(document.getElementById('ns-c').value)||4,ledger:[{id:id+'-nov',month:CUR,kind:'abono',label:'Mensualidad de noviembre',amount:S.settings.mensualidad,status:'pendiente'}],recover:[],remind:true,pending:null,pieces:[],attended:{},av:C.rosa}); closeSheet(); toast(n+' ya es parte de Hipatia'); return; }
 });
 document.addEventListener('input',e=>{
+  if(e.target.dataset.set){ setDraft[e.target.dataset.set]=e.target.value; const b=document.querySelector('.savebar'); if(b) b.classList.add('show'); return; }
   if(e.target.dataset.guest){ sheetCtx[e.target.dataset.guest==='name'?'gname':'gphone']=e.target.value; return; }
   if(e.target.dataset.input==='aluQuery'){ S.aluQuery=e.target.value; const pos=e.target.selectionStart; render(); const i=document.querySelector('[data-input="aluQuery"]'); i.focus(); i.setSelectionRange(pos,pos); }
 });
